@@ -1,7 +1,7 @@
 """T030: local grant procedure. Fake account ids and display names only."""
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import pytest
 from noor_registry.authorizations import Register

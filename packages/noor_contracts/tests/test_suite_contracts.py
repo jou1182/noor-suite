@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 from noor_contracts.validate import ContractError, validate
 
-
 ROOT = Path(__file__).resolve().parents[3]
 AT = "2026-10-27T00:00:00Z"
 HASH = "a" * 64

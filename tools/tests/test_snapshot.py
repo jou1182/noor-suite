@@ -10,8 +10,8 @@ import unicodedata
 from pathlib import Path
 
 import pytest
-
 from noor_contracts.validate import validate
+
 from tools.snapshot import __main__ as cli
 
 
@@ -285,8 +285,8 @@ def test_verify_rejects_marker_and_duplicate_scans(dirs, monkeypatch, capsys):
                                   "name.blocked", "name.blocked_path", "meta.blocked_name",
                                   "secret.aws"])
 def test_approval_hard_stops(rule):
-    from tools.snapshot import scan as snapshot_scan
     from tools import scan_public_repo as scanner
+    from tools.snapshot import scan as snapshot_scan
     digest = hashlib.sha256(b"synthetic").hexdigest()
     finding = scanner.Finding(rule, "x.txt", 0, "")
     report = scanner.ScanReport([finding], [], {"x.txt": digest[:12]}, 1, {"x.txt": digest})

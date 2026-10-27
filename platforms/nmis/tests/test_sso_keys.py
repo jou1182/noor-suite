@@ -1,8 +1,8 @@
 """Signing key must be supplied as an external PEM at production startup."""
-import pytest
 from dataclasses import replace
 from pathlib import Path
 
+import pytest
 from noor_registry.app import create_app
 from noor_registry.keys import generate
 

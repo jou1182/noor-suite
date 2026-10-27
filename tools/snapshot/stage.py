@@ -7,8 +7,7 @@ import shutil
 import subprocess
 import tarfile
 from datetime import datetime, timezone
-from pathlib import Path
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 
 from . import SnapshotError, now, paths, write_state
 
@@ -66,7 +65,12 @@ def run(repo: Path, platform: str, source_dir: str | None, git_dir: str | None,
     target.mkdir(parents=True)
     try:
         if git_dir:
-            result = subprocess.run(["git", "-C", str(source), "archive", "--format=tar", commit],
+            git_executable = shutil.which("git")
+            if git_executable is None:
+                raise SnapshotError("git executable unavailable")
+            git_executable = str(Path(git_executable).resolve())
+            result = subprocess.run(  # noqa: S603 - fixed git argv, no shell; commit is one argument
+                [git_executable, "-C", str(source), "archive", "--format=tar", commit],
                                     capture_output=True, check=False, timeout=120)
             if result.returncode:
                 raise SnapshotError("git archive failed")

@@ -1,5 +1,4 @@
 """Platform origins, entry codes and forwarding boundaries."""
-from app_fixtures import client_for
 from noor_registry import sso
 from noor_registry.db import open_db
 

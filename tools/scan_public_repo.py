@@ -24,12 +24,13 @@ import io
 import json
 import os
 import re
+import shutil
+import struct
 import subprocess
 import sys
-import zipfile
-import struct
-import zlib
 import unicodedata
+import zipfile
+import zlib
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -392,7 +393,7 @@ def scan_tree(root: Path, blocklist: list[str], *, repo_exemptions: bool = False
         elif full.is_dir():
             for folder, dirs, files in os.walk(full, followlinks=False):
                 # A staging tree is fingerprinted whole, so it is scanned whole: skip nothing.
-                def keep_dir(name: str) -> bool:
+                def keep_dir(name: str, folder: str = folder) -> bool:
                     if not repo_exemptions or not _skipped(name) or tracked is None:
                         return True
                     rel_dir = (Path(folder) / name).relative_to(repo).as_posix().casefold() + "/"
@@ -537,6 +538,10 @@ def scan_history(repo: Path, blocklist: list[str],
                  stdin="\n".join(blobs).encode()).splitlines()
     findings: list[Finding] = []
     wanted = []
+    git_executable = shutil.which("git")
+    if git_executable is None:
+        raise ConfigError("git executable unavailable")
+    git_executable = str(Path(git_executable).resolve())
     for line in kinds:
         sha, kind, size = line.split()
         if kind != "blob":
@@ -546,11 +551,13 @@ def scan_history(repo: Path, blocklist: list[str],
             findings.append(Finding("file.too_large", rel, 0, ""))
             if report is not None:
                 digest = hashlib.sha256()
-                process = subprocess.Popen(["git", "-C", str(repo), "cat-file", "blob", sha],
+                process = subprocess.Popen(  # noqa: S603 - fixed git argv, no shell; sha comes from git object output
+                    [git_executable, "-C", str(repo), "cat-file", "blob", sha],
                                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                assert process.stdout is not None
-                with process.stdout:
-                    for chunk in iter(lambda: process.stdout.read(1024 * 1024), b""):
+                if process.stdout is None:
+                    raise ConfigError("git cat-file stdout unavailable")
+                with process.stdout as stdout:
+                    for chunk in iter(lambda: stdout.read(1024 * 1024), b""):
                         digest.update(chunk)
                 if process.wait(timeout=GIT_TIMEOUT) != 0:
                     raise ConfigError("git cat-file failed")

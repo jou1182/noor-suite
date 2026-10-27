@@ -6,8 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import PLATFORMS, SnapshotError
-from . import fingerprint, importer, scan, selection, stage, verify
+from . import PLATFORMS, SnapshotError, fingerprint, importer, scan, selection, stage, verify
 
 REPO = Path(__file__).resolve().parents[2]
 

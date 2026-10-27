@@ -12,7 +12,6 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from jsonschema import Draft202012Validator, FormatChecker
 
 HOME_ORIGIN = "http://noor.localhost:5310"
 IDLE = timedelta(minutes=30)
@@ -191,9 +190,11 @@ ACTION_TO_CORE = {
 def register_authz(app):
     import os
     import re
-    from flask import current_app, jsonify, request
+
+    from flask import jsonify, request
+    from noor_sso.verify import AssertionError401, AssertionVerifier
+
     from .authz import AuthzError, authorize, load_user
-    from noor_sso.verify import AssertionVerifier, AssertionError401
     from .platforms_registry import BROWSER_ORIGINS
 
     extension = app.extensions['noor_registry']
@@ -277,6 +278,6 @@ def start_expiry_timer(app):
                 finally:
                     conn.close()
             except Exception:
-                pass
+                app.logger.exception('session expiry failed')
             threading.Event().wait(1)
     threading.Thread(target=loop, daemon=True, name='noor-session-expiry').start()

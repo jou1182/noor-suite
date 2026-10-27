@@ -7,7 +7,6 @@ Query arguments, form fields, headers and JSON never choose the principal.
 from __future__ import annotations
 
 import hmac
-import secrets
 import sqlite3
 from datetime import timedelta
 from functools import wraps
@@ -20,13 +19,12 @@ from flask import (
     g,
     redirect,
     request,
-    session,
     url_for,
 )
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from .authz import load_user
 from . import sso
+from .authz import load_user
 
 #: "no-referrer" makes Chromium send "Origin: null" on form posts, which the
 #: mandatory Origin check rejects; "same-origin" keeps the Origin on same-origin

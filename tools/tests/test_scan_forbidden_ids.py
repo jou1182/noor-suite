@@ -3,17 +3,15 @@
 import hashlib
 import io
 import json
-import subprocess
 import struct
+import subprocess
 import unicodedata
 import zipfile
 import zlib
-from pathlib import Path
 
 import pytest
 
 from tools import scan_public_repo as scan
-
 
 FAKE = "ال" + "فلاني"
 LATIN = "al" + "fulani"

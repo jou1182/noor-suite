@@ -2,9 +2,17 @@
 import json
 from pathlib import Path
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 from jsonschema import Draft202012Validator, FormatChecker
+
+
+class _LoopbackRedirectHandler(HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, msg, headers, newurl):
+        parsed = urlsplit(newurl)
+        if parsed.scheme != 'http' or parsed.hostname != '127.0.0.1':
+            raise ValueError('home authz redirect must be loopback')
+        return super().redirect_request(request, fp, code, msg, headers, newurl)
 
 
 class AuthzClient:
@@ -21,10 +29,14 @@ class AuthzClient:
 
     def check(self, assertion, tender_id, action):
         body = json.dumps({'assertion': assertion, 'tender_id': tender_id, 'action': action}).encode('utf-8')
-        request = Request(self.url, body, headers={'Authorization': 'Noor-Platform ' + self.key,
+        parsed = urlsplit(self.url)
+        if parsed.scheme != 'http' or parsed.hostname != '127.0.0.1':
+            return False
+        request = Request(  # noqa: S310 - URL and redirects are checked for HTTP loopback
+            self.url, body, headers={'Authorization': 'Noor-Platform ' + self.key,
                                                     'Content-Type': 'application/json'}, method='POST')
         try:
-            with urlopen(request, timeout=2) as response:
+            with build_opener(_LoopbackRedirectHandler()).open(request, timeout=2) as response:
                 decision = json.load(response)
         except (OSError, ValueError):
             return False

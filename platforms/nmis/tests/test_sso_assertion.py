@@ -3,15 +3,14 @@ import base64
 import json
 from datetime import datetime
 
-from app_fixtures import client_for
+import pytest
 from noor_registry import sso
 from noor_registry.db import open_db
-from noor_sso.verify import AssertionVerifier, AssertionError401
-import pytest
+from noor_sso.verify import AssertionError401, AssertionVerifier
 
 
 def test_signed_principal_is_canonical_and_replay_checked(nmis_app, client_for):
-    client = client_for('pm')
+    client_for('pm')
     conn = open_db(nmis_app.config.data_dir)
     parent = conn.execute('SELECT * FROM system_session').fetchone()
     user = __import__('noor_registry.authz', fromlist=['load_user']).load_user(conn, 'pm')

@@ -1,15 +1,14 @@
 """The visible home shell reports pending platforms without implying integration."""
 
-from html.parser import HTMLParser
-from pathlib import Path
 import json
 import os
 import struct
 import zlib
+from html.parser import HTMLParser
+from pathlib import Path
 
 import pytest
 from noor_registry.app import create_app
-
 from noor_registry.platforms_registry import ORDER
 
 
@@ -56,7 +55,7 @@ def test_home_has_fixed_buttons_and_badges(client_for):
     parser.feed(html)
     assert [link["href"].split("/")[-1] for link in parser.links] == list(ORDER)
     assert [name in link["text"] for name, link in zip(
-        ("الرادار", "التحليل السريع", "NMIS", "ATPAS", "JoUReady"), parser.links)] == [True] * 5
+        ("الرادار", "التحليل السريع", "NMIS", "ATPAS", "JoUReady"), parser.links, strict=True)] == [True] * 5
     assert len(parser.badges) == 5
     assert all(badge["aria"] and badge["text"].strip() for badge in parser.badges)
     assert "لم تُستلم لقطة هذه المنصة بعد؛ لا تُعرض عاملة" in html

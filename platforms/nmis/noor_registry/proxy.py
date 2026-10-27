@@ -4,7 +4,7 @@ from __future__ import annotations
 import http.client
 from urllib.parse import urlsplit
 
-from flask import abort, current_app, g, make_response, redirect, request
+from flask import abort, current_app, make_response, redirect, request
 
 from . import sso
 from .authz import load_user

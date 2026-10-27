@@ -21,7 +21,7 @@ def _channel(value: int) -> float:
 def contrast(foreground: str, background: str) -> float:
     def luminance(color: str) -> float:
         channels = [_channel(int(color[i:i + 2], 16)) for i in (1, 3, 5)]
-        return sum(a * b for a, b in zip(channels, (0.2126, 0.7152, 0.0722)))
+        return sum(a * b for a, b in zip(channels, (0.2126, 0.7152, 0.0722), strict=True))
 
     light, dark = sorted((luminance(foreground), luminance(background)), reverse=True)
     return (light + 0.05) / (dark + 0.05)

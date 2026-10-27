@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, abort, current_app, g, redirect, render_template, send_file, url_for
+from flask import Blueprint, abort, current_app, g, redirect, render_template, send_file
 
 from .security import login_required
 
@@ -43,9 +43,9 @@ def platform(platform_id: str):
 
 def entry_url(platform_id: str) -> str | None:
     """Issue a short code only for a platform cleared and running now."""
-    from .platforms_registry import BROWSER_ORIGINS
-    from .app import get_db
     from . import sso
+    from .app import get_db
+    from .platforms_registry import BROWSER_ORIGINS
     if platform_id not in BROWSER_ORIGINS:
         return None
     item = current_app.extensions['noor_registry']['platforms'][platform_id]

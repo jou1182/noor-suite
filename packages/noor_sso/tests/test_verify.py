@@ -1,8 +1,9 @@
 """The platform verifier rejects malformed, forged and replayed assertions."""
-import pytest
 import base64
 import json
 from datetime import datetime, timedelta, timezone
+
+import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 
@@ -26,15 +27,15 @@ def _assertion(key, **changes):
 
 
 def test_missing_assertion_fails_closed():
-    from noor_sso.verify import AssertionVerifier, AssertionError401
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from noor_sso.verify import AssertionError401, AssertionVerifier
     verifier = AssertionVerifier(Ed25519PrivateKey.generate().public_key(), 'radar')
     with pytest.raises(AssertionError401):
         verifier.verify('')
 
 
 def test_verifier_rejects_wrong_key_audience_expiry_and_replay():
-    from noor_sso.verify import AssertionVerifier, AssertionError401
+    from noor_sso.verify import AssertionError401, AssertionVerifier
     key = Ed25519PrivateKey.generate()
     verifier = AssertionVerifier(key.public_key(), 'radar')
     good = _assertion(key)
@@ -49,8 +50,9 @@ def test_verifier_rejects_wrong_key_audience_expiry_and_replay():
 
 def test_asgi_guard_denies_missing_assertion_without_fastapi():
     import asyncio
-    from noor_sso.verify import AssertionVerifier
+
     from noor_sso.fastapi_guard import AssertionMiddleware
+    from noor_sso.verify import AssertionVerifier
     async def app(scope, receive, send):
         await send({'type': 'http.response.start', 'status': 200, 'headers': []})
         await send({'type': 'http.response.body', 'body': b'ok'})
@@ -66,8 +68,8 @@ def test_asgi_guard_denies_missing_assertion_without_fastapi():
 
 def test_flask_guard_checks_platform_origin_and_asserted_csrf():
     from flask import Flask
-    from noor_sso.verify import AssertionVerifier
     from noor_sso.flask_guard import install_guard
+    from noor_sso.verify import AssertionVerifier
     key = Ed25519PrivateKey.generate()
     app = Flask(__name__)
     install_guard(app, AssertionVerifier(key.public_key(), 'radar'))
@@ -83,3 +85,14 @@ def test_flask_guard_checks_platform_origin_and_asserted_csrf():
     # A fresh assertion is needed because the guard consumed the nonce above.
     headers['X-Noor-Assertion'] = _assertion(key, nonce=_encode(b'm' * 16))
     assert client.post('/write', headers=headers).status_code == 200
+
+
+def test_authz_client_rejects_non_loopback_open_and_redirect():
+    from noor_sso.authz_client import AuthzClient, _LoopbackRedirectHandler
+
+    client = AuthzClient('synthetic-key')
+    client.url = 'file:' + '///untrusted'
+    assert client.check('assertion', 'tender', 'read') is False
+    with pytest.raises(ValueError, match='loopback'):
+        _LoopbackRedirectHandler().redirect_request(None, None, 302, 'redirect', {},
+                                                    'https://example.invalid/decision')

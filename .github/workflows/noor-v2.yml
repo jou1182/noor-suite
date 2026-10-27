@@ -27,7 +27,7 @@ jobs:
       - name: Install test tools
         run: |
           python -m pip install --upgrade pip
-          pip install pytest flask jsonschema python-docx cryptography==50.0.2 ruff
+          pip install pytest flask jsonschema python-docx cryptography==50.0.2 ruff==0.17.2
           pip install -e packages/noor_contracts
       - name: Lint new code (T004, ruff)
         run: ruff check --config packages/noor_contracts/pyproject.toml packages platforms tools tests/support tests/e2e

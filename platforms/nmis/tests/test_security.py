@@ -163,6 +163,7 @@ def test_browser_login_origin_and_referrer_policy_on_home_and_platform(nmis_app)
 
 def test_pending_login_tokens_expire_and_are_bounded(nmis_app, monkeypatch):
     from datetime import timedelta
+
     from noor_registry import security
     current = security.sso.now()
     monkeypatch.setattr(security.sso, 'now', lambda: current)

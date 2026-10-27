@@ -2,21 +2,21 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import shutil
 import uuid
-import re
-import hashlib
-from unittest.mock import patch
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from noor_registry.app import create_app
 from noor_registry.config import load_config
 from noor_registry.db import open_db, utc_now
 from werkzeug.security import generate_password_hash
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TENDER_ID = "NT-2026-0001"

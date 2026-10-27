@@ -6,9 +6,9 @@ import re
 from pathlib import Path
 
 from tools import scan_public_repo as scanner
+
 from . import SnapshotError, now, paths, read_state, write_json, write_state
 from .fingerprint import inventory
-
 
 OPAQUE_RE = re.compile(r"^([0-9a-f]{64})\s+(visual|path|session)\s+(.+)$")
 HARD_STOPS = ("secret.", "name.blocked", "meta.blocked_name", "meta.unverifiable_",

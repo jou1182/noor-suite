@@ -1,20 +1,18 @@
 """Platform key and signed binding both gate tender authorization."""
 import json
 from pathlib import Path
+
 import pytest
-
+from app_fixtures import TENDER_ID, give_membership
 from jsonschema import validate
-
 from noor_registry import sso
-from noor_registry.authz import load_user
-from noor_registry.authz import authorize, AuthzError
+from noor_registry.authz import AuthzError, authorize, load_user
 from noor_registry.db import open_db
-from app_fixtures import give_membership, TENDER_ID
 
 
 def _decision(nmis_app, client_for, monkeypatch, user_id, platform, action, tender_id=TENDER_ID, task_id=None):
     monkeypatch.setenv('NOOR_PLATFORM_KEY_' + platform.upper(), 'synthetic-platform-key')
-    client = client_for(user_id)
+    client_for(user_id)
     conn = open_db(nmis_app.config.data_dir)
     parent = conn.execute('SELECT * FROM system_session WHERE user_id=? ORDER BY created_at DESC', (user_id,)).fetchone()
     code = sso.entry_code(conn, parent['sid_hash'], platform)

@@ -1,4 +1,4 @@
 """Public-key-only platform assertion verification and guards."""
-from .verify import AssertionVerifier, AssertionError401
+from .verify import AssertionError401, AssertionVerifier
 
 __all__ = ['AssertionVerifier', 'AssertionError401']

@@ -1,7 +1,7 @@
 """T029: synthetic account seeding."""
 
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import pytest
 from noor_registry.config import load_config

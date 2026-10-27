@@ -9,6 +9,7 @@ from pathlib import Path
 from noor_contracts.validate import validate
 
 from tools.scan_public_repo import SCANNER_VERSION, TOOL_IDS
+
 from . import SnapshotError, paths, read_state, write_json, write_state
 
 

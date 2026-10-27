@@ -68,5 +68,5 @@ class AssertionVerifier:
                         raise ValueError('replay')
                     self.seen[payload['nonce']] = expires
             return payload
-        except (AttributeError, TypeError, ValueError, KeyError, UnicodeError, InvalidSignature) as exc:
+        except (AttributeError, TypeError, ValueError, KeyError, UnicodeError, InvalidSignature):
             raise AssertionError401() from None

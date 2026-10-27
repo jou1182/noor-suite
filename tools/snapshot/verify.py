@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 from noor_contracts.validate import validate
+
 from tools import scan_public_repo as scanner
 
 from . import DESTINATIONS, SnapshotError

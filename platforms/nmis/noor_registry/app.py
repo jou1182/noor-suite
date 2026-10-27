@@ -6,6 +6,9 @@ never opens an outbound network connection.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from flask import (
     Flask,
     current_app,
@@ -16,16 +19,14 @@ from flask import (
     request,
     url_for,
 )
-import json
-from pathlib import Path
 from jsonschema import Draft202012Validator
 
+from . import sso
 from .config import load_config
 from .db import open_db
+from .platforms_registry import load_platforms
 from .security import init_security, login_required, state_change
 from .security import login as security_login
-from .platforms_registry import load_platforms
-from . import sso
 
 #: The demo server binds to the loopback interface only, never the wildcard address:
 #: the data is synthetic but the application is not hardened for network use.
@@ -49,8 +50,9 @@ def create_app(config=None) -> Flask:
         config = load_config()
     app = Flask(__name__, template_folder="templates", static_folder="static")
     app.config["NOOR_CONFIG"] = config
-    from noor_identity import build_identity
     from importlib.resources import files
+
+    from noor_identity import build_identity
     identity = build_identity(config.identity_dir)
     try:
         labels_document = json.loads(files("noor_identity").joinpath("labels.ar.json").read_text(encoding="utf-8"))
@@ -126,7 +128,7 @@ def create_app(config=None) -> Flask:
         return shell_home()
 
     # Story 1: registry, import, decisions, manual entry (T043-T046).
-    from . import views_approval, views_import, views_manual, views_tenders, views_shell
+    from . import views_approval, views_import, views_manual, views_shell, views_tenders
 
     for module in (views_tenders, views_import, views_approval, views_manual, views_shell):
         app.register_blueprint(module.bp)

@@ -7,9 +7,12 @@ from noor_registry.app import create_app
 from noor_registry.keys import generate
 
 
-def test_generate_refuses_repository_directory(tmp_path):
+def test_generate_refuses_repository_directory():
+    # tmp_path is outside the repository on CI, so name a path inside it explicitly.
+    inside = Path(__file__).resolve().parents[3] / '.pytest_tmp' / 'refused-keys'
     with pytest.raises(ValueError):
-        generate(tmp_path)
+        generate(inside)
+    assert not inside.exists()
 
 
 def test_startup_refuses_missing_or_repository_signing_key(nmis_app):

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/open-approval.schema.json",
+  "title": "noor.open-approval/v1",
+  "description": "إطار JoUReady ← غلاف البيت (postMessage، internal-api §4). طلب انتقال فقط إلى صفحة اعتماد تقرير في البيت؛ لا ينفّذ قرارًا. البيت يحلّ التقرير بمعرّفه ويشتق منافسته من سجله، ولا يثق بـ tender_id الوارد إلا للمطابقة.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.open-approval/v1"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^RR-[0-9a-f]{12}$"
+    },
+    "tender_id": {
+      "type": "string",
+      "pattern": "^NT-[0-9]{4}-[0-9]{4}$"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": ["schema", "report_id", "tender_id", "synthetic"]
+}

@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/proposal-version.schema.json",
+  "title": "noor.proposal-version/v1",
+  "description": "ATPAS ← NMIS (W3). بلا مسار ملف (ATP-D8)؛ الملف يُسلَّم منفصلًا ويُطابق ببصمته.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.proposal-version/v1"
+    },
+    "tender_id": {
+      "type": "string",
+      "pattern": "^NT-[0-9]{4}-[0-9]{4}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "built_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "requested_by": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]{2,40}$"
+    },
+    "activity_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100
+    },
+    "rejected_activities": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "content_not_licensed",
+              "content_missing",
+              "unknown_code"
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "reason"
+        ]
+      }
+    },
+    "identity_profile": {
+      "const": "noor"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "tender_id",
+    "version",
+    "sha256",
+    "built_at",
+    "requested_by",
+    "activity_codes",
+    "rejected_activities",
+    "identity_profile",
+    "synthetic"
+  ]
+}

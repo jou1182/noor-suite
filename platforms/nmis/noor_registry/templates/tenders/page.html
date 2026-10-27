@@ -1,0 +1,229 @@
+{% extends "base.html" %} {% block title %}{{ tender.tender_id }} — NMIS{%
+endblock %} {% block content %}
+<article>
+  <h1>{{ tender.title }}</h1>
+  <dl>
+    <dt>المعرّف الموحد</dt>
+    <dd>{{ tender.tender_id }}</dd>
+    <dt>الجهة الطارحة (مصطنعة)</dt>
+    <dd>{{ tender.issuing_entity }}</dd>
+    <dt>موعد الإغلاق</dt>
+    <dd>{{ tender.closing_at or "غير محدد" }}</dd>
+    <dt>الحالة</dt>
+    <dd>
+      <span class="state state-tender-{{ tender.status }}">{{ status }}</span>
+    </dd>
+    <dt>رقم اعتماد (اختياري)</dt>
+    <dd>{{ tender.etimad_ref or "—" }}</dd>
+    <dt>المصدر</dt>
+    <dd>{{ source.label }}</dd>
+    <dt>عمر البيانات</dt>
+    <dd>
+      آخر تحديث {{ source.updated_at or "غير معروف" }} ({{ source.age }}) —
+      بيانات لقطة، ليست حية.
+    </dd>
+  </dl>
+
+  {% if missing %}
+  <section class="warning" role="note" aria-labelledby="missing-h">
+    <h2 id="missing-h">حقول ناقصة</h2>
+    <p>
+      لا يمكن قبول المنافسة حتى تُستكمل هذه الحقول بقرار مسجّل: {% for key,
+      label in missing %}{{ label }}{% if not loop.last %}، {% endif %}{% endfor
+      %}
+    </p>
+    {% if can_complete %} {% for key, label in missing %}
+    <form
+      method="post"
+      action="{{ url_for('approval.complete_field', tender_id=tender.tender_id) }}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="hidden" name="field" value="{{ key }}" />
+      <p>
+        <label for="value-{{ key }}"
+          >{{ label }} (مثال: 2026-12-01T10:00:00+03:00)</label
+        >
+        <input
+          id="value-{{ key }}"
+          name="value"
+          type="text"
+          dir="ltr"
+          required
+        />
+      </p>
+      <p><button type="submit">استكمال الحقل</button></p>
+    </form>
+    {% endfor %} {% endif %}
+  </section>
+  {% endif %} {% if can_decide %}
+  <section aria-labelledby="decide-h">
+    <h2 id="decide-h">قرار المنافسة</h2>
+    <form
+      method="post"
+      action="{{ url_for('approval.accept', tender_id=tender.tender_id) }}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <fieldset>
+        <legend>القبول</legend>
+        <p>
+          <input
+            id="d-approved"
+            type="radio"
+            name="decision"
+            value="approved"
+            checked
+          />
+          <label for="d-approved">قبول</label>
+          <input
+            id="d-reserved"
+            type="radio"
+            name="decision"
+            value="approved_with_reservation"
+          />
+          <label for="d-reserved">قبول بتحفظ</label>
+        </p>
+        <p>
+          <label for="accept-reservations"
+            >التحفظات (إلزامية مع «قبول بتحفظ»)</label
+          >
+          <textarea
+            id="accept-reservations"
+            name="reservations"
+            rows="2"
+          ></textarea>
+        </p>
+        <p><button type="submit">اعتماد القرار</button></p>
+      </fieldset>
+    </form>
+    <form
+      method="post"
+      action="{{ url_for('approval.reject', tender_id=tender.tender_id) }}"
+    >
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <p>
+        <label for="reject-reason">سبب الرفض (اختياري)</label>
+        <textarea id="reject-reason" name="reservations" rows="2"></textarea>
+      </p>
+      <p><button type="submit">رفض المنافسة</button></p>
+    </form>
+  </section>
+  {% endif %}
+
+  <section aria-labelledby="tasks-h">
+    <h2 id="tasks-h">المهام</h2>
+    {% if tasks %}
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">المهمة</th>
+          <th scope="col">المسؤول</th>
+          <th scope="col">الدور</th>
+          <th scope="col">الموعد</th>
+          <th scope="col">الحالة</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>{{ task.title }}</td>
+          <td>{{ task.owner_name or "—" }}</td>
+          <td>
+            {{ task.owner_role or "—" }}{% if task.origin.endswith(":fallback")
+            %} (إسناد احتياطي: لا عضو مخوّل بعد){% endif %}
+          </td>
+          <td>{{ task.due_at or "—" }}</td>
+          <td>{{ "مفتوحة" if task.status == "open" else "منجزة" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>لا مهام بعد (تُنشأ من القالب عند القبول).</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="versions-h">
+    <h2 id="versions-h">إصدارات العرض</h2>
+    {% if versions %}
+    <ul>
+      {% for v in versions %}
+      <li>
+        الإصدار {{ v.version }} — <span dir="ltr">{{ v.sha256 }}</span> — {{
+        v.built_at }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>لا إصدارات بعد.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="reports-h">
+    <h2 id="reports-h">تقارير المراجعة</h2>
+    {% if reports %}
+    <ul>
+      {% for r in reports %}
+      <li>{{ r.report_id }} — {{ r.approval_state }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>لا تقارير بعد.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="gaps-h">
+    <h2 id="gaps-h">مقترحات الثغرات</h2>
+    {% if gaps %}
+    <ul>
+      {% for g in gaps %}
+      <li>{{ g.summary }} — {{ g.state }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>لا مقترحات بعد.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="decisions-h">
+    <h2 id="decisions-h">سجل القرارات</h2>
+    {% if decisions %}
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">النوع</th>
+          <th scope="col">القرار</th>
+          <th scope="col">بواسطة</th>
+          <th scope="col">الدور</th>
+          <th scope="col">الوقت</th>
+          <th scope="col">التحفظات</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in decisions %}
+        <tr>
+          <td>{{ d.subject_type }}</td>
+          <td>{{ decision_labels.get(d.decision, d.decision) }}</td>
+          <td>{{ d.actor_name }}</td>
+          <td>{{ d.acting_role }}</td>
+          <td>{{ d.decided_at }}</td>
+          <td>{{ d.reservations or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>لا قرارات بعد.</p>
+    {% endif %} {% if changes %}
+    <h3>سجل التغييرات</h3>
+    <ul>
+      {% for c in changes %}
+      <li>
+        {{ c.field }}: «{{ c.old or "—" }}» ← «{{ c.new or "—" }}» ({{ c.source
+        }}، {{ c.at }})
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+</article>
+{% endblock %}

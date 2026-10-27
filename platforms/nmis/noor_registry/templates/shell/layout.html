@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="shell">
+  <aside class="shell-sidebar" aria-label="المنصات الخمس">
+    <h2>المنصات</h2>
+    <nav aria-label="اختيار المنصة">
+      <ul class="platform-list">
+        {% for item in platforms %}
+        <li>
+          <a class="platform-button{% if active_id == item.id %} current{% endif %}" href="{{ url_for('shell.platform', platform_id=item.id) }}" {% if active_id == item.id %}aria-current="page"{% endif %}>
+            <strong>{{ item.name.text_ar }}</strong>
+            <span class="state platform-state badge-{{ item.state_label.shape }} token-{{ item.state_label.color_token }}" aria-label="{{ item.state_label.aria_label_ar }}">{{ item.state_label.text_ar }}</span>
+            <span class="platform-meta">النضج: {{ item.status.maturity }} · وضع الذكاء الاصطناعي: {{ item.provider_label.text_ar }} · {{ disclosures.fr010_label }}: {{ item.fr010_text }}</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </aside>
+  <div class="shell-main">{% block shell_content %}{% endblock %}</div>
+</div>
+{% endblock %}

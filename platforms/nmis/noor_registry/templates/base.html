@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}{{ identity.system_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('shell.identity_asset', name='build/noor-tokens.css') }}" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='noor.css') }}"
+    />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">تخطَّ إلى المحتوى</a>
+    <p class="synthetic-banner" role="note">
+      نسخة عرض: كل البيانات هنا مصطنعة لأغراض العرض.
+    </p>
+    <header class="site">
+      <a class="brand" href="{{ url_for('home') }}" aria-label="{{ identity.system_name }}">{% if identity.logo_ok %}<img src="{{ url_for('shell.identity_asset', name=identity.logo) }}" alt="{{ identity.system_name }}" />{% else %}{{ identity.short_name }}{% endif %}</a>
+      <nav class="site" aria-label="التنقل الرئيسي">
+        <ul>
+          <li><a href="{{ url_for('home') }}">البيت</a></li>
+          {% if current_user %}
+          <li>
+            <span class="visually-hidden">الحساب الحالي:</span>
+            <span>{{ current_user.display_name }}</span>
+          </li>
+          <li>
+            <form method="post" action="{{ url_for('logout') }}">
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <button type="submit">خروج</button>
+            </form>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </header>
+    <main id="main" tabindex="-1">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div role="status" aria-live="polite">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+    <footer class="site">
+      <p>{{ identity.company_name }} — كيان افتراضي للعرض</p>
+      <p>
+        الختم في هذه المنظومة تحقق من سلامة الملفات، ليس توقيعًا ولا إثبات هوية.
+      </p>
+    </footer>
+  </body>
+</html>

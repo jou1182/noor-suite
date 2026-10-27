@@ -1,0 +1,23 @@
+{% extends "shell/layout.html" %}
+{% block title %}البيت — {{ identity.system_name }}{% endblock %}
+{% block shell_content %}
+<section class="welcome-card">
+  <p class="eyebrow">البيت</p>
+  <h1>{{ identity.system_name }}</h1>
+  <p>مساحة واحدة للمنصات الخمس. حالة كل منصة ونضجها ظاهران قبل فتحها.</p>
+  <div class="home-links" aria-label="روابط NMIS الحالية">
+    <a href="{{ url_for('tenders.list_tenders') }}">المنافسات</a>
+    <a href="{{ url_for('imports.import_form') }}">استيراد</a>
+    <a href="{{ url_for('manual.manual_form') }}">إدخال يدوي</a>
+  </div>
+</section>
+<section class="disclosure" aria-labelledby="disclosure-title">
+  <h2 id="disclosure-title">مستوى النضج والإفصاح</h2>
+  <ul>
+    {% for item in platforms %}
+    <li><strong>{{ item.name.text_ar }}</strong> · {{ item.status.maturity }} · {{ item.state_label.text_ar }} · وضع المزود: {{ item.provider_label.text_ar }} · {{ disclosures.fr010_label }}: {{ item.fr010_text }}{% if item.status.demo_gate != 'passed' %} — لم تُستلم لقطة هذه المنصة بعد؛ لا تُعرض عاملة ({{ disclosures.not_cleared }}){% endif %}</li>
+    {% endfor %}
+    {% for disclosure in disclosures.home_items %}<li>{{ disclosure }}</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

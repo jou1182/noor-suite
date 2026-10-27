@@ -1,0 +1,27 @@
+{
+  "schema": "noor.identity-profile/v1",
+  "system_name": "منظومة النور",
+  "short_name": "النور",
+  "company_name": "شركة النور للمقاولات",
+  "logo": null,
+  "logo_rights_ref": null,
+  "palette": {
+    "light": {
+      "primary": "#0b5d4b", "on_primary": "#ffffff", "surface": "#ffffff", "on_surface": "#182c27",
+      "muted": "#52615e", "focus": "#7a3900", "status_ok": "#0b5d4b", "status_fail": "#9d2020",
+      "status_unverified": "#704a00", "status_proposed": "#5b4585", "status_approved": "#075949"
+    },
+    "dark": {
+      "primary": "#9de8ce", "on_primary": "#10221d", "surface": "#101d1b", "on_surface": "#f3f7f5",
+      "muted": "#b5c8c0", "focus": "#ffce70", "status_ok": "#a5e5c2", "status_fail": "#ffb2ae",
+      "status_unverified": "#f6d18b", "status_proposed": "#d9c0ff", "status_approved": "#a5e5c2"
+    }
+  },
+  "font": {
+    "family": "Tajawal",
+    "files": ["fonts/Tajawal-Regular.ttf", "fonts/Tajawal-Bold.ttf"],
+    "rights_ref": "fonts/OFL.txt",
+    "fallback": "Tahoma, sans-serif"
+  },
+  "synthetic_entity": true
+}

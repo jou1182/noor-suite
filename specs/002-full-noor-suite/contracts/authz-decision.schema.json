@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/authz-decision.schema.json",
+  "title": "noor.authz-decision/v1",
+  "description": "البيت ← منصة (رد /internal/authz/check). قرار تفويض على منافسة من دالة التفويض الموحدة (المبدأ I).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.authz-decision/v1"
+    },
+    "platform_id": {
+      "enum": [
+        "nmis_full",
+        "radar",
+        "quick_analysis",
+        "atpas",
+        "jouready"
+      ]
+    },
+    "user_id": {
+      "type": "string",
+      "pattern": "^U-[0-9a-f]{8}$"
+    },
+    "tender_id": {
+      "type": "string",
+      "pattern": "^NT-[0-9]{4}-[0-9]{4}$"
+    },
+    "action": {
+      "type": "string",
+      "pattern": "^[a-z_]{2,40}$"
+    },
+    "allowed": {
+      "type": "boolean"
+    },
+    "reason": {
+      "enum": [
+        "ok",
+        "no_membership",
+        "viewer_read_only",
+        "wrong_role",
+        "tender_not_found",
+        "expired"
+      ]
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "platform_id",
+    "user_id",
+    "tender_id",
+    "action",
+    "allowed",
+    "reason",
+    "decided_at",
+    "synthetic"
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/qa-analysis.schema.json",
+  "title": "noor.qa-analysis/v1",
+  "description": "التحليل السريع ← البيت (QA-U6 المعدّل). حالة تحليل وتقريره بالبصمة، بلا مسارات ولا معرّفات جلسة.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.qa-analysis/v1"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "tender_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^NT-[0-9]{4}-[0-9]{4}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "level": {
+      "enum": [
+        "quick",
+        "standard",
+        "deep"
+      ]
+    },
+    "state": {
+      "enum": [
+        "uploaded",
+        "extracting",
+        "analyzing",
+        "rendering",
+        "done",
+        "failed"
+      ]
+    },
+    "report_docx_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "report_pdf_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "provider_mode": {
+      "const": "local"
+    },
+    "model": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:/-]{1,80}$"
+    },
+    "nature": {
+      "const": "general_first_look_no_evidence"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "job_id",
+    "tender_id",
+    "level",
+    "state",
+    "report_docx_sha256",
+    "report_pdf_sha256",
+    "provider_mode",
+    "model",
+    "nature",
+    "updated_at",
+    "synthetic"
+  ]
+}

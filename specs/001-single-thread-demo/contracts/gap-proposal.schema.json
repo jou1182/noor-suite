@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/gap-proposal.schema.json",
+  "title": "noor.gap-proposal/v1",
+  "description": "JoUReady ← NMIS (W5). ينتجه JoUReady مع التقرير بحالة pending؛ يستورده NMIS ولا يصبح مهمة إلا باعتمادين (FR-019).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.gap-proposal/v1"
+    },
+    "finding_key": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "tender_id": {
+      "type": "string",
+      "pattern": "^NT-[0-9]{4}-[0-9]{4}$"
+    },
+    "report_id": {
+      "type": "string",
+      "pattern": "^RR-[0-9a-f]{12}$"
+    },
+    "proposal_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "criterion_id": {
+      "type": "string",
+      "pattern": "^[A-Z]{2,6}-[0-9]{2,3}$"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "state": {
+      "const": "pending"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "finding_key",
+    "tender_id",
+    "report_id",
+    "proposal_version",
+    "criterion_id",
+    "summary",
+    "state",
+    "synthetic"
+  ]
+}

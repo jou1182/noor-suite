@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/identity-profile.schema.json",
+  "title": "noor.identity-profile/v1",
+  "description": "ملف تعريف الهوية (FR-020/021/022، research R9). يغيّر المنصات الخمس ومخرجاتها بلا تعديل كود، ولا يحمل أسماء المنصات ولا المصطلحات.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.identity-profile/v1"
+    },
+    "system_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "short_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30
+    },
+    "company_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "logo": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^(?![/\\\\])(?![A-Za-z]:)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\x00]{1,400}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "logo_rights_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 200
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "light": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "primary": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "on_primary": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "surface": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "on_surface": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "muted": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "focus": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_ok": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_fail": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_unverified": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_proposed": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_approved": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            }
+          },
+          "required": [
+            "primary",
+            "on_primary",
+            "surface",
+            "on_surface",
+            "muted",
+            "focus",
+            "status_ok",
+            "status_fail",
+            "status_unverified",
+            "status_proposed",
+            "status_approved"
+          ]
+        },
+        "dark": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "primary": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "on_primary": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "surface": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "on_surface": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "muted": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "focus": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_ok": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_fail": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_unverified": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_proposed": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "status_approved": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            }
+          },
+          "required": [
+            "primary",
+            "on_primary",
+            "surface",
+            "on_surface",
+            "muted",
+            "focus",
+            "status_ok",
+            "status_fail",
+            "status_unverified",
+            "status_proposed",
+            "status_approved"
+          ]
+        }
+      },
+      "required": [
+        "light",
+        "dark"
+      ]
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "files": {
+          "type": "array",
+          "maxItems": 8,
+          "items": {
+            "type": "string",
+            "pattern": "^(?![/\\\\])(?![A-Za-z]:)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\x00]{1,400}$"
+          }
+        },
+        "rights_ref": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fallback": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        }
+      },
+      "required": [
+        "family",
+        "files",
+        "rights_ref",
+        "fallback"
+      ]
+    },
+    "synthetic_entity": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "schema",
+    "system_name",
+    "short_name",
+    "company_name",
+    "logo",
+    "logo_rights_ref",
+    "palette",
+    "font",
+    "synthetic_entity"
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/snapshot-manifest.schema.json",
+  "title": "noor.snapshot-manifest/v1",
+  "description": "مجلد التجهيز ← المستودع (research R4، FR-007). بيان لقطة منقّحة مفحوصة؛ الدخول فقط عند تطابق tree_sha256 المعاد حسابه.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.snapshot-manifest/v1"
+    },
+    "platform_id": {
+      "enum": [
+        "nmis_full",
+        "radar",
+        "quick_analysis",
+        "atpas",
+        "jouready"
+      ]
+    },
+    "source_label": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{3,60}$"
+    },
+    "source_commit": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{7,40}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "copied_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^(?![/\\\\])(?![A-Za-z]:)(?!.*(^|/)\\.\\.(/|$))[^\\\\\\x00]{1,400}$"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "path",
+          "size",
+          "sha256"
+        ]
+      }
+    },
+    "tree_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "scans": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tool": {
+            "enum": [
+              "secrets_paths_ids",
+              "forbidden_identities",
+              "asset_metadata"
+            ]
+          },
+          "version": {
+            "type": "string",
+            "maxLength": 40
+          },
+          "result": {
+            "enum": [
+              "clean",
+              "findings_resolved"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "tool",
+          "version",
+          "result",
+          "at"
+        ]
+      }
+    },
+    "exposures_closed": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^EXP-[A-Z0-9-]{2,30}$"
+      }
+    },
+    "binary_assets_reviewed_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "synthetic_data_only": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "platform_id",
+    "source_label",
+    "source_commit",
+    "copied_at",
+    "files",
+    "tree_sha256",
+    "scans",
+    "exposures_closed",
+    "binary_assets_reviewed_by",
+    "synthetic_data_only"
+  ]
+}

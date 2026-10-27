@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/provider-config.schema.json",
+  "title": "noor.provider-config/v1",
+  "description": "إعداد المزود لمنصة واحدة (research R8، FR-014/015). السحابي يتطلب consent، ويُرفض في بناء الهاكاثون قبل قراءتها.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.provider-config/v1"
+    },
+    "platform_id": {
+      "enum": [
+        "radar",
+        "quick_analysis",
+        "jouready"
+      ]
+    },
+    "mode": {
+      "enum": [
+        "local",
+        "cloud"
+      ]
+    },
+    "endpoint": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "model": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:/-]{1,80}$"
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "data_sent": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "processing_location": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "retention": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "signer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "signed_on": {
+          "type": "string",
+          "format": "date"
+        },
+        "signature_ed25519": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      },
+      "required": [
+        "provider",
+        "data_sent",
+        "processing_location",
+        "retention",
+        "signer",
+        "signed_on",
+        "signature_ed25519"
+      ]
+    }
+  },
+  "required": [
+    "schema",
+    "platform_id",
+    "mode",
+    "endpoint",
+    "model"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "local"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "pattern": "^http://127\\.0\\.0\\.1:[0-9]{2,5}(/.*)?$"
+          }
+        },
+        "not": {
+          "required": [
+            "consent"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "cloud"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "consent"
+        ],
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "pattern": "^https://[a-z0-9.-]{3,120}(:[0-9]{2,5})?(/[A-Za-z0-9._~-]{1,40}){0,6}/?$"
+          }
+        }
+      }
+    }
+  ]
+}

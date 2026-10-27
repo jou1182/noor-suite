@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block content %}
+<section role="alert">
+  <h1>تنبيه</h1>
+  <p>{{ text }}</p>
+  {% if details %}
+  <ul class="details" dir="ltr" lang="en">
+    {% for item in details %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <p>
+    <a href="{{ url_for('tenders.list_tenders') }}">العودة إلى المنافسات</a>
+  </p>
+</section>
+{% endblock %}

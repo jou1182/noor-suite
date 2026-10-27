@@ -1,0 +1,99 @@
+{% extends "base.html" %} {% block title %}إدخال يدوي — NMIS{% endblock %} {%
+block content %}
+<section>
+  <h1>إدخال منافسة مصطنعة يدويًا</h1>
+  {% if errors %}
+  <div role="alert">
+    <p>البيانات لا تطابق قواعد سجل المنافسة:</p>
+    <ul dir="ltr" lang="en">
+      {% for e in errors %}
+      <li>{{ e }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %} {% if matches %}
+  <section role="note" aria-labelledby="matches-h">
+    <h2 id="matches-h">سجلات قد تكون المنافسة نفسها</h2>
+    <p>
+      الجهة نفسها، وعنوان مشابه، وموعد إغلاق قريب (±7 أيام). اختر سجلًا قائمًا
+      أو أكّد إنشاء سجل جديد.
+    </p>
+    <ul>
+      {% for m in matches %}
+      <li>
+        <a href="{{ url_for('tenders.tender_page', tender_id=m.tender_id) }}"
+          >{{ m.tender_id }}</a
+        >
+        — {{ m.title }} — {{ m.closing_at or "غير محدد" }}
+        <form method="post" action="{{ url_for('manual.select_existing') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="hidden" name="tender_id" value="{{ m.tender_id }}" />
+          <button type="submit">هذه هي المنافسة</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('manual.manual_post') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <p>
+      <label for="title">العنوان</label>
+      <input
+        id="title"
+        name="title"
+        type="text"
+        maxlength="300"
+        required
+        value="{{ fields.title or '' }}"
+      />
+    </p>
+    <p>
+      <label for="issuing_entity">الجهة الطارحة المصطنعة</label>
+      <input
+        id="issuing_entity"
+        name="issuing_entity"
+        type="text"
+        maxlength="200"
+        required
+        value="{{ fields.issuing_entity or '' }}"
+      />
+    </p>
+    <p>
+      <label for="closing_at"
+        >موعد الإغلاق (اختياري، مثال: 2026-12-01T10:00:00+03:00)</label
+      >
+      <input
+        id="closing_at"
+        name="closing_at"
+        type="text"
+        dir="ltr"
+        value="{{ fields.closing_at or '' }}"
+      />
+    </p>
+    <p>
+      <label for="etimad_ref">رقم اعتماد (اختياري)</label>
+      <input
+        id="etimad_ref"
+        name="etimad_ref"
+        type="text"
+        dir="ltr"
+        value="{{ fields.etimad_ref or '' }}"
+      />
+    </p>
+    {% if matches %}
+    <p>
+      <input id="confirm_new" type="checkbox" name="confirm_new" value="1" />
+      <label for="confirm_new"
+        >أؤكد أنها منافسة جديدة رغم السجلات المشابهة أعلاه</label
+      >
+    </p>
+    {% endif %}
+    <p>
+      <button type="submit" name="action" value="check">فحص التطابقات</button>
+      <button type="submit" name="action" value="create">إنشاء السجل</button>
+    </p>
+  </form>
+</section>
+{% endblock %}

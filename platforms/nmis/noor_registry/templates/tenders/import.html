@@ -1,0 +1,36 @@
+{% extends "base.html" %} {% block title %}استيراد منافسة — NMIS{% endblock %}
+{% block content %}
+<section>
+  <h1>استيراد منافسة من الرادار</h1>
+  {% if not allowed %}
+  <p>حسابك غير مخوّل بإنشاء منافسات مصطنعة، فلا يمكنه الاستيراد.</p>
+  {% elif not names %}
+  <p>لا توجد ملفات عقد في مجلد التبادل.</p>
+  {% else %}
+  <form method="post" action="{{ url_for('imports.import_post') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <fieldset>
+      <legend>اختر ملف العقد (noor.tender-candidate/v1) بالاسم</legend>
+      {% for name in names %}
+      <p>
+        <input
+          id="f-{{ loop.index }}"
+          type="radio"
+          name="filename"
+          value="{{ name }}"
+          {%
+          if
+          loop.first
+          %}checked{%
+          endif
+          %}
+        />
+        <label for="f-{{ loop.index }}" dir="ltr">{{ name }}</label>
+      </p>
+      {% endfor %}
+    </fieldset>
+    <p><button type="submit">استيراد</button></p>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

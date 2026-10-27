@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="login" dir="rtl" lang="ar">
+  <h1>تسجيل الدخول</h1>
+  <p>أدخل اسم المستخدم وكلمة المرور للمتابعة إلى النظام.</p>
+  <form method="post" action="{{ url_for('login_post') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p>
+      <label for="user_id">اسم المستخدم</label>
+      <input id="user_id" name="user_id" type="text" autocomplete="username" required>
+    </p>
+    <p>
+      <label for="password">كلمة المرور</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+    </p>
+    <p>
+      <button type="submit">دخول</button>
+    </p>
+  </form>
+</section>
+{% endblock %}

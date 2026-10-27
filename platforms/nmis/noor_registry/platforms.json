@@ -1,0 +1,7 @@
+[
+  {"platform_id":"nmis_full","display_key":"platform.nmis_full","upstream":"http://127.0.0.1:5311","browser_origin":"http://nmis.noor.localhost:5310","run_state":"not_cleared_for_demo","maturity":"L0","provider_mode":"none","demo_gate":"pending","fr010":null,"snapshot_tree_sha256":null},
+  {"platform_id":"radar","display_key":"platform.radar","upstream":"http://127.0.0.1:5312","browser_origin":"http://radar.noor.localhost:5310","run_state":"not_cleared_for_demo","maturity":"L0","provider_mode":"local","demo_gate":"pending","fr010":null,"snapshot_tree_sha256":null},
+  {"platform_id":"quick_analysis","display_key":"platform.quick_analysis","upstream":"http://127.0.0.1:5313","browser_origin":"http://qa.noor.localhost:5310","run_state":"not_cleared_for_demo","maturity":"L0","provider_mode":"local","demo_gate":"pending","fr010":null,"snapshot_tree_sha256":null},
+  {"platform_id":"atpas","display_key":"platform.atpas","upstream":"desktop","browser_origin":"desktop","run_state":"not_cleared_for_demo","maturity":"L0","provider_mode":"none","demo_gate":"pending","fr010":null,"snapshot_tree_sha256":null},
+  {"platform_id":"jouready","display_key":"platform.jouready","upstream":"http://127.0.0.1:5314","browser_origin":"http://jr.noor.localhost:5310","run_state":"not_cleared_for_demo","maturity":"L0","provider_mode":"local","demo_gate":"pending","fr010":null,"snapshot_tree_sha256":null}
+]

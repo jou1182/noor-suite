@@ -1,0 +1,16 @@
+{% extends "base.html" %} {% block content %}
+<section class="home" dir="rtl" lang="ar">
+  <h1>البيت</h1>
+  <ul>
+    <li><a href="{{ url_for('tenders.list_tenders') }}">المنافسات</a></li>
+    <li>
+      <a href="{{ url_for('imports.import_form') }}"
+        >استيراد منافسة من الرادار</a
+      >
+    </li>
+    <li>
+      <a href="{{ url_for('manual.manual_form') }}">إدخال منافسة يدويًا</a>
+    </li>
+  </ul>
+</section>
+{% endblock %}

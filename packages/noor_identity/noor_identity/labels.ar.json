@@ -1,0 +1,26 @@
+{
+  "schema": "noor.labels/v1",
+  "entries": {
+    "platform.radar": {"text_ar":"الرادار","aria_label_ar":"منصة الرادار","shape":"circle","color_token":"primary"},
+    "platform.quick_analysis": {"text_ar":"التحليل السريع","aria_label_ar":"منصة التحليل السريع","shape":"circle","color_token":"primary"},
+    "platform.nmis_full": {"text_ar":"NMIS","aria_label_ar":"منصة NMIS","shape":"circle","color_token":"primary"},
+    "platform.atpas": {"text_ar":"ATPAS","aria_label_ar":"منصة ATPAS","shape":"circle","color_token":"primary"},
+    "platform.jouready": {"text_ar":"JoUReady","aria_label_ar":"منصة JoUReady","shape":"circle","color_token":"primary"},
+    "term.tender": {"text_ar":"منافسة","aria_label_ar":"منافسة","shape":"circle","color_token":"primary"},
+    "tender_status.candidate": {"text_ar":"مرشَّحة","aria_label_ar":"منافسة مرشَّحة","shape":"dashed","color_token":"status_proposed"},
+    "tender_status.accepted": {"text_ar":"مقبولة","aria_label_ar":"منافسة مقبولة","shape":"solid","color_token":"status_ok"},
+    "tender_status.rejected": {"text_ar":"مرفوضة","aria_label_ar":"منافسة مرفوضة","shape":"cross","color_token":"status_fail"},
+    "check_result.match": {"text_ar":"مطابق","aria_label_ar":"نتيجة الفحص مطابق","shape":"solid","color_token":"status_ok"},
+    "check_result.mismatch": {"text_ar":"غير مطابق","aria_label_ar":"نتيجة الفحص غير مطابق","shape":"cross","color_token":"status_fail"},
+    "check_result.unverifiable": {"text_ar":"تعذّر التحقق","aria_label_ar":"نتيجة الفحص تعذّر التحقق","shape":"triangle","color_token":"status_unverified"},
+    "approval_state.proposed": {"text_ar":"مقترح","aria_label_ar":"حالة الاعتماد مقترح","shape":"dashed","color_token":"status_proposed"},
+    "approval_state.approved": {"text_ar":"معتمد","aria_label_ar":"حالة الاعتماد معتمد","shape":"solid","color_token":"status_approved"},
+    "platform_state.running": {"text_ar":"تعمل","aria_label_ar":"حالة المنصة تعمل","shape":"solid","color_token":"status_ok"},
+    "platform_state.stopped": {"text_ar":"متوقفة","aria_label_ar":"حالة المنصة متوقفة","shape":"cross","color_token":"status_fail"},
+    "platform_state.unavailable_on_device": {"text_ar":"غير متاحة على هذا الجهاز","aria_label_ar":"حالة المنصة غير متاحة على هذا الجهاز","shape":"triangle","color_token":"status_unverified"},
+    "platform_state.not_cleared_for_demo": {"text_ar":"لم تجتز شروط العرض","aria_label_ar":"حالة المنصة لم تجتز شروط العرض","shape":"dashed","color_token":"status_proposed"},
+    "provider_mode.local": {"text_ar":"محلي","aria_label_ar":"مزود الذكاء الاصطناعي محلي","shape":"circle","color_token":"primary"},
+    "provider_mode.cloud": {"text_ar":"سحابي","aria_label_ar":"مزود الذكاء الاصطناعي سحابي","shape":"circle","color_token":"primary"},
+    "provider_mode.none": {"text_ar":"بلا مزود","aria_label_ar":"بلا مزود ذكاء اصطناعي","shape":"circle","color_token":"muted"}
+  }
+}

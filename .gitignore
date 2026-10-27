@@ -1,0 +1,101 @@
+# ============================================================
+# Noor AI Platform — .gitignore
+# يحمي الأسرار والبيانات الضخمة من الرفع إلى GitHub
+# ============================================================
+
+# ---------- Secrets / Environment ----------
+.env
+.env.*
+!.env.example
+!.env.docker.example
+*.key
+*.pem
+*.p12
+
+# ---------- Databases (بيانات العملاء الحقيقية) ----------
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+noor.db*
+tender_db.sqlite*
+test_stress.db*
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# ---------- Node / Next.js ----------
+node_modules/
+.next/
+out/
+npm-debug.log*
+tsconfig.tsbuildinfo
+
+# ---------- Tender Radar service (بيانات محلية خاصة) ----------
+radar/.radar-data/
+radar/service.log
+
+# ---------- ATPAS runtime output (مخرجات توليد واختبارات) ----------
+atpas_engine/output/
+
+# ---------- Vector stores & heavy data (تُعاد بناؤها) ----------
+qdrant_data/
+qdrant_storage/
+
+# ---------- Uploads (ملفات المنافسات — سرية) ----------
+uploads/
+!uploads/.gitkeep
+
+# ---------- Backups & restore artifacts ----------
+backups/
+restore_test/
+
+# ---------- Media & large binaries ----------
+*.mp4
+*.mov
+*.avi
+*.zip
+*.rar
+!deploy/**/*.zip
+
+# ---------- OS / Editor ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# ---------- Hermes / local tooling ----------
+.remember/
+.commandcode/
+scratch/
+
+# ---------- Misc project-local ----------
+*.url
+# Root scratch page only; the shell template platforms/.../shell/home.html must be committed.
+/home.html
+
+# ---------- Noor v2 runtime data (spec 001, T002) — never in the repo ----------
+noor_data/
+noor_exchange/
+.jr_state/
+**/logs/usage.jsonl
+platforms/**/output/
+# Samples are synthetic and tracked, including their .docx files
+!samples/synthetic/**/*.docx
+# NMIS home page template is source code (the root rule above targets a stray export)
+!platforms/nmis/**/templates/home.html
+
+# 002: identity build output and pytest temp (generated, never committed)
+config/identity/*/build/
+.pytest_tmp/

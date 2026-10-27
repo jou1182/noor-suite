@@ -1,0 +1,20 @@
+{% extends "shell/layout.html" %}
+{% block title %}{{ selected.name.text_ar }} — {{ identity.system_name }}{% endblock %}
+{% block shell_content %}
+<section class="platform-page">
+  <p class="eyebrow">المنصات / {{ selected.name.text_ar }}</p>
+  <h1>{{ selected.name.text_ar }}</h1>
+  <div class="platform-facts">
+    <span class="state platform-state badge-{{ selected.state_label.shape }} token-{{ selected.state_label.color_token }}" aria-label="{{ selected.state_label.aria_label_ar }}">{{ selected.state_label.text_ar }}</span>
+    <span>مستوى النضج: {{ selected.status.maturity }}</span>
+    <span>وضع الذكاء الاصطناعي: {{ selected.provider_label.text_ar }}</span>
+    <span>{{ disclosures.fr010_label }}: {{ selected.fr010_text }}</span>
+    {% if selected.status.demo_gate != 'passed' %}<span>{{ disclosures.not_cleared }}</span>{% endif %}
+  </div>
+  {% if selected.status.demo_gate == 'passed' and selected.status.run_state == 'running' and selected.id != 'atpas' %}
+  <p><a href="{{ url_for('shell.enter_platform', platform_id=selected.id) }}">فتح المنصة</a></p>
+  {% else %}<div class="empty-frame" role="status">
+    <p>ستُفتح المنصة هنا بعد استلام لقطتها واجتياز شروط العرض</p>
+  </div>{% endif %}
+</section>
+{% endblock %}

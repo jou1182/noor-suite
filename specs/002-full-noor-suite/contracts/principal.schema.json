@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/principal.schema.json",
+  "title": "noor.principal/v1",
+  "description": "البيت (الوكيل) ← خادم كل منصة: حمولة X-Noor-Assertion الموقّعة Ed25519 بمفتاح البيت الخاص (research R2). لا تحمل معرّف جلسة ولا مرجعًا ثابتًا لها؛ nonce فريد لكل تأكيد، وربطه بالجلسة محفوظ في البيت فقط مدة صلاحية التأكيد. aud = المنصة، والعمر ≤5 ثوانٍ.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.principal/v1"
+    },
+    "platform_id": {
+      "enum": [
+        "nmis_full",
+        "radar",
+        "quick_analysis",
+        "atpas",
+        "jouready"
+      ]
+    },
+    "user_id": {
+      "type": "string",
+      "pattern": "^U-[0-9a-f]{8}$"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "role": {
+      "enum": [
+        "proposal_manager",
+        "review_approver",
+        "member",
+        "viewer"
+      ]
+    },
+    "platform_permissions": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 20,
+      "items": {
+        "enum": [
+          "read",
+          "send_candidate",
+          "upload_analyze",
+          "read_report",
+          "full",
+          "accept_tender",
+          "approve_gaps",
+          "own_tasks",
+          "build",
+          "read_outputs",
+          "run_review",
+          "approve_report"
+        ]
+      }
+    },
+    "csrf": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    },
+    "theme": {
+      "enum": [
+        "system",
+        "light",
+        "dark"
+      ]
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "nonce": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{22}$"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "platform_id",
+    "user_id",
+    "display_name",
+    "role",
+    "platform_permissions",
+    "csrf",
+    "theme",
+    "issued_at",
+    "expires_at",
+    "nonce",
+    "synthetic"
+  ]
+}

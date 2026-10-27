@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/desktop-event.schema.json",
+  "title": "noor.desktop-event/v1",
+  "description": "البيت ← ATPAS المكتبي (long-poll، research R3). حدث يقفل الواجهة عند logout أو expired أو revoked.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.desktop-event/v1"
+    },
+    "client": {
+      "const": "desktop:atpas"
+    },
+    "event": {
+      "enum": [
+        "heartbeat",
+        "logout",
+        "expired",
+        "revoked"
+      ]
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "schema",
+    "client",
+    "event",
+    "at"
+  ]
+}

@@ -1,0 +1,584 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/platform-status.schema.json",
+  "title": "noor.platform-status/v1",
+  "description": "البيت ← الغلاف وحساب العرض (FR-001، FR-028). المنصات الخمس بمفاتيح ثابتة فريدة؛ fr010 فارغ قبل أول تشغيل؛ passed يتطلب نتيجة ولقطة.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.platform-status/v1"
+    },
+    "platforms": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nmis_full": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run_state": {
+              "enum": [
+                "running",
+                "stopped",
+                "unavailable_on_device",
+                "not_cleared_for_demo"
+              ]
+            },
+            "maturity": {
+              "enum": [
+                "L0",
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            "provider_mode": {
+              "enum": [
+                "local",
+                "cloud",
+                "none"
+              ]
+            },
+            "demo_gate": {
+              "enum": [
+                "passed",
+                "failed",
+                "at_risk",
+                "pending"
+              ]
+            },
+            "fr010": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "passed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "run_id": {
+                      "type": "string",
+                      "pattern": "^FR-[0-9a-f]{12}$"
+                    }
+                  },
+                  "required": [
+                    "passed",
+                    "total",
+                    "at",
+                    "run_id"
+                  ]
+                }
+              ]
+            },
+            "snapshot_tree_sha256": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "run_state",
+            "maturity",
+            "provider_mode",
+            "demo_gate",
+            "fr010",
+            "snapshot_tree_sha256"
+          ],
+          "if": {
+            "properties": {
+              "demo_gate": {
+                "const": "passed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fr010": {
+                "type": "object"
+              },
+              "snapshot_tree_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "radar": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run_state": {
+              "enum": [
+                "running",
+                "stopped",
+                "unavailable_on_device",
+                "not_cleared_for_demo"
+              ]
+            },
+            "maturity": {
+              "enum": [
+                "L0",
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            "provider_mode": {
+              "enum": [
+                "local",
+                "cloud",
+                "none"
+              ]
+            },
+            "demo_gate": {
+              "enum": [
+                "passed",
+                "failed",
+                "at_risk",
+                "pending"
+              ]
+            },
+            "fr010": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "passed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "run_id": {
+                      "type": "string",
+                      "pattern": "^FR-[0-9a-f]{12}$"
+                    }
+                  },
+                  "required": [
+                    "passed",
+                    "total",
+                    "at",
+                    "run_id"
+                  ]
+                }
+              ]
+            },
+            "snapshot_tree_sha256": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "run_state",
+            "maturity",
+            "provider_mode",
+            "demo_gate",
+            "fr010",
+            "snapshot_tree_sha256"
+          ],
+          "if": {
+            "properties": {
+              "demo_gate": {
+                "const": "passed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fr010": {
+                "type": "object"
+              },
+              "snapshot_tree_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "quick_analysis": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run_state": {
+              "enum": [
+                "running",
+                "stopped",
+                "unavailable_on_device",
+                "not_cleared_for_demo"
+              ]
+            },
+            "maturity": {
+              "enum": [
+                "L0",
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            "provider_mode": {
+              "enum": [
+                "local",
+                "cloud",
+                "none"
+              ]
+            },
+            "demo_gate": {
+              "enum": [
+                "passed",
+                "failed",
+                "at_risk",
+                "pending"
+              ]
+            },
+            "fr010": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "passed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "run_id": {
+                      "type": "string",
+                      "pattern": "^FR-[0-9a-f]{12}$"
+                    }
+                  },
+                  "required": [
+                    "passed",
+                    "total",
+                    "at",
+                    "run_id"
+                  ]
+                }
+              ]
+            },
+            "snapshot_tree_sha256": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "run_state",
+            "maturity",
+            "provider_mode",
+            "demo_gate",
+            "fr010",
+            "snapshot_tree_sha256"
+          ],
+          "if": {
+            "properties": {
+              "demo_gate": {
+                "const": "passed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fr010": {
+                "type": "object"
+              },
+              "snapshot_tree_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "atpas": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run_state": {
+              "enum": [
+                "running",
+                "stopped",
+                "unavailable_on_device",
+                "not_cleared_for_demo"
+              ]
+            },
+            "maturity": {
+              "enum": [
+                "L0",
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            "provider_mode": {
+              "enum": [
+                "local",
+                "cloud",
+                "none"
+              ]
+            },
+            "demo_gate": {
+              "enum": [
+                "passed",
+                "failed",
+                "at_risk",
+                "pending"
+              ]
+            },
+            "fr010": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "passed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "run_id": {
+                      "type": "string",
+                      "pattern": "^FR-[0-9a-f]{12}$"
+                    }
+                  },
+                  "required": [
+                    "passed",
+                    "total",
+                    "at",
+                    "run_id"
+                  ]
+                }
+              ]
+            },
+            "snapshot_tree_sha256": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "run_state",
+            "maturity",
+            "provider_mode",
+            "demo_gate",
+            "fr010",
+            "snapshot_tree_sha256"
+          ],
+          "if": {
+            "properties": {
+              "demo_gate": {
+                "const": "passed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fr010": {
+                "type": "object"
+              },
+              "snapshot_tree_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "jouready": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "run_state": {
+              "enum": [
+                "running",
+                "stopped",
+                "unavailable_on_device",
+                "not_cleared_for_demo"
+              ]
+            },
+            "maturity": {
+              "enum": [
+                "L0",
+                "L1",
+                "L2",
+                "L3"
+              ]
+            },
+            "provider_mode": {
+              "enum": [
+                "local",
+                "cloud",
+                "none"
+              ]
+            },
+            "demo_gate": {
+              "enum": [
+                "passed",
+                "failed",
+                "at_risk",
+                "pending"
+              ]
+            },
+            "fr010": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "passed": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "total": {
+                      "type": "integer",
+                      "minimum": 1
+                    },
+                    "at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "run_id": {
+                      "type": "string",
+                      "pattern": "^FR-[0-9a-f]{12}$"
+                    }
+                  },
+                  "required": [
+                    "passed",
+                    "total",
+                    "at",
+                    "run_id"
+                  ]
+                }
+              ]
+            },
+            "snapshot_tree_sha256": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "run_state",
+            "maturity",
+            "provider_mode",
+            "demo_gate",
+            "fr010",
+            "snapshot_tree_sha256"
+          ],
+          "if": {
+            "properties": {
+              "demo_gate": {
+                "const": "passed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "fr010": {
+                "type": "object"
+              },
+              "snapshot_tree_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "nmis_full",
+        "radar",
+        "quick_analysis",
+        "atpas",
+        "jouready"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "platforms",
+    "generated_at",
+    "synthetic"
+  ]
+}

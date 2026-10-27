@@ -1,0 +1,30 @@
+{
+  "template_id": "standard-v1",
+  "description": "قالب مهام عام لمنافسة مقبولة. الإزاحة بالأيام من موعد الإغلاق (سالبة = قبله).",
+  "tasks": [
+    {
+      "key": "study-rfp",
+      "title": "دراسة الكراسة وتحديد المتطلبات",
+      "owner_role": "approver",
+      "due_offset_days": -14
+    },
+    {
+      "key": "build-proposal",
+      "title": "بناء العرض الفني",
+      "owner_role": "member",
+      "due_offset_days": -10
+    },
+    {
+      "key": "review-proposal",
+      "title": "مراجعة العرض مقابل الكراسة",
+      "owner_role": "member",
+      "due_offset_days": -5
+    },
+    {
+      "key": "final-approval",
+      "title": "الاعتماد النهائي قبل التقديم",
+      "owner_role": "approver",
+      "due_offset_days": -2
+    }
+  ]
+}

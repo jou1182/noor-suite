@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/tender-candidate.schema.json",
+  "title": "noor.tender-candidate/v1",
+  "description": "الرادار ← NMIS (W1). الرادار مصدر ولا يصدر المعرّف الموحد (SYS-13).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.tender-candidate/v1"
+    },
+    "source_name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,31}$"
+    },
+    "source_ref": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{1,64}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300
+    },
+    "issuing_entity": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "closing_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "etimad_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9A-Za-z-]{1,40}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source_updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synthetic": {
+      "const": true
+    }
+  },
+  "required": [
+    "schema",
+    "source_name",
+    "source_ref",
+    "title",
+    "issuing_entity",
+    "closing_at",
+    "source_updated_at",
+    "exported_at",
+    "synthetic"
+  ]
+}

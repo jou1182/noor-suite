@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block title %}المنافسات — NMIS{% endblock %} {%
+block content %}
+<section>
+  <h1>المنافسات</h1>
+  {% if tenders %}
+  <table>
+    <caption class="visually-hidden">
+      قائمة المنافسات المصطنعة وحالاتها
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">المعرّف</th>
+        <th scope="col">العنوان</th>
+        <th scope="col">الجهة الطارحة</th>
+        <th scope="col">موعد الإغلاق</th>
+        <th scope="col">الحالة</th>
+        <th scope="col">المصدر وعمر البيانات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in tenders %}
+      <tr>
+        <td>
+          <a
+            href="{{ url_for('tenders.tender_page', tender_id=item.row.tender_id) }}"
+            >{{ item.row.tender_id }}</a
+          >
+        </td>
+        <td>{{ item.row.title }}</td>
+        <td>{{ item.row.issuing_entity }}</td>
+        <td>{{ item.row.closing_at or "غير محدد" }}</td>
+        <td>
+          <span class="state state-tender-{{ item.row.status }}"
+            >{{ item.status }}</span
+          >
+          {% if item.missing %}<span class="warning"
+            >حقول ناقصة: {{ item.missing | join("، ") }}</span
+          >{% endif %}
+        </td>
+        <td>{{ item.source.label }} — {{ item.source.age }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>لا توجد منافسات بعد.</p>
+  {% endif %}
+</section>
+{% endblock %}

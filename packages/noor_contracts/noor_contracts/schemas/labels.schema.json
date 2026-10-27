@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://noor.local/contracts/labels.schema.json",
+  "title": "noor.labels/v1",
+  "description": "جدول التسميات الثابت (FR-023/024). نتيجة الفحص وحالة الاعتماد مفتاحان منفصلان دائمًا.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "noor.labels/v1"
+    },
+    "entries": {
+      "type": "object",
+      "minProperties": 20,
+      "propertyNames": {
+        "pattern": "^(platform|term|tender_status|check_result|approval_state|platform_state|provider_mode)\\.[a-z_]{2,40}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "text_ar": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "aria_label_ar": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "shape": {
+            "type": "string",
+            "pattern": "^[a-z_]{2,30}$"
+          },
+          "color_token": {
+            "type": "string",
+            "pattern": "^[a-z_]{2,30}$"
+          }
+        },
+        "required": [
+          "text_ar",
+          "aria_label_ar",
+          "shape",
+          "color_token"
+        ]
+      }
+    }
+  },
+  "required": [
+    "schema",
+    "entries"
+  ]
+}

@@ -12,7 +12,7 @@ from pathlib import Path
 from noor_contracts.validate import validate
 
 from . import DESTINATIONS, SnapshotError, paths, read_state, write_json, write_state
-from .fingerprint import exact_scans, inventory, tree_hash
+from .fingerprint import check_label, check_sanitize_gate, exact_scans, inventory, tree_hash
 from .verify import source_status, tree_matches_manifest
 
 
@@ -35,6 +35,7 @@ def run(repo: Path, platform: str, stamp: str) -> str:
     repo = repo.resolve()
     stage, private = paths(repo, platform, stamp)
     state = read_state(private)
+    check_sanitize_gate(repo, platform, state)
     target = repo / DESTINATIONS[platform]
     manifest_path = repo / "platforms" / "_snapshots" / f"{platform}.json"
     unpublished = not target.exists() or all(
@@ -59,6 +60,7 @@ def run(repo: Path, platform: str, stamp: str) -> str:
             valid = False
         if not valid:
             raise SnapshotError("published tree mismatch; remove the destination")
+        check_label(repo, manifest["source_label"])
         write_json(manifest_path, manifest)
         state["status"] = "imported"
         state.pop("publishing_manifest", None)
@@ -73,6 +75,7 @@ def run(repo: Path, platform: str, stamp: str) -> str:
         raise SnapshotError("manifest invalid", 1) from None
     if manifest["platform_id"] != platform or not exact_scans(manifest["scans"]):
         raise SnapshotError("manifest scans or platform invalid", 1)
+    check_label(repo, manifest["source_label"])
     records = {item["path"]: item for item in manifest["files"]}
     if len(records) != len(manifest["files"]):
         raise SnapshotError("duplicate manifest path", 1)

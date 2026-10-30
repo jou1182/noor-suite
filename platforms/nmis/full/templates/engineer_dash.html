@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مناقصاتي — {{ eng_name }}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--muted:#8b949e;--gold:#ffc107;--red:#f85149;--green:#3fb950;--orange:#d29922}
+body{background:var(--bg);color:#e6edf3;font-family:system-ui,sans-serif;padding:0 0 4rem}
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:.9rem 1rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.header h1{font-size:1rem;color:var(--gold)}
+.header .sub{font-size:.78rem;color:var(--muted)}
+.logout{color:var(--muted);font-size:.8rem;text-decoration:none;padding:.3rem .6rem;border:1px solid var(--border);border-radius:6px}
+.summary{display:flex;gap:.5rem;padding:.8rem 1rem;overflow-x:auto}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.6rem .9rem;text-align:center;min-width:80px;flex:1}
+.stat .n{font-size:1.4rem;font-weight:700}
+.stat .l{font-size:.72rem;color:var(--muted)}
+.tenders{padding:.5rem 1rem;display:flex;flex-direction:column;gap:.75rem}
+.tender-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;position:relative;overflow:hidden}
+.tender-card.urgent{border-color:var(--red)}
+.tender-card.soon{border-color:var(--orange)}
+.tender-card.done{opacity:.6}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;margin-bottom:.5rem}
+.badge.red{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+.badge.orange{background:rgba(210,153,34,.15);color:var(--orange);border:1px solid rgba(210,153,34,.3)}
+.badge.green{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.badge.grey{background:rgba(139,148,158,.1);color:var(--muted);border:1px solid var(--border)}
+.badge.gold{background:rgba(255,193,7,.15);color:var(--gold);border:1px solid rgba(255,193,7,.3)}
+.title{font-size:.93rem;font-weight:600;line-height:1.4;margin-bottom:.3rem}
+.meta{font-size:.78rem;color:var(--muted);margin-bottom:.8rem}
+.actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.btn{padding:.5rem .9rem;border-radius:7px;border:1px solid var(--border);background:transparent;color:#e6edf3;cursor:pointer;font-size:.82rem;transition:.15s;flex:1;text-align:center}
+.btn:hover{background:rgba(255,255,255,.06)}
+.btn.active-submit{background:rgba(63,185,80,.2);border-color:var(--green);color:var(--green)}
+.btn.active-no{background:rgba(248,81,73,.2);border-color:var(--red);color:var(--red)}
+.btn.active-won{background:rgba(255,193,7,.2);border-color:var(--gold);color:var(--gold)}
+.btn.active-lost{background:rgba(139,148,158,.15);border-color:var(--muted);color:var(--muted)}
+.result-row{display:none;margin-top:.6rem;gap:.5rem}
+.result-row.show{display:flex}
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.tg-btn{background:transparent;cursor:pointer;font:inherit}
+.tg-box{margin:.8rem 1rem 0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;line-height:1.7}
+.tg-box p{font-size:.85rem;color:var(--muted);margin:.3rem 0}
+.tg-code{font-family:ui-monospace,Consolas,monospace;font-size:1.5rem;font-weight:700;letter-spacing:2px;margin:.4rem 0;user-select:all}
+.tg-un{background:none;border:0;color:var(--red);cursor:pointer;font:inherit;text-decoration:underline}
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#3fb950;color:#000;padding:.6rem 1.2rem;border-radius:20px;font-size:.85rem;font-weight:600;display:none;z-index:999}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+<div class="header">
+  <div>
+    <h1>👷 {{ eng_name }}</h1>
+    <div class="sub">{{ total }} منافسة مُعيّنة</div>
+  </div>
+  <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+    {% if kanban_board %}<a href="/tasks?engineer={{ eng_name|urlencode }}" class="logout">🗂️ مهامي على اللوحة</a>{% endif %}
+    {% if has_account %}<a href="/engineer/password" class="logout">🔑 كلمة المرور</a>
+    <button type="button" class="logout tg-btn" onclick="tgLink()">🔗 {{ 'تليجرام مربوط' if tg_links else 'ربط تليجرام' }}</button>{% endif %}
+    <a href="/engineer/logout" class="logout">خروج</a>
+  </div>
+</div>
+
+{% if has_account %}
+<div class="tg-box" id="tgBox" hidden role="dialog" aria-labelledby="tgT">
+  <b id="tgT">ربط تليجرام بحسابك</b>
+  <p>افتح بوت الشركة في <b>محادثة خاصة</b> وأرسل خلال {{ 10 }} دقائق:</p>
+  <div class="tg-code" dir="ltr">/link <span id="tgCode">——————</span></div>
+  <p class="tg-note">الرمز لمرة واحدة. بعدها تصلك مهامك وتذكيراتك، وأمر /mytasks يعمل باسمك.
+    {% if tg_links %}مربوط حالياً بـ {{ tg_links }} محادثة — <button type="button" class="tg-un" onclick="tgUnlink()">إلغاء الربط</button>{% endif %}</p>
+  <button type="button" class="logout" onclick="document.getElementById('tgBox').hidden=true">إغلاق</button>
+</div>
+{% endif %}
+<div class="summary">
+  <div class="stat"><div class="n" style="color:var(--red)">{{ urgent_count }}</div><div class="l">عاجل</div></div>
+  <div class="stat"><div class="n" style="color:var(--orange)">{{ soon_count }}</div><div class="l">قريباً</div></div>
+  <div class="stat"><div class="n" style="color:var(--green)">{{ submitted_count }}</div><div class="l">قدّمنا</div></div>
+  <div class="stat"><div class="n" style="color:var(--gold)">{{ won_count }}</div><div class="l">فزنا</div></div>
+</div>
+
+<div class="tenders">
+{% if not tenders %}
+  <div class="empty">🎉 لا توجد منافسات مُعيّنة لك الآن</div>
+{% endif %}
+{% for t in tenders %}
+<div class="tender-card {{ t.urgency_class }}" id="card-{{ t.id }}">
+  {% if t.days_left is not none %}
+    {% if t.days_left < 0 %}
+      <span class="badge red">متأخر {{ (-t.days_left) }} يوم</span>
+    {% elif t.days_left == 0 %}
+      <span class="badge red">⚡ اليوم!</span>
+    {% elif t.days_left == 1 %}
+      <span class="badge orange">⚡ غداً</span>
+    {% elif t.days_left <= 3 %}
+      <span class="badge orange">{{ t.days_left }} أيام</span>
+    {% elif t.days_left <= 7 %}
+      <span class="badge gold">{{ t.days_left }} أيام</span>
+    {% else %}
+      <span class="badge grey">{{ t.days_left }} يوم</span>
+    {% endif %}
+  {% else %}
+    <span class="badge grey">بدون تاريخ</span>
+  {% endif %}
+  {% if t.result == 'won' %}<span class="badge gold">🏆 فزنا</span>
+  {% elif t.result == 'lost' %}<span class="badge grey">خسرنا</span>{% endif %}
+
+  <div class="title">{{ t.title }}</div>
+  <div class="meta">📅 {{ t.submission_date or '—' }} &nbsp;|&nbsp; {{ t.owner or '' }}</div>
+
+  <div class="actions">
+    <button class="btn {{ 'active-submit' if t.did_submit == 1 }}"
+            onclick="setStatus({{ t.id }}, 'submit', this)"
+            id="btn-submit-{{ t.id }}">✅ قدّمنا</button>
+    <button class="btn {{ 'active-no' if t.did_submit == 0 and t.did_submit is not none }}"
+            onclick="setStatus({{ t.id }}, 'no', this)"
+            id="btn-no-{{ t.id }}">❌ لم نقدّم</button>
+  </div>
+  {% if t.did_submit == 1 %}
+  <div class="result-row show" id="result-{{ t.id }}">
+    <button class="btn {{ 'active-won' if t.result == 'won' }}"
+            onclick="setStatus({{ t.id }}, 'won', this)"
+            id="btn-won-{{ t.id }}">🏆 فزنا</button>
+    <button class="btn {{ 'active-lost' if t.result == 'lost' }}"
+            onclick="setStatus({{ t.id }}, 'lost', this)"
+            id="btn-lost-{{ t.id }}">💔 خسرنا</button>
+  </div>
+  {% else %}
+  <div class="result-row" id="result-{{ t.id }}">
+    <button class="btn" onclick="setStatus({{ t.id }}, 'won', this)" id="btn-won-{{ t.id }}">🏆 فزنا</button>
+    <button class="btn" onclick="setStatus({{ t.id }}, 'lost', this)" id="btn-lost-{{ t.id }}">💔 خسرنا</button>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+async function tgLink(){
+  const box = document.getElementById('tgBox'); box.hidden = false;
+  try {
+    const r = await fetch('/engineer/telegram-code', {method: 'POST'}); const j = await r.json();
+    if (!j.ok) throw new Error(j.msg || 'تعذّر إصدار الرمز');
+    document.getElementById('tgCode').textContent = j.code;
+  } catch(e) { toast(e.message, false); box.hidden = true; }
+}
+async function tgUnlink(){
+  if (!confirm('إلغاء ربط تليجرام؟ لن تصلك الإشعارات حتى تربط من جديد.')) return;
+  const j = await (await fetch('/engineer/telegram-unlink', {method: 'POST'})).json();
+  if (j.ok) location.reload(); else toast(j.msg || 'خطأ', false);
+}
+function toast(msg, ok=true){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.background=ok?'#3fb950':'#f85149';
+  t.style.display='block'; setTimeout(()=>t.style.display='none',2200);
+}
+function setStatus(tid, action, btn){
+  fetch('/api/eng/tender/'+tid+'/status',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({action})
+  }).then(r=>r.json()).then(d=>{
+    if(!d.ok){toast(d.error||'خطأ',false);return;}
+    const card = document.getElementById('card-'+tid);
+    const resRow = document.getElementById('result-'+tid);
+    if(action==='submit'){
+      document.getElementById('btn-submit-'+tid).className='btn active-submit';
+      document.getElementById('btn-no-'+tid).className='btn';
+      if(resRow)resRow.className='result-row show';
+      toast('✅ تم تسجيل: قدّمنا');
+    } else if(action==='no'){
+      document.getElementById('btn-submit-'+tid).className='btn';
+      document.getElementById('btn-no-'+tid).className='btn active-no';
+      if(resRow)resRow.className='result-row';
+      toast('تم: لم نقدّم');
+    } else if(action==='won'){
+      document.getElementById('btn-won-'+tid).className='btn active-won';
+      document.getElementById('btn-lost-'+tid).className='btn';
+      toast('🏆 تم تسجيل الفوز!');
+    } else if(action==='lost'){
+      document.getElementById('btn-won-'+tid).className='btn';
+      document.getElementById('btn-lost-'+tid).className='btn active-lost';
+      toast('تم تسجيل النتيجة');
+    }
+  }).catch(()=>toast('خطأ في الاتصال',false));
+}
+</script>
+</body></html>

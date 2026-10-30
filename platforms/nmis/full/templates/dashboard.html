@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="refresh" content="300">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>{{ co.short_ar }} — لوحة المنافسات</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:{{ co.theme_bg }};--field:{{ co.theme_field }}; --card:{{ co.theme_card }}; --hover:{{ co.theme_hover }}; --head:{{ co.theme_head }};
+  --border:#c8a028; --border2:#a07820; --text:#1e1404; --sub:#4a3810; --muted:#7a5e28;
+  --amber:{{ co.theme_primary }}; --amber-l:{{ co.theme_primary_l }}; --amber-d:{{ co.theme_primary_d }};
+  --blue:#1a5a9a; --green:#247848; --yellow:#a06800;
+  --red:#b02828; --orange:#a84e1a; --purple:#643ca0;
+}
+html{-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;margin:0}
+
+/* TOP BAR */
+.topbar{background:linear-gradient(135deg,#5a2800 0%,#8a4800 55%,#b06000 100%);
+  border-bottom:2px solid #6e3200;
+  padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;color:#fff4d8;
+  transition:box-shadow .3s cubic-bezier(.25,1,.5,1)}
+.brand{display:flex;align-items:center;gap:.65rem;font-weight:900;font-size:1.2rem;letter-spacing:-.3px;color:#fff4d8}
+.brand-sub{color:rgba(255,215,140,.7);font-weight:500;font-size:.83rem}
+.pulse{width:8px;height:8px;background:#6effa0;border-radius:50%;
+  animation:blink 2s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{box-shadow:0 0 0 0 rgba(110,255,160,.5)}50%{box-shadow:0 0 0 5px rgba(110,255,160,0)}}
+.tnav{display:flex;align-items:center;gap:.5rem}
+.tnav a{color:rgba(255,215,140,.8);text-decoration:none;font-size:.83rem;padding:.3rem .65rem;border-radius:7px;transition:.15s}
+.tnav a:hover{background:rgba(255,255,255,.12);color:#fff}
+.tnav a.hi{color:#ffd060}
+.ts{font-size:.74rem;color:rgba(255,215,140,.6)}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}}
+.scard{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:1.5rem 1.75rem;position:relative;overflow:hidden;transition:.2s;cursor:default}
+.scard:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(100,60,0,.2)}
+.scard.t-amber{background:linear-gradient(145deg,var(--head) 0%,var(--card) 65%);border-color:var(--amber-d)}
+.scard.t-red{border-color:rgba(196,82,82,.3)}
+.scard.t-yellow{border-color:rgba(200,144,64,.3)}
+.scard.t-orange{border-color:rgba(200,120,64,.3)}
+.scard.t-green{border-color:rgba(90,171,120,.3)}
+.stat-hero{padding:2.2rem 2rem}
+.snum{font-size:3.4rem;font-weight:900;line-height:.9;letter-spacing:-2px;margin-top:.35rem}
+.stat-hero .snum{font-size:clamp(4.2rem,5.5vw,6rem);letter-spacing:-3px}
+.slbl{color:var(--sub);font-size:.78rem;letter-spacing:.4px;margin-bottom:.3rem;font-weight:600}
+
+/* PANEL */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.phead{background:var(--head);border-bottom:1px solid var(--border);
+  border-right:3px solid var(--amber);padding:.75rem 1rem;
+  font-weight:700;font-size:.84rem;display:flex;align-items:center;justify-content:space-between}
+.pbody{padding:.85rem}
+
+/* TABLE */
+.t-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--head);border-bottom:1px solid var(--border)}
+thead th{padding:.55rem .8rem;font-weight:700;font-size:.82rem;color:var(--sub);
+  text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(180,140,40,.25);transition:background .1s}
+/* v5.7.4: rows are NEVER hidden by CSS — the entrance animation hides/reveals via JS inline styles */
+/* v5.7.3: modal rows are added dynamically AFTER the entrance animation ran —
+   without this exemption they inherit opacity:0 forever and render invisible */
+.modal tbody tr{opacity:1!important;transform:none!important;animation:none!important}
+tbody tr:hover{background:var(--hover)}
+tbody td{padding:.5rem .8rem;vertical-align:middle;font-size:.88rem}
+tr.ru td:first-child{box-shadow:inset 3px 0 0 var(--red)}
+tr.rw td:first-child{box-shadow:inset 3px 0 0 var(--yellow)}
+tr.ro td:first-child{box-shadow:inset 3px 0 0 var(--green)}
+tr.rg td:first-child{box-shadow:inset 3px 0 0 var(--border)}
+tr.miss{opacity:.5}
+
+/* DAY BADGES */
+.db{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;
+  font-size:.74rem;font-weight:700;white-space:nowrap}
+.db-r{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+.db-w{background:rgba(227,179,65,.15);color:var(--yellow);border:1px solid rgba(227,179,65,.3)}
+.db-g{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.db-s{background:rgba(139,148,158,.1);color:var(--muted);border:1px solid var(--border)}
+
+/* ENG CHIP */
+.echip{display:inline-block;padding:2px 8px;background:rgba(200,135,60,.1);
+  color:var(--amber-l);border-radius:4px;font-size:.77rem;font-weight:600;
+  border:1px solid rgba(200,135,60,.25)}
+
+/* ACTION BUTTONS */
+.abtn{width:27px;height:27px;border:1px solid var(--border);background:transparent;
+  color:var(--muted);border-radius:7px;cursor:pointer;transition:.15s;
+  display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;padding:0}
+.abtn:hover{background:var(--hover);color:var(--text);border-color:#444d56}
+.abtn.ae:hover{background:rgba(88,166,255,.1);color:var(--blue);border-color:rgba(88,166,255,.4)}
+.abtn.ar:hover{background:rgba(63,185,80,.1);color:var(--green);border-color:rgba(63,185,80,.4)}
+
+/* ENGINEER CARDS */
+.ecard{background:var(--hover);border:1px solid var(--border);border-radius:8px;
+  padding:.75rem .9rem;margin-bottom:.5rem;transition:.15s}
+.ecard:hover{border-color:var(--border2)}
+.eavatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:.95rem;flex-shrink:0;color:#fff}
+.ebar{height:5px;border-radius:3px;background:rgba(160,112,0,.18);margin-top:5px;overflow:hidden}
+.ebar-fill{height:100%;width:100%;border-radius:3px;transform-origin:right center;transform:scaleX(0);transition:transform .75s cubic-bezier(.25,1,.5,1)}
+
+/* MODAL */
+.modal-content{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.modal-header{background:var(--head);border-bottom:1px solid var(--border)}
+.modal-footer{border-top:1px solid var(--border)}
+.form-label{color:var(--muted);font-size:.81rem;margin-bottom:.3rem}
+.form-control,.form-select{background:var(--field)!important;border:1px solid var(--border)!important;
+  color:var(--text)!important;border-radius:8px}
+.form-control:focus,.form-select:focus{border-color:var(--amber)!important;
+  box-shadow:0 0 0 3px rgba(200,135,60,.12)!important}
+
+/* TOAST */
+#tw{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999}
+.tmsg{background:#e8f5ea;color:var(--green);border:1px solid rgba(36,120,72,.3);
+  padding:.6rem 1.5rem;border-radius:10px;font-size:.87rem;
+  box-shadow:0 6px 28px rgba(100,60,0,.15),0 0 0 1px rgba(36,120,72,.1);
+  opacity:0;transform:translateY(12px) scale(.96);
+  transition:opacity .28s cubic-bezier(.22,1,.36,1),
+             transform .32s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;white-space:nowrap}
+.tmsg.err{background:#fde8e8;color:var(--red);border-color:rgba(176,40,40,.3);
+  box-shadow:0 6px 28px rgba(100,60,0,.15),0 0 0 1px rgba(176,40,40,.1)}
+.tmsg.on{opacity:1;transform:translateY(0) scale(1)}
+
+/* ── ENTRANCE KEYFRAMES ──────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ── URGENT BADGE GLOW PULSE ─────────────────── */
+@keyframes urgGlow{0%,100%{box-shadow:0 0 0 0 rgba(248,81,73,.55)}65%{box-shadow:0 0 0 7px rgba(248,81,73,0)}}
+.db-r{animation:urgGlow 2.8s ease-in-out infinite}
+
+/* ── PAGE LOAD — START INVISIBLE ─────────────── */
+.scard{opacity:0}
+.panel{opacity:0}
+
+/* ── ENHANCED COLOR-MATCHED HOVER GLOWS ─────── */
+.scard.t-amber:hover{box-shadow:0 10px 28px rgba(100,60,0,.22),0 0 0 1px rgba(138,72,0,.35)}
+.scard.t-red:hover{box-shadow:0 10px 28px rgba(100,60,0,.15),0 0 0 1px rgba(176,40,40,.28)}
+.scard.t-yellow:hover{box-shadow:0 10px 28px rgba(100,60,0,.15),0 0 0 1px rgba(160,104,0,.28)}
+.scard.t-orange:hover{box-shadow:0 10px 28px rgba(100,60,0,.15),0 0 0 1px rgba(168,78,26,.28)}
+
+/* ── BUTTON PRESS FEEDBACK ───────────────────── */
+.abtn{transition:background .15s,color .15s,border-color .15s,box-shadow .18s,transform .08s}
+.abtn:active{transform:scale(0.82)!important;transition:transform .08s!important}
+.abtn.ae:hover{box-shadow:0 0 0 3px rgba(126,179,232,.18)!important}
+.abtn.ar:hover{box-shadow:0 0 0 3px rgba(90,171,120,.18)!important}
+
+/* ── ENGINEER CHIP HOVER ─────────────────────── */
+.echip{transition:transform .18s cubic-bezier(.25,1,.5,1),
+  box-shadow .18s,background .18s}
+.echip:hover{transform:scale(1.06);
+  box-shadow:0 2px 10px rgba(200,135,60,.22)}
+
+/* ── TOPBAR ELEVATION ON SCROLL ──────────────── */
+.topbar.elevated{box-shadow:0 4px 28px rgba(60,20,0,.45)}
+
+/* ── COPY FLASH ON TITLE ─────────────────────── */
+@keyframes cpFlash{
+  0%  {background:rgba(200,135,60,.22);color:var(--amber-l);border-radius:4px}
+  80% {background:rgba(200,135,60,.08)}
+  100%{background:transparent;color:inherit}
+}
+td.t-title.flashing{animation:cpFlash .55s cubic-bezier(.25,1,.5,1) both}
+
+/* ── FILTER BUTTON SMOOTH TRANSITION ─────────── */
+.fbtn{transition:background .2s cubic-bezier(.25,1,.5,1),
+  color .2s,border-color .2s,transform .1s}
+.fbtn:active{transform:scale(.93)}
+
+/* ── SEARCH RESULT COUNT FADE ────────────────── */
+.srch-res{transition:opacity .2s}
+
+/* ── SAVE BUTTON SUCCESS FLASH ───────────────── */
+@keyframes saveOk{
+  0%  {background:#5aab78;color:#fff;transform:scale(.96)}
+  40% {transform:scale(1.04)}
+  100%{background:#198754;color:#fff;transform:scale(1)}
+}
+.btn-success.did-save{animation:saveOk .4s cubic-bezier(.25,1,.5,1) both}
+
+/* ── SCARD BOTTOM ACCENT LINE ────────────────── */
+.scard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--amber);transform:scaleX(0);transform-origin:center;
+  transition:transform .35s cubic-bezier(.25,1,.5,1)}
+.scard:hover::after{transform:scaleX(.6)}
+.scard.t-red::after{background:var(--red)}
+.scard.t-yellow::after{background:var(--yellow)}
+.scard.t-orange::after{background:var(--orange)}
+
+/* ── ECARD HOVER ─────────────────────────────── */
+.ecard{transition:border-color .2s,transform .2s cubic-bezier(.25,1,.5,1),box-shadow .2s}
+.ecard:hover{transform:translateX(-2px);
+  box-shadow:2px 0 0 var(--amber-d),0 4px 12px rgba(100,60,0,.15)}
+
+/* ── SEARCH + FILTER BAR ─────────────────────── */
+.srch-bar{padding:.55rem .9rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;background:var(--head)}
+.srch-wrap{position:relative;display:flex;align-items:center;min-width:160px;max-width:250px;flex:1}
+.srch-input{background:var(--field);border:1px solid var(--border);color:var(--text);
+  border-radius:7px;padding:.38rem .75rem .38rem 2.2rem;font-family:'Tajawal',sans-serif;
+  font-size:.82rem;width:100%;outline:none;transition:border-color .2s,box-shadow .2s;direction:rtl}
+.srch-input:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(200,135,60,.15)}
+.srch-input::placeholder{color:var(--muted)}
+.srch-ico{position:absolute;left:.6rem;color:var(--muted);pointer-events:none;font-size:.75rem}
+.srch-kbd{position:absolute;left:2rem;color:var(--muted);font-size:.6rem;
+  border:1px solid var(--border);border-radius:3px;padding:1px 4px;line-height:1;
+  opacity:.7;pointer-events:none;transition:opacity .2s}
+.srch-input:focus~.srch-kbd{opacity:0}
+.fbtns{display:flex;gap:.3rem}
+.fbtn{background:transparent;border:1px solid var(--border);color:var(--muted);
+  border-radius:6px;padding:.28rem .6rem;font-family:'Tajawal',sans-serif;
+  font-size:.72rem;cursor:pointer;transition:.15s;white-space:nowrap}
+.fbtn:hover{background:var(--hover);color:var(--text)}
+.fbtn.fbtn-active{background:rgba(200,135,60,.12);color:var(--amber-l);border-color:var(--amber-d)}
+.fbtn.fbtn-r.fbtn-active{background:rgba(196,82,82,.15);color:var(--red);border-color:rgba(196,82,82,.3)}
+.fbtn.fbtn-w.fbtn-active{background:rgba(200,144,64,.15);color:var(--yellow);border-color:rgba(200,144,64,.3)}
+.fbtn.fbtn-g.fbtn-active{background:rgba(90,171,120,.15);color:var(--green);border-color:rgba(90,171,120,.3)}
+.srch-res{color:var(--muted);font-size:.71rem;margin-right:auto;white-space:nowrap}
+
+/* ── SORTABLE HEADERS ────────────────────────── */
+th.sortable{cursor:pointer;user-select:none;transition:color .15s}
+th.sortable:hover{color:var(--text)!important}
+th.sortable::after{content:' ⇅';color:var(--muted);font-size:.6rem}
+th.sort-asc::after{content:' ↑';color:var(--amber-l)!important}
+th.sort-desc::after{content:' ↓';color:var(--amber-l)!important}
+
+/* ── REFRESH COUNTDOWN ───────────────────────── */
+.rf-count{color:var(--sub);font-size:.78rem;font-variant-numeric:tabular-nums;transition:color .3s}
+.rf-count.soon{color:var(--yellow)}
+
+/* ── COPY HINT ON TITLE ──────────────────────── */
+td.t-title{cursor:pointer;transition:color .15s;line-height:1.5;max-width:560px;word-break:break-word}
+td.t-title:hover{color:var(--amber-l)}
+
+/* ── BULK SELECTION ──────────────────────────── */
+.cb-cell{width:30px;padding:0 .4rem!important;text-align:center}
+.cb-row{width:15px;height:15px;cursor:pointer;accent-color:var(--amber);border-radius:3px}
+tr.sel-row{background:rgba(200,135,60,.07)!important}
+tr.sel-row:hover{background:rgba(200,135,60,.12)!important}
+
+/* ── BULK TOOLBAR ────────────────────────────── */
+#bulkBar{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--card);border:1px solid var(--amber-d);border-radius:12px;
+  padding:.6rem .9rem;display:flex;align-items:center;gap:.6rem;
+  box-shadow:0 8px 32px rgba(100,60,0,.25);z-index:500;
+  transition:transform .3s cubic-bezier(.25,1,.5,1),opacity .25s;
+  opacity:0;pointer-events:none;white-space:nowrap
+}
+#bulkBar.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:all}
+#bulkBar .blbl{color:var(--amber-l);font-size:.82rem;font-weight:700;min-width:90px}
+#bulkBar select{background:var(--field);border:1px solid var(--border);color:var(--text);
+  border-radius:7px;padding:.3rem .65rem;font-family:'Tajawal',sans-serif;font-size:.82rem;outline:none}
+#bulkBar select:focus{border-color:var(--amber)}
+#bulkBar .bapply{background:var(--amber);border:none;color:#fff;border-radius:7px;
+  padding:.3rem .85rem;font-family:'Tajawal',sans-serif;font-size:.82rem;font-weight:700;
+  cursor:pointer;transition:.15s}
+#bulkBar .bapply:hover{background:var(--amber-l)}
+#bulkBar .bapply:disabled{opacity:.5;cursor:not-allowed}
+#bulkBar .bcancel{background:transparent;border:1px solid var(--border);color:var(--muted);
+  border-radius:7px;padding:.3rem .65rem;font-family:'Tajawal',sans-serif;font-size:.78rem;
+  cursor:pointer;transition:.15s}
+#bulkBar .bcancel:hover{background:var(--hover);color:var(--text)}
+
+/* ── REDUCED MOTION FALLBACK (Accessibility) ─── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   MOBILE RESPONSIVE
+   ══════════════════════════════════════════════ */
+@media(max-width:768px){
+  body{font-size:15px}
+
+  /* ── TOPBAR ─────────────────── */
+  .topbar{padding:.55rem .7rem;gap:.35rem;flex-wrap:wrap;max-width:100%;overflow-x:hidden}
+  .brand-sub,.ts{display:none}
+  .brand{font-size:.95rem;gap:.4rem;min-width:0}
+  .tnav{gap:.15rem;overflow-x:auto;flex-wrap:nowrap;max-width:100%;
+    scrollbar-width:none;-ms-overflow-style:none}
+  .tnav::-webkit-scrollbar{display:none}
+  .tnav a{font-size:.74rem;padding:.4rem .45rem;flex-shrink:0;
+    min-height:40px;display:inline-flex;align-items:center;
+    touch-action:manipulation}
+
+  /* ── LAYOUT ─────────────────── */
+  .page-wrap{padding:.65rem .65rem!important}
+
+  /* ── STATS GRID ─────────────── */
+  .stats-grid{grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.6rem}
+  .scard,.stat-hero{padding:.95rem 1rem}
+  .snum{font-size:2.4rem;letter-spacing:-1px}
+  .stat-hero .snum{font-size:clamp(2.8rem,8.5vw,3.8rem);letter-spacing:-1.5px}
+  .slbl{font-size:.59rem;letter-spacing:1px}
+
+  /* ── PANEL ──────────────────── */
+  .phead{padding:.6rem .85rem;font-size:.81rem}
+  .pbody{padding:.55rem .65rem}
+
+  /* ── SEARCH BAR → 2 rows ────── */
+  .srch-bar{flex-direction:column;align-items:stretch;padding:.5rem .65rem;gap:.38rem}
+  .srch-wrap{max-width:100%;min-width:0}
+  .srch-input{font-size:.9rem;padding:.48rem .75rem .48rem 2.2rem;height:42px}
+  .srch-kbd{display:none}
+  .fbtns{overflow-x:auto;flex-wrap:nowrap;gap:.25rem;padding-bottom:1px;
+    scrollbar-width:none;-ms-overflow-style:none;justify-content:flex-start}
+  .fbtns::-webkit-scrollbar{display:none}
+  .fbtn{flex-shrink:0;padding:.35rem .65rem;font-size:.76rem;
+    min-height:38px;touch-action:manipulation}
+  .srch-res{text-align:center;font-size:.7rem}
+
+  /* ── TABLE → CARD VIEW ──────── */
+  .t-wrap{overflow:visible}
+  table{display:block}
+  thead{display:none}
+  tbody{display:block;padding:.3rem .4rem .5rem}
+
+  tbody tr{
+    display:grid;
+    grid-template-areas:
+      "title title title title"
+      "days  eng   .     act";
+    grid-template-columns:auto auto 1fr auto;
+    margin-bottom:.42rem;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:.75rem .85rem .65rem;
+    gap:.38rem .5rem;
+    background:var(--hover);
+    box-shadow:none!important;
+    transform:none!important;
+  }
+  /* Color accent: right edge (RTL leading side) */
+  tbody tr.ru{border-right:3px solid var(--red)}
+  tbody tr.rw{border-right:3px solid var(--yellow)}
+  tbody tr.ro{border-right:3px solid var(--green)}
+  tbody tr.rg{border-right:3px solid var(--border)}
+  tbody tr.miss{opacity:.45!important}
+
+  /* Hide: checkbox col, row# col, date col */
+  tbody td:nth-child(1),
+  tbody td:nth-child(2),
+  tbody td:nth-child(4){display:none!important}
+
+  /* Title → full top row */
+  tbody td:nth-child(3){
+    grid-area:title;
+    display:block!important;
+    font-size:.88rem;
+    line-height:1.45;
+    padding:0;
+    border:none;
+    white-space:normal;
+    color:var(--text);
+  }
+  /* Show submission date under title via data-date attr */
+  tbody td.t-title::after{
+    content:attr(data-date);
+    display:block;
+    font-size:.7rem;
+    color:var(--muted);
+    margin-top:.22rem;
+    font-weight:400;
+  }
+
+  /* Days badge → bottom-right section */
+  tbody td:nth-child(5){
+    grid-area:days;
+    display:flex!important;
+    align-items:center;
+    padding:0;border:none;
+  }
+  /* Engineer chip → bottom-center */
+  tbody td:nth-child(6){
+    grid-area:eng;
+    display:flex!important;
+    align-items:center;
+    padding:0;border:none;
+  }
+  /* Action buttons → bottom-right */
+  tbody td:nth-child(7){
+    grid-area:act;
+    display:flex!important;
+    align-items:center;
+    gap:5px;
+    padding:0;border:none;
+  }
+
+  /* Bigger touch targets */
+  .abtn{width:42px;height:42px;font-size:1rem;border-radius:9px}
+  .abtn:active{transform:scale(.85)!important}
+
+  /* Engineer load panel */
+  .eavatar{width:30px;height:30px;font-size:.8rem}
+  .ecard{padding:.55rem .7rem;margin-bottom:.38rem}
+
+  /* ── MODALS → slide from bottom ─ */
+  .modal-dialog{
+    margin:0!important;
+    position:fixed!important;
+    bottom:0!important;left:0!important;right:0!important;
+    width:100%!important;max-width:100%!important;
+    transform:none!important;
+  }
+  .modal.fade .modal-dialog{transform:translateY(100%)!important;transition:transform .3s cubic-bezier(.25,1,.5,1)!important}
+  .modal.show .modal-dialog{transform:translateY(0)!important}
+  .modal-content{border-radius:18px 18px 0 0!important;border-bottom:none!important;
+    padding-bottom:env(safe-area-inset-bottom,0)}
+  .modal-body{max-height:62vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+  /* ── BULK TOOLBAR ────────────── */
+  #bulkBar{
+    width:calc(100% - 1.2rem);
+    flex-wrap:wrap;
+    justify-content:space-between;
+    bottom:.6rem;
+    padding:.55rem .7rem;
+    gap:.35rem;
+    border-radius:10px;
+  }
+  #bulkBar .blbl{
+    order:-1;width:100%;
+    border-bottom:1px solid var(--border);
+    padding-bottom:.3rem;min-width:auto;
+  }
+  #bulkBar select{flex:1;min-width:130px;font-size:.85rem}
+  #bulkBar .bapply,#bulkBar .bcancel{min-height:40px;touch-action:manipulation}
+
+  /* Chart */
+  #dChart{max-height:155px!important}
+}
+
+/* ── Very small phones ≤400px ───── */
+@media(max-width:400px){
+  .page-wrap{padding:.5rem!important}
+  .stats-grid{gap:.35rem}
+  .scard,.stat-hero{padding:.8rem .85rem}
+  .snum{font-size:2rem;letter-spacing:-.5px}
+  .stat-hero .snum{font-size:clamp(2.2rem,9.5vw,3rem)}
+  .abtn{width:40px;height:40px}
+  .topbar{padding:.55rem .7rem}
+  tbody tr{padding:.65rem .75rem .55rem}
+  tbody td:nth-child(3){font-size:.84rem}
+}
+
+/* ── MINI STATS ROW ──────────────── */
+.mini-stats{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.mstat{background:var(--card);border:1px solid var(--border);border-radius:9px;
+  padding:.55rem 1rem;display:flex;align-items:center;gap:.55rem;flex:1;min-width:140px}
+.mstat-ico{font-size:1.3rem;line-height:1}
+.mstat-info{display:flex;flex-direction:column}
+.mstat-num{font-size:1.4rem;font-weight:900;line-height:1;letter-spacing:-1px}
+.mstat-lbl{font-size:.68rem;color:var(--muted);font-weight:600;letter-spacing:.3px;margin-top:2px}
+@media(max-width:768px){
+  .mini-stats{gap:.4rem}
+  .mstat{padding:.45rem .7rem;min-width:110px}
+  .mstat-num{font-size:1.15rem}
+}
+
+/* ── GUARANTEES + CALENDAR (v5.6) ── */
+.g-row{display:flex;gap:.55rem;align-items:flex-start;padding:.45rem .5rem;border-radius:9px;
+  margin-bottom:.4rem;text-decoration:none;border:1px solid var(--border);background:var(--card);transition:.15s}
+.g-row:hover{background:var(--hover);transform:translateX(-2px)}
+.g-badge{flex-shrink:0;font-size:.66rem;font-weight:800;padding:.18rem .5rem;border-radius:6px;white-space:nowrap;margin-top:.1rem}
+.g-red .g-badge{background:rgba(200,40,40,.12);color:var(--red);border:1px solid rgba(200,40,40,.3)}
+.g-amber .g-badge{background:rgba(184,106,0,.13);color:var(--amber-l);border:1px solid rgba(184,106,0,.3)}
+.g-green .g-badge{background:rgba(36,120,72,.12);color:var(--green);border:1px solid rgba(36,120,72,.28)}
+.g-info{display:flex;flex-direction:column;min-width:0}
+.g-title{font-size:.78rem;font-weight:700;color:var(--amber-d);line-height:1.35}
+.g-owner{font-size:.68rem;color:var(--muted)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.cal-h{font-size:.64rem;font-weight:800;color:var(--amber);padding:.15rem 0}
+.cal-d{font-size:.72rem;font-weight:600;padding:.28rem 0;border-radius:7px;color:var(--sub)}
+.cal-empty{visibility:hidden}
+.cal-today{outline:2px solid var(--amber-l);outline-offset:-2px;font-weight:900;color:var(--amber)}
+.cal-r{background:rgba(200,40,40,.16);color:var(--red);font-weight:800}
+.cal-y{background:rgba(212,160,23,.22);color:#7a5800;font-weight:800}
+.cal-gr{background:rgba(36,120,72,.14);color:var(--green);font-weight:800}
+.cal-g{background:rgba(184,106,0,.22);color:var(--amber-d);font-weight:900;box-shadow:inset 0 0 0 1px rgba(184,106,0,.4)}
+
+/* ── OWNER DISTRIBUTION ──────────── */
+.owner-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.42rem}
+.owner-name{font-size:.8rem;color:var(--sub);min-width:0;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.owner-bar-wrap{width:70px;flex-shrink:0}
+.owner-bar{height:5px;border-radius:3px;background:rgba(160,112,0,.18);overflow:hidden}
+.owner-bar-fill{height:100%;border-radius:3px;background:var(--amber-l);
+  transform-origin:right;transform:scaleX(0);
+  transition:transform .7s cubic-bezier(.25,1,.5,1)}
+.owner-cnt{font-size:.8rem;font-weight:700;color:var(--amber);min-width:18px;text-align:left}
+
+/* ── PRINT ──────────────────────── */
+@media print{
+  .topbar,.srch-bar,.abtn,#bulkBar,#tw,.tnav,.mini-stats,
+  .col-lg-4,.fbtn,#cbAll,.cb-cell,thead th:last-child,
+  tbody td:last-child,tbody td:first-child{display:none!important}
+  body{background:#fff!important;color:#000!important;font-size:11pt}
+  .panel,.scard{background:#fff!important;border-color:#ccc!important;opacity:1!important}
+  .stats-grid{grid-template-columns:repeat(4,1fr)!important}
+  .snum{color:#000!important}
+  .phead{background:#f0f0f0!important;border-color:#ccc!important}
+  thead tr{background:#f0f0f0!important}
+  tbody tr{break-inside:avoid}
+  table{width:100%!important}
+  .col-12,.col-lg-8{width:100%!important;max-width:100%!important}
+  .echip{background:#eee!important;color:#000!important;border-color:#aaa!important}
+  .db{background:#eee!important;border-color:#aaa!important;color:#000!important}
+  @page{margin:1.5cm}
+}
+/* about dropdown */
+.about-wrap{position:relative;display:inline-flex}
+.about-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,200,100,.25);color:rgba(255,215,140,.85);padding:.3rem .75rem;border-radius:8px;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:.82rem;transition:.15s;display:flex;align-items:center;gap:.35rem}
+.about-btn:hover{background:rgba(255,255,255,.18);color:#fff}
+.about-drop{position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#3d1800 0%,#6e3200 60%,#8a4800 100%);border:1px solid rgba(200,160,40,.4);border-radius:12px;padding:1.1rem 1.4rem;min-width:200px;text-align:center;z-index:300;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+.about-drop::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);border:7px solid transparent;border-bottom-color:#3d1800}
+.about-heart{font-size:2.2rem;margin-bottom:.5rem;line-height:1}
+.about-line{color:rgba(255,220,150,.85);font-size:.88rem;line-height:1.7}
+.about-name{color:#ffd060;font-weight:800;font-size:1rem;margin-top:.55rem;letter-spacing:.3px}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div style="background:#fff;border-radius:9px;padding:5px 12px;display:inline-flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.22);flex-shrink:0">
+      <img src="{{ logo_uri }}" alt="{{ co.name_ar }}" style="height:44px;width:auto;display:block">
+    </div>
+    <span>{{ co.system_title }}</span>
+    <span class="brand-sub">لوحة المنافسات</span>
+    <div class="pulse" title="النظام يعمل"></div>
+  </div>
+  <div class="tnav">
+    {% if kanban_on %}<a href="/tasks">🗂️ المهام</a>{% endif %}
+    <a href="/results" class="hi">📊 سجل النتائج</a>
+    <a href="/engineer-view">👷 المهندسين</a>
+    <a href="/owners">🏢 الجهات</a>
+    <span class="ts">{{ refreshed }}</span>
+    <div class="about-wrap">
+      <button class="about-btn" onclick="toggleAboutD(event)">عن ▾</button>
+      <div id="aboutDropD" class="about-drop" style="display:none">
+        <div class="about-heart">❤️</div>
+        <div class="about-line">صُنع بكل حب</div>
+        <div class="about-line">من فريق العروض الفنية</div>
+        <div class="about-line">لشركة {{ co.short_ar }}</div>
+        <div class="about-name">م. يوسف سليم</div>
+      </div>
+    </div>
+    <a href="/logout">خروج ↩</a>
+  </div>
+</div>
+
+<div class="page-wrap" style="padding:1.25rem 1.5rem;max-width:1700px;margin:0 auto">
+
+  <!-- STAT CARDS -->
+  <div class="stats-grid">
+    <div class="scard t-amber stat-hero">
+      <div class="slbl">المنافسات النشطة</div>
+      <div class="snum" style="color:var(--amber)">{{ total_active }}</div>
+    </div>
+    <div class="scard t-orange" {% if pending_count %}onclick="openPending()" style="cursor:pointer" title="اضغط لعرض المنافسات بانتظار الاعتماد"{% endif %}>
+      <div class="slbl">بانتظار الاعتماد {% if pending_count %}<span style="font-size:.65rem;color:var(--orange);opacity:.8">← اضغط للعرض</span>{% endif %}</div>
+      <div class="snum" style="color:{% if pending_count %}var(--orange){% else %}var(--muted){% endif %}">{{ pending_count }}</div>
+    </div>
+    <div class="scard t-red">
+      <div class="slbl">حرجة ≤ 3 أيام</div>
+      <div class="snum" style="color:{% if urgent %}var(--red){% else %}var(--muted){% endif %}">{{ urgent }}</div>
+    </div>
+    <div class="scard t-yellow">
+      <div class="slbl">تنبيه 4–7 أيام</div>
+      <div class="snum" style="color:{% if warning %}var(--yellow){% else %}var(--muted){% endif %}">{{ warning }}</div>
+    </div>
+  </div>
+
+  <!-- MINI STATS ROW -->
+  <div class="mini-stats">
+    <div class="mstat">
+      <span class="mstat-ico">⌛</span>
+      <div class="mstat-info">
+        <span class="mstat-num" style="color:{% if today_count %}var(--red){% else %}var(--muted){% endif %}">{{ today_count }}</span>
+        <span class="mstat-lbl">تنتهي اليوم</span>
+      </div>
+    </div>
+    <div class="mstat">
+      <span class="mstat-ico">⏰</span>
+      <div class="mstat-info">
+        <span class="mstat-num" style="color:{% if expired %}var(--red){% else %}var(--muted){% endif %}">{{ expired }}</span>
+        <span class="mstat-lbl">منتهية التاريخ</span>
+      </div>
+    </div>
+    <div class="mstat">
+      <span class="mstat-ico">📤</span>
+      <div class="mstat-info">
+        <span class="mstat-num" style="color:{% if submitted_upload %}var(--orange){% else %}var(--muted){% endif %}">{{ submitted_upload }}</span>
+        <span class="mstat-lbl">مرفوعة للقسم</span>
+      </div>
+    </div>
+    <div class="mstat">
+      <span class="mstat-ico">🌐</span>
+      <div class="mstat-info">
+        <span class="mstat-num" style="color:{% if uploaded_platform %}var(--green){% else %}var(--muted){% endif %}">{{ uploaded_platform }}</span>
+        <span class="mstat-lbl">منشورة على المنصة</span>
+      </div>
+    </div>
+    <div class="mstat">
+      <span class="mstat-ico">✅</span>
+      <div class="mstat-info">
+        <span class="mstat-num" style="color:{% if ok_count %}var(--green){% else %}var(--muted){% endif %}">{{ ok_count }}</span>
+        <span class="mstat-lbl">مريحة &gt; 7 أيام</span>
+      </div>
+    </div>
+    <div class="mstat">
+      <span class="mstat-ico">🗂️</span>
+      <div class="mstat-info">
+        <span class="mstat-num" style="color:var(--muted)">{{ closed_count }}</span>
+        <span class="mstat-lbl">مغلقة (أرشيف)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+
+    <!-- TENDERS TABLE -->
+    <div class="col-12 col-lg-8">
+      <div class="panel">
+        <div class="phead">
+          <span>المنافسات النشطة
+            <span id="tCount" style="color:var(--sub);font-weight:500;font-size:.84rem">&nbsp;({{ tenders|length }})</span>
+          </span>
+          <span style="display:flex;align-items:center;gap:.4rem">
+            <span class="rf-count" id="rfCnt"></span>
+            <a href="/export/csv" title="تصدير Excel/CSV" style="display:inline-flex;align-items:center;gap:.25rem;
+               padding:.25rem .6rem;background:rgba(36,120,72,.1);color:var(--green);
+               border:1px solid rgba(36,120,72,.25);border-radius:6px;font-size:.75rem;
+               font-weight:700;text-decoration:none;transition:.15s"
+               onmouseover="this.style.background='rgba(36,120,72,.18)'"
+               onmouseout="this.style.background='rgba(36,120,72,.1)'">
+              ⬇️ تصدير
+            </a>
+            <button onclick="window.print()" title="طباعة" style="display:inline-flex;align-items:center;gap:.25rem;
+               padding:.25rem .6rem;background:rgba(26,90,154,.1);color:var(--blue);
+               border:1px solid rgba(26,90,154,.25);border-radius:6px;font-size:.75rem;
+               font-weight:700;cursor:pointer;transition:.15s;font-family:'Tajawal',sans-serif"
+               onmouseover="this.style.background='rgba(26,90,154,.18)'"
+               onmouseout="this.style.background='rgba(26,90,154,.1)'">
+              🖨️ طباعة
+            </button>
+          </span>
+        </div>
+        <div class="srch-bar">
+          <div class="srch-wrap">
+            <input type="text" id="srch" class="srch-input" placeholder="بحث بالعنوان أو المهندس..." oninput="doSearch(this.value)" autocomplete="off">
+            <span class="srch-ico">🔍</span>
+            <span class="srch-kbd">/</span>
+          </div>
+          <div class="fbtns">
+            <button class="fbtn fbtn-active" id="fball" onclick="setFilt('all')">الكل</button>
+            <button class="fbtn fbtn-r" id="fbr" onclick="setFilt('r')">🔴 حرجة</button>
+            <button class="fbtn fbtn-w" id="fbw" onclick="setFilt('w')">🟡 تنبيه</button>
+            <button class="fbtn fbtn-g" id="fbg" onclick="setFilt('g')">🟢 مريحة</button>
+          </div>
+          <span class="srch-res" id="srchRes"></span>
+        </div>
+        <div class="t-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="cb-cell"><input type="checkbox" class="cb-row" id="cbAll" title="تحديد الكل" onchange="toggleAll(this)"></th>
+                <th style="width:28px">#</th>
+                <th class="sortable" data-col="2" onclick="sortTbl(2)">اسم المنافسة</th>
+                <th class="sortable" data-col="3" style="width:105px" onclick="sortTbl(3)">تاريخ الإغلاق</th>
+                <th class="sortable" data-col="4" style="width:72px;text-align:center" onclick="sortTbl(4)">المتبقي</th>
+                <th class="sortable" data-col="5" style="width:90px" onclick="sortTbl(5)">المهندس</th>
+                <th style="width:60px;text-align:center">إجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in tenders %}
+              {% if t.badge == 'danger' %}{% set rc='ru' %}
+              {% elif t.badge == 'warning' %}{% set rc='rw' %}
+              {% elif t.badge == 'success' %}{% set rc='ro' %}
+              {% else %}{% set rc='rg' %}{% endif %}
+              <tr class="{{ rc }}{% if t.missing_seen_count and t.missing_seen_count > 0 %} miss{% endif %}" data-id="{{ t.id }}">
+                <td class="cb-cell"><input type="checkbox" class="cb-row row-cb" onchange="onRowCb()" data-id="{{ t.id }}"></td>
+                <td style="color:var(--sub);font-size:.8rem;font-weight:500">{{ loop.index }}</td>
+                <td class="t-title" data-full="{{ t.title|e }}"
+                    data-date="{{ t.submission_date[:10] if t.submission_date and t.submission_date != 'N/A' else '' }}"
+                    onclick="cpTitle(this)" title="{{ t.title|e }}">
+                  {{ t.title }}
+                  {% if t.missing_seen_count and t.missing_seen_count > 0 %}
+                  <span title="اختفت من البوابة {{ t.missing_seen_count }} مرة متتالية — ستُغلق تلقائياً بعد انتهاء الموعد"
+                    style="background:rgba(168,78,26,.13);color:#a84e1a;border:1px solid rgba(168,78,26,.25);
+                           border-radius:4px;padding:1px 6px;font-size:.63rem;margin-right:3px;
+                           font-weight:600;white-space:nowrap">
+                    ⚠️ غائبة {{ t.missing_seen_count }}×
+                  </span>
+                  {% endif %}
+                  {% if t.uploaded_to_platform %}<span title="منشورة على المنصة" style="font-size:.72rem;margin-right:2px">🌐</span>
+                  {% elif t.submitted_to_upload %}<span title="مرفوعة لقسم الرفع" style="font-size:.72rem;margin-right:2px">📤</span>
+                  {% elif t.submitted_to_review %}<span title="قُدِّمت للمراجعة" style="font-size:.72rem;margin-right:2px">📄</span>{% endif %}
+                  {% if t.is_extended %}<span title="مُمدَّدة" style="font-size:.72rem;margin-right:2px">🔄</span>{% endif %}
+                </td>
+                <td style="color:var(--sub);font-size:.83rem;white-space:nowrap">
+                  {{ t.submission_date[:10] if t.submission_date and t.submission_date != 'N/A' else '—' }}
+                </td>
+                <td style="text-align:center">
+                  {% if t.days_left is not none %}
+                  {% if t.badge=='danger' %}{% set dc='db-r' %}{% elif t.badge=='warning' %}{% set dc='db-w' %}{% elif t.badge=='success' %}{% set dc='db-g' %}{% else %}{% set dc='db-s' %}{% endif %}
+                  <span class="db {{ dc }}">
+                    {% if t.days_left < 0 %}منتهية
+                    {% elif t.days_left == 0 %}اليوم
+                    {% elif t.days_left == 1 %}غداً
+                    {% else %}{{ t.days_left }}ي{% endif %}
+                  </span>
+                  {% else %}<span style="color:var(--muted)">—</span>{% endif %}
+                </td>
+                <td>
+                  {% if t.assigned_engineer %}<span class="echip">{{ t.assigned_engineer }}</span>
+                  {% else %}<span style="color:var(--muted)">—</span>{% endif %}
+                </td>
+                <td style="text-align:center">
+                  <div style="display:inline-flex;gap:3px">
+                    <a class="abtn" href="/tender/{{ t.id }}" title="تفاصيل وملاحظات"
+                       style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">📋</a>
+                    <button class="abtn ae" data-t="{{ t.title|e }}" onclick="openEdit({{ t.id }}, this.dataset.t)" title="تعديل">✏️</button>
+                    <button class="abtn ar" data-t="{{ t.title|e }}" onclick="openResult({{ t.id }}, this.dataset.t)" title="تسجيل نتيجة">📝</button>
+                  </div>
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2.5rem">لا توجد منافسات نشطة</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="col-12 col-lg-4">
+
+      <!-- DYNAMIC CHART -->
+      <div class="panel mb-3">
+        <div class="phead" style="gap:.5rem;flex-wrap:wrap">
+          <div style="position:relative;flex:1;min-width:0;display:flex;align-items:center">
+            <select id="chartSel" onchange="switchChart(this.value)" style="
+              width:100%;appearance:none;-webkit-appearance:none;
+              background:rgba(122,94,40,.12);
+              border:1.5px solid var(--amber);border-radius:8px;
+              color:var(--text);
+              font-family:'Tajawal',sans-serif;font-size:.84rem;font-weight:700;
+              cursor:pointer;outline:none;
+              padding:.3rem 2rem .3rem .7rem;
+              box-shadow:0 1px 3px rgba(0,0,0,.08);
+              transition:background .2s,border-color .2s">
+              <option value="tenders">📈 توزيع المنافسات</option>
+              <option value="owners">🏢 توزيع الجهات المالكة</option>
+              <option value="engineers">👷 حمل المهندسين</option>
+              <option value="overview">📊 نشطة مقابل مغلقة</option>
+              <option value="status_pct">📉 نسبة الضغط</option>
+              <option value="trend">📅 الاتجاه اليومي (14 يوم)</option>
+            </select>
+            <span style="position:absolute;left:.55rem;top:50%;transform:translateY(-50%);
+              pointer-events:none;font-size:.65rem;color:var(--amber);line-height:1">▼</span>
+          </div>
+          <span id="chartSub" style="color:var(--muted);font-size:.72rem;white-space:nowrap">{{ total_active }} نشطة</span>
+        </div>
+        <div class="pbody" style="padding:.75rem 1rem;transition:all .3s ease">
+          <canvas id="dChart"></canvas>
+        </div>
+      </div>
+
+      <!-- GUARANTEES (v5.6) -->
+      <div class="panel mb-3">
+        <div class="phead">
+          <span>🛡️ الضمانات الابتدائية القادمة</span>
+          <span style="color:var(--muted);font-size:.72rem">{{ guarantees|length }}</span>
+        </div>
+        <div class="pbody" style="padding:.6rem .8rem">
+          {% if guarantees %}
+            {% for g in guarantees %}
+            <a href="/tender/{{ g.id }}" class="g-row {{ g.cls }}">
+              <span class="g-badge">{{ g.label }}</span>
+              <span class="g-info">
+                <span class="g-title">{{ g.title[:46] }}{% if g.title|length > 46 %}…{% endif %}</span>
+                <span class="g-owner">{{ g.owner[:30] }} · استحقاق {{ g.due }}{% if g.auto %} (تلقائي){% endif %}</span>
+              </span>
+            </a>
+            {% endfor %}
+          {% else %}
+            <div style="color:var(--muted);font-size:.8rem;text-align:center;padding:.6rem">لا ضمانات مستحقة قريباً ✓</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- MONTH CALENDAR (v5.6) -->
+      <div class="panel mb-3">
+        <div class="phead">
+          <span>📅 {{ cal.label }}</span>
+          <span style="color:var(--muted);font-size:.62rem">🔴 ≤3 · 🟡 ≤7 · 🟢 مريحة · 🛡️ ضمان</span>
+        </div>
+        <div class="pbody" style="padding:.55rem .7rem">
+          <div class="cal-grid">
+            {% for h in ['ح','ن','ث','ر','خ','ج','س'] %}<span class="cal-h">{{ h }}</span>{% endfor %}
+            {% for w in cal.weeks %}{% for d in w %}
+              {% if d == 0 %}<span class="cal-d cal-empty">·</span>
+              {% else %}{% set lvl = cal.marks.get(d, 0) %}<span class="cal-d {% if d == cal.today %}cal-today {% endif %}{% if lvl == 4 %}cal-g{% elif lvl == 3 %}cal-r{% elif lvl == 2 %}cal-y{% elif lvl == 1 %}cal-gr{% endif %}">{{ d }}</span>
+              {% endif %}
+            {% endfor %}{% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- OWNER DISTRIBUTION -->
+      {% if owner_dist %}
+      <div class="panel mb-3">
+        <div class="phead">
+          <span>🏢 توزيع الجهات المالكة</span>
+          <span style="color:var(--muted);font-size:.72rem">{{ owner_dist|length }} جهة</span>
+        </div>
+        <div class="pbody">
+          {% set max_count = owner_dist.values()|list|max if owner_dist else 1 %}
+          {% for owner_name, cnt in owner_dist.items() %}
+          <div class="owner-row">
+            <span class="owner-name" title="{{ owner_name }}">{{ owner_name[:28] }}{% if owner_name|length > 28 %}…{% endif %}</span>
+            <div class="owner-bar-wrap">
+              <div class="owner-bar">
+                <div class="owner-bar-fill" data-w="{{ (cnt / max_count * 100)|round|int }}"></div>
+              </div>
+            </div>
+            <span class="owner-cnt">{{ cnt }}</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- ENGINEERS -->
+      <div class="panel">
+        <div class="phead">
+          <span>👷 حمل المهندسين</span>
+          <span style="color:var(--muted);font-size:.72rem">{{ engineers|length }} مهندس</span>
+        </div>
+        <div class="pbody">
+          {% set acolors = ['#388bfd','#a371f7','#d29922','#f85149','#3fb950','#e3b341','#58a6ff','#ffa657'] %}
+          {% for eng in engineers %}
+          {% set ld = eng_load.get(eng.name,{}) %}
+          {% set pct = ld.get('pct',0) %}
+          {% set hx  = ld.get('hex','#3fb950') %}
+          {% set ai  = loop.index0 % 8 %}
+          <div class="ecard">
+            <div style="display:flex;align-items:center;gap:.65rem">
+              <div class="eavatar" style="background:{{ acolors[ai] }}">{{ eng.name[2:3] if eng.name.startswith('ال') else eng.name[:1] }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                  <span style="font-weight:600;font-size:.88rem">{{ eng.name }}</span>
+                  <span style="color:var(--sub);font-size:.82rem;font-weight:600">{{ ld.get('count',0) }}/{{ ld.get('capacity',5) }}</span>
+                </div>
+                <div class="ebar">
+                  <div class="ebar-fill" data-w="{{ pct }}" style="background:{{ hx }}"></div>
+                </div>
+              </div>
+              <span style="font-size:.82rem;font-weight:700;color:{{ hx }};min-width:34px;text-align:left">{{ pct }}%</span>
+            </div>
+          </div>
+          {% else %}
+          <p style="color:var(--muted);text-align:center;padding:1rem">لا يوجد مهندسون</p>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="editModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 id="editModalLabel" class="modal-title" style="font-size:.95rem">✏️ تعديل المنافسة</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalTitle" style="color:var(--muted);font-size:.82rem;margin-bottom:1rem;padding:.5rem .75rem;background:var(--hover);border-radius:7px;border:1px solid var(--border)"></p>
+        <div class="mb-3">
+          <label class="form-label">👷 المهندس المسؤول</label>
+          <select id="engSelect" class="form-select"></select>
+          <button type="button" id="lockBtn" onclick="toggleEngineerLock()" title="قفل/فتح تعيين المهندس" style="margin-top:.5rem;padding:.45rem .8rem;border-radius:7px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#aaa;cursor:pointer;font-size:.88rem;width:100%;text-align:center;transition:background .15s,color .15s,border-color .15s">🔓 تعيين مفتوح — انقر للقفل</button>
+        </div>
+        <div>
+          <label class="form-label">📅 تاريخ الإغلاق</label>
+          <input type="date" id="dateInput" class="form-control">
+          <button type="button" id="dateLockBtn" onclick="toggleDateLock()" title="قفل/فتح تاريخ التقديم" style="margin-top:.5rem;padding:.45rem .8rem;border-radius:7px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#aaa;cursor:pointer;font-size:.88rem;width:100%;text-align:center;transition:background .15s,color .15s,border-color .15s">🔓 تاريخ مفتوح — انقر للقفل</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+        <button id="saveBtn" class="btn btn-success btn-sm px-4" onclick="saveEdit()">💾 حفظ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="resultModalLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 id="resultModalLabel" class="modal-title" style="font-size:.95rem">📝 تسجيل النتيجة</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+      <div class="modal-body">
+        <p id="resultTitle" style="color:var(--muted);font-size:.82rem;margin-bottom:1rem;padding:.5rem .75rem;background:var(--hover);border-radius:7px;border:1px solid var(--border)"></p>
+        <div class="mb-3">
+          <label class="form-label">هل قدّمنا عرضاً؟</label>
+          <div style="display:flex;gap:.5rem">
+            <button id="btnYes" onclick="setSubmit(true)" type="button" class="btn btn-sm btn-outline-success" style="flex:1">✅ نعم، قدّمنا</button>
+            <button id="btnNo"  onclick="setSubmit(false)" type="button" class="btn btn-sm btn-outline-secondary" style="flex:1">❌ لم نقدّم</button>
+          </div>
+        </div>
+        <div id="resultSection" class="mb-3">
+          <label class="form-label">النتيجة</label>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button type="button" class="btn btn-sm btn-outline-success result-btn" onclick="setResult('won')">🏆 فزنا</button>
+            <button type="button" class="btn btn-sm btn-outline-danger result-btn" onclick="setResult('lost')">❌ خسرنا</button>
+            <button type="button" class="btn btn-sm btn-outline-warning result-btn" onclick="setResult('pending')">⏳ معلق</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary result-btn" onclick="setResult('unknown')">⚪ لم تُعلن</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary result-btn" onclick="setResult('cancelled')">🚫 ملغي</button>
+          </div>
+        </div>
+        <div id="priceSection" class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label">سعرنا المقدَّم (ريال)</label>
+            <input type="number" id="ourPrice" class="form-control" placeholder="0.00" step="0.01">
+          </div>
+          <div class="col-6">
+            <label class="form-label">سعر الفائز (اختياري)</label>
+            <input type="number" id="winPrice" class="form-control" placeholder="0.00" step="0.01">
+          </div>
+        </div>
+        <div>
+          <label class="form-label">ملاحظات</label>
+          <textarea id="resultNotes" class="form-control" rows="2" placeholder="أي تفاصيل إضافية..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+        <button id="saveResultBtn" class="btn btn-success btn-sm px-4" onclick="saveResult()">💾 حفظ النتيجة</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING TENDERS MODAL -->
+<div class="modal fade" id="pendingModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="pendingModalLabel">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 id="pendingModalLabel" class="modal-title" style="font-size:.95rem">⏳ المنافسات بانتظار الاعتماد
+          <span style="background:rgba(168,78,26,.15);color:var(--orange);border-radius:20px;
+                padding:1px 8px;font-size:.78rem;margin-right:.5rem;font-weight:700">{{ pending_count }}</span>
+        </h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+      <div class="modal-body" style="padding:.75rem">
+        {% if pending_tenders %}
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--head);border-bottom:1px solid var(--border)">
+                <th style="padding:.5rem .75rem;font-size:.78rem;color:var(--sub);font-weight:700;text-align:right">اسم المنافسة</th>
+                <th style="padding:.5rem .75rem;font-size:.78rem;color:var(--sub);font-weight:700;width:110px">نوع التغيير</th>
+                <th style="padding:.5rem .75rem;font-size:.78rem;color:var(--sub);font-weight:700;width:115px">المهندس المقترح</th>
+                <th style="padding:.5rem .75rem;font-size:.78rem;color:var(--sub);font-weight:700;width:100px">تاريخ الإغلاق</th>
+                <th style="padding:.5rem .75rem;font-size:.78rem;color:var(--sub);font-weight:700;width:130px;text-align:center">إجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in pending_tenders %}
+              <tr id="prow-{{ p.id }}" style="border-bottom:1px solid rgba(180,140,40,.2)">
+                <td style="padding:.5rem .75rem;font-size:.84rem;color:var(--text)">
+                  <span title="{{ p.title|e }}">{{ p.title }}</span>
+                  {% if p.approval_stage == 'awaiting_engineer' %}
+                  <br><span style="background:rgba(200,144,64,.12);color:var(--yellow);border-radius:4px;padding:0 5px;font-size:.68rem;font-weight:700">🔧 بانتظار موافقة المهندس</span>
+                  {% elif p.approval_stage == 'awaiting_manager' %}
+                  <br><span style="background:rgba(26,90,154,.12);color:var(--blue);border-radius:4px;padding:0 5px;font-size:.68rem;font-weight:700">👔 بانتظار موافقة المدير</span>
+                  {% endif %}
+                </td>
+                <td style="padding:.5rem .75rem">
+                  {% if p.change_type == 'NEW_TENDER' or p.change_type == 'NEW' %}
+                  <span style="background:rgba(26,90,154,.1);color:var(--blue);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:700;border:1px solid rgba(26,90,154,.2)">جديدة</span>
+                  {% elif p.change_type == 'DELETED' %}
+                  <span style="background:rgba(200,40,40,.12);color:var(--red,#c62828);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:700;border:1px solid rgba(200,40,40,.3)">🚨 حُذفت من المنصة</span>
+                  {% elif p.change_type == 'REOPENED' %}
+                  <span style="background:rgba(40,140,90,.1);color:var(--green);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:700;border:1px solid rgba(40,140,90,.2)">إعادة فتح</span>
+                  {% elif 'DATE' in (p.change_type or '') %}
+                  <span style="background:rgba(200,144,64,.1);color:var(--yellow);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:700;border:1px solid rgba(200,144,64,.2)">تعديل تاريخ</span>
+                  {% elif 'ENG' in (p.change_type or '') %}
+                  <span style="background:rgba(100,60,160,.1);color:var(--purple);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:700;border:1px solid rgba(100,60,160,.2)">تعيين مهندس</span>
+                  {% else %}
+                  <span style="background:rgba(139,148,158,.1);color:var(--muted);border-radius:4px;padding:1px 6px;font-size:.72rem;border:1px solid var(--border)">{{ p.change_type or '—' }}</span>
+                  {% endif %}
+                </td>
+                <td style="padding:.5rem .75rem">
+                  {% if p.suggested_engineer %}
+                  <span style="color:var(--amber-l);font-size:.8rem;font-weight:600">{{ p.suggested_engineer }}</span>
+                  {% else %}<span style="color:var(--muted)">—</span>{% endif %}
+                </td>
+                <td style="padding:.5rem .75rem;font-size:.8rem;color:var(--sub)">
+                  {{ (p.submission_date or '')[:10] or '—' }}
+                </td>
+                <td style="padding:.5rem .75rem;text-align:center">
+                  <div style="display:inline-flex;gap:.3rem">
+                    <button onclick="approvePending({{ p.id }}, '{{ p.suggested_engineer or '' }}')"
+                      style="background:rgba(36,120,72,.12);color:var(--green);border:1px solid rgba(36,120,72,.3);
+                             border-radius:6px;padding:.25rem .6rem;font-size:.75rem;font-weight:700;
+                             cursor:pointer;font-family:'Tajawal',sans-serif;transition:.15s"
+                      onmouseover="this.style.background='rgba(36,120,72,.22)'"
+                      onmouseout="this.style.background='rgba(36,120,72,.12)'">✅ اعتماد</button>
+                    <button onclick="rejectPending({{ p.id }})"
+                      style="background:rgba(176,40,40,.08);color:var(--red);border:1px solid rgba(176,40,40,.25);
+                             border-radius:6px;padding:.25rem .6rem;font-size:.75rem;font-weight:700;
+                             cursor:pointer;font-family:'Tajawal',sans-serif;transition:.15s"
+                      onmouseover="this.style.background='rgba(176,40,40,.18)'"
+                      onmouseout="this.style.background='rgba(176,40,40,.08)'">❌ رفض</button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p style="text-align:center;color:var(--muted);padding:2rem">لا توجد منافسات بانتظار الاعتماد</p>
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BULK ASSIGN TOOLBAR -->
+<div id="bulkBar">
+  <span class="blbl" id="bulkLbl">0 محددة</span>
+  <select id="bulkEng">
+    <option value="">— اختر مهندساً —</option>
+    {% for eng in engineers %}
+    <option value="{{ eng.name }}">{{ eng.name }}</option>
+    {% endfor %}
+  </select>
+  <button class="bapply" onclick="applyBulk()">✅ تعيين</button>
+  <button class="bcancel" onclick="clearSel()">✕ إلغاء</button>
+</div>
+
+<div id="tw"><div id="toast" class="tmsg"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ── DYNAMIC CHART ENGINE ─────────────────────────────
+const _pal = ['#388bfd','#a371f7','#d29922','#f85149','#3fb950','#e3b341','#58a6ff','#ffa657','#79c0ff','#d2a8ff'];
+const _pal2 = _pal.map(c => c + 'b0'); // semi-transparent version
+
+const _ownerData   = {{ owner_dist | tojson }};
+const _engLoadData = {{ eng_load | tojson }};
+const _engNames    = [{% for e in engineers %}'{{ e.name }}',{% endfor %}];
+const _dailyTrend  = {{ daily_trend | tojson }};
+
+const _chartSets = {
+  tenders: {
+    sub:'{{ total_active }} نشطة',
+    ctype:'doughnut', cutout:true,
+    labels:['حرجة ≤3ي','تنبيه 4-7ي','مريحة >7ي','منتهية التاريخ'],
+    data:[{{ urgent }},{{ warning }},{{ ok_count }},{{ expired }}],
+    bg:['rgba(248,81,73,.65)','rgba(227,179,65,.65)','rgba(63,185,80,.65)','rgba(139,148,158,.35)'],
+    bdr:['#f85149','#e3b341','#3fb950','#8b949e'],
+  },
+  owners: {
+    sub:Object.keys(_ownerData).length+' جهة',
+    ctype:'bar', horiz:true,
+    labels:Object.keys(_ownerData).map(k=>k.length>22?k.slice(0,22)+'…':k),
+    data:Object.values(_ownerData),
+    bg:Object.keys(_ownerData).map((_,i)=>_pal2[i%_pal.length]),
+    bdr:Object.keys(_ownerData).map((_,i)=>_pal[i%_pal.length]),
+  },
+  engineers: {
+    sub:_engNames.length+' مهندس',
+    ctype:'bar', horiz:false,
+    labels:_engNames,
+    data:_engNames.map(n=>(_engLoadData[n]||{}).count||0),
+    bg:_engNames.map(n=>{const h=(_engLoadData[n]||{}).hex||'#3fb950';return h+'b0';}),
+    bdr:_engNames.map(n=>(_engLoadData[n]||{}).hex||'#3fb950'),
+    cap:_engNames.map(n=>(_engLoadData[n]||{}).capacity||5),
+  },
+  overview: {
+    sub:'{{ total_active + closed_count }} إجمالي',
+    ctype:'doughnut', cutout:true,
+    labels:['نشطة','مغلقة (أرشيف)'],
+    data:[{{ total_active }},{{ closed_count }}],
+    bg:['rgba(63,185,80,.65)','rgba(139,148,158,.35)'],
+    bdr:['#3fb950','#8b949e'],
+  },
+  status_pct: {
+    sub:'مؤشر الضغط',
+    ctype:'bar', horiz:false,
+    labels:_engNames,
+    data:_engNames.map(n=>(_engLoadData[n]||{}).pct||0),
+    bg:_engNames.map(n=>{const p=(_engLoadData[n]||{}).pct||0;
+      return p>=85?'rgba(248,81,73,.65)':p>=60?'rgba(227,179,65,.65)':'rgba(63,185,80,.65)';}),
+    bdr:_engNames.map(n=>(_engLoadData[n]||{}).hex||'#3fb950'),
+    isPercent:true,
+  },
+  trend: {
+    sub:_dailyTrend.data.reduce((a,b)=>a+b,0)+' منافسة جديدة',
+    ctype:'line',
+    labels:_dailyTrend.labels,
+    data:_dailyTrend.data,
+    bg:'rgba(56,139,253,.15)',
+    bdr:'#388bfd',
+  },
+};
+
+let _chartInst = null;
+
+function switchChart(type) {
+  const ds = _chartSets[type];
+  if (!ds) return;
+  const canvas = document.getElementById('dChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (_chartInst) { _chartInst.destroy(); _chartInst = null; }
+
+  // Adjust canvas height
+  if (ds.horiz) canvas.style.maxHeight = Math.max(130, ds.labels.length * 30) + 'px';
+  else if (ds.ctype === 'bar') canvas.style.maxHeight = '185px';
+  else canvas.style.maxHeight = '210px';
+
+  const isDoughnut = ds.ctype === 'doughnut';
+  const isLine = ds.ctype === 'line';
+  let cfg;
+  if (isLine) {
+    cfg = {
+      type:'line',
+      data:{ labels:ds.labels, datasets:[{
+        data:ds.data, label:'منافسات جديدة',
+        borderColor:ds.bdr, backgroundColor:ds.bg,
+        fill:true, tension:.3, borderWidth:2,
+        pointRadius:3, pointBackgroundColor:ds.bdr,
+      }]},
+      options:{
+        animation:{duration:550,easing:'easeOutQuart'},
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:c=>` ${c.raw} منافسة`}}
+        },
+        scales:{
+          x:{ticks:{color:'#7a5e28',font:{family:'Tajawal',size:9}},
+            grid:{color:'transparent'}},
+          y:{beginAtZero:true,ticks:{color:'#7a5e28',font:{family:'Tajawal',size:10},stepSize:1},
+            grid:{color:'rgba(180,140,40,.12)'}}
+        }
+      }
+    };
+  } else if (isDoughnut) {
+    cfg = {
+      type:'doughnut',
+      data:{ labels:ds.labels, datasets:[{
+        data:ds.data, backgroundColor:ds.bg, borderColor:ds.bdr,
+        borderWidth:1.5, hoverOffset:7
+      }]},
+      options:{
+        cutout:'70%',
+        animation:{duration:550,easing:'easeOutQuart'},
+        plugins:{
+          legend:{position:'bottom',labels:{color:'#7a5e28',font:{family:'Tajawal',size:11},boxWidth:10,padding:12}},
+          tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw} منافسة`}}
+        }
+      }
+    };
+  } else {
+    // Build datasets — add capacity line for engineers if available
+    const datasets = [{
+      data:ds.data,
+      backgroundColor:ds.bg,
+      borderColor:ds.bdr,
+      borderWidth:1.5,
+      borderRadius:5,
+      borderSkipped:false,
+      label:'المنافسات'
+    }];
+    if (ds.cap) {
+      datasets.push({
+        type:'line',
+        data:ds.cap,
+        label:'الطاقة القصوى',
+        borderColor:'rgba(138,72,0,.5)',
+        borderDash:[5,4],
+        borderWidth:1.5,
+        pointRadius:3,
+        pointBackgroundColor:'rgba(138,72,0,.6)',
+        fill:false,
+        tension:0,
+      });
+    }
+    cfg = {
+      type:'bar',
+      data:{ labels:ds.labels, datasets},
+      options:{
+        indexAxis: ds.horiz ? 'y' : 'x',
+        animation:{duration:450,easing:'easeOutQuart'},
+        plugins:{
+          legend:{display:!!ds.cap,
+            labels:{color:'#7a5e28',font:{family:'Tajawal',size:10},boxWidth:10}},
+          tooltip:{callbacks:{label:c=>` ${c.raw}${ds.isPercent?'%':' منافسة'}`}}
+        },
+        scales:{
+          x:{ticks:{color:'#7a5e28',font:{family:'Tajawal',size:10},
+              maxRotation:ds.horiz?0:35},
+            grid:{color:'rgba(180,140,40,.12)'},
+            ...(ds.isPercent?{max:100}:{})},
+          y:{ticks:{color:'#4a3810',font:{family:'Tajawal',size:10}},
+            grid:{color:ds.horiz?'rgba(180,140,40,.12)':'transparent'},
+            ...(ds.isPercent?{max:100}:{})}
+        }
+      }
+    };
+  }
+  _chartInst = new Chart(ctx, cfg);
+  const sub = document.getElementById('chartSub');
+  if (sub) { sub.style.opacity='0'; setTimeout(()=>{sub.textContent=ds.sub;sub.style.opacity='1';},150); }
+}
+
+// Init on load
+switchChart('tenders');
+
+// ── ENTRANCE ANIMATION ENGINE ─────────────────────────────
+(function(){
+  const E4 = t => 1 - Math.pow(1-t, 4);
+
+  // 1. Stat cards stagger in + number count-up
+  document.querySelectorAll('.scard').forEach((card, i) => {
+    const delay = 40 + i * 90;
+    card.style.animation = `fadeUp .5s cubic-bezier(.25,1,.5,1) ${delay}ms both`;
+    const num = card.querySelector('.snum');
+    if (num) {
+      const target = parseInt(num.textContent.trim(), 10) || 0;
+      if (target > 0) {
+        const orig = num.textContent.trim();
+        num.textContent = '0';
+        const s = performance.now(), dur = 900;
+        const tick = n => {
+          const p = Math.min((n - s) / dur, 1);
+          num.textContent = Math.round(target * E4(p));
+          if (p < 1) requestAnimationFrame(tick);
+          else num.textContent = orig;
+        };
+        setTimeout(() => requestAnimationFrame(tick), delay + 20);
+      }
+    }
+  });
+
+  // 2. Panels fade in after cards
+  document.querySelectorAll('.panel').forEach((p, i) => {
+    p.style.animation = `fadeIn .42s ease-out ${300 + i * 70}ms both`;
+  });
+
+  // 3. Table rows stagger in — translateY on mobile (cards), translateX on desktop (table)
+  const isMobileView = window.matchMedia('(max-width:768px)').matches;
+  document.querySelectorAll('tbody tr').forEach((tr, i) => {
+    const delay = 330 + Math.min(i, 17) * 22;
+    const isMiss = tr.classList.contains('miss');
+    tr.style.opacity = '0';
+    tr.style.transform = isMobileView ? 'translateY(10px)' : 'translateX(6px)';
+    setTimeout(() => {
+      tr.style.transition = 'opacity .28s ease, transform .38s cubic-bezier(.22,1,.36,1)';
+      tr.style.opacity = isMiss ? '0.45' : '1';
+      tr.style.transform = 'translate(0,0)';
+      setTimeout(() => {
+        tr.style.transition = isMobileView ? '' : 'background .1s';
+      }, 420);
+    }, delay);
+  });
+
+  // 4. Engineer bars: GPU-accelerated scaleX
+  document.querySelectorAll('.ebar-fill[data-w]').forEach((el, i) => {
+    setTimeout(() => {
+      el.style.transform = 'scaleX(' + (parseInt(el.dataset.w, 10) / 100) + ')';
+    }, 520 + i * 70);
+  });
+
+  // 5. Owner distribution bars
+  document.querySelectorAll('.owner-bar-fill[data-w]').forEach((el, i) => {
+    setTimeout(() => {
+      el.style.transform = 'scaleX(' + (parseInt(el.dataset.w, 10) / 100) + ')';
+    }, 600 + i * 50);
+  });
+})();
+
+// ── SEARCH + FILTER ──────────────────────────────────
+let _filt='all';
+function doSearch(q){_applyView(q,_filt);}
+function setFilt(f){
+  _filt=f;
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('fbtn-active'));
+  const btn=document.getElementById('fb'+f);
+  if(btn)btn.classList.add('fbtn-active');
+  _applyView(document.getElementById('srch').value.trim(),f);
+}
+function _titleHas(t,q){
+  // Arabic word-boundary: match only when query is not followed by another Arabic letter
+  if(!t.includes(q))return false;
+  let idx=t.indexOf(q);
+  while(idx>=0){
+    const after=t.charCodeAt(idx+q.length);
+    if(isNaN(after)||after<0x0600||after>0x06ff)return true;
+    idx=t.indexOf(q,idx+1);
+  }
+  return false;
+}
+function _applyView(q,f){
+  q=(q||'').toLowerCase();
+  let vis=0,total=0;
+  document.querySelectorAll('tbody tr').forEach(tr=>{
+    total++;
+    const titleEl=tr.querySelector('.t-title')||tr.cells[2];
+    const title=(titleEl?.textContent||'').toLowerCase();
+    const eng=(tr.querySelector('.echip')?.textContent||'').toLowerCase();
+    const mQ=!q||_titleHas(title,q)||eng.includes(q);
+    const mF=f==='all'||(f==='r'&&tr.classList.contains('ru'))
+             ||(f==='w'&&tr.classList.contains('rw'))
+             ||(f==='g'&&tr.classList.contains('ro'));
+    const show=mQ&&mF;
+    tr.style.display=show?'':'none';
+    // Uncheck hidden rows so they're excluded from bulk actions
+    if(!show){const cb=tr.querySelector('.row-cb');if(cb&&cb.checked){cb.checked=false;tr.classList.remove('sel-row');}}
+    if(show)vis++;
+  });
+  onRowCb();
+  const res=document.getElementById('srchRes');
+  if(res){
+    const txt=(q||f!=='all')?`${vis} من ${total} نتيجة`:'';
+    if(res.textContent!==txt){
+      res.style.opacity='0';
+      setTimeout(()=>{res.textContent=txt;res.style.opacity='1';},120);
+    }
+  }
+  const tc=document.getElementById('tCount');
+  if(tc)tc.textContent=` (${vis})`;
+}
+
+// ── SORT ─────────────────────────────────────────────
+let _sCol=-1,_sDir=1;
+function sortTbl(col){
+  if(_sCol===col)_sDir*=-1; else{_sCol=col;_sDir=1;}
+  document.querySelectorAll('th.sortable').forEach(h=>{
+    h.classList.remove('sort-asc','sort-desc');
+    if(+h.dataset.col===col)h.classList.add(_sDir>0?'sort-asc':'sort-desc');
+  });
+  const tb=document.querySelector('tbody');
+  [...tb.querySelectorAll('tr')].sort((a,b)=>{
+    const av=(a.cells[col]?.textContent||'').trim();
+    const bv=(b.cells[col]?.textContent||'').trim();
+    const an=parseFloat(av),bn=parseFloat(bv);
+    if(!isNaN(an)&&!isNaN(bn))return(an-bn)*_sDir;
+    return av.localeCompare(bv,'ar')*_sDir;
+  }).forEach(r=>tb.appendChild(r));
+}
+
+// ── COPY TITLE ───────────────────────────────────────
+function cpTitle(td){
+  const t=td.dataset.full||td.textContent.trim();
+  // Flash animation — restart via reflow
+  td.classList.remove('flashing');
+  void td.offsetWidth;
+  td.classList.add('flashing');
+  setTimeout(()=>td.classList.remove('flashing'),560);
+  if(navigator.clipboard){navigator.clipboard.writeText(t).then(()=>toast('✅ تم نسخ العنوان'));}
+  else{const i=document.createElement('input');i.value=t;document.body.appendChild(i);i.select();document.execCommand('copy');document.body.removeChild(i);toast('✅ تم نسخ العنوان');}
+}
+
+// ── TOPBAR SCROLL ELEVATION ───────────────────────────
+(function(){
+  const tb=document.querySelector('.topbar');
+  if(!tb)return;
+  const onScroll=()=>tb.classList.toggle('elevated',window.scrollY>6);
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+
+// ── KEYBOARD SHORTCUTS ───────────────────────────────
+document.addEventListener('keydown',e=>{
+  const active=document.activeElement;
+  const inInput=active.tagName==='INPUT'||active.tagName==='TEXTAREA'||active.tagName==='SELECT';
+  if(e.key==='/'&&!inInput){e.preventDefault();const s=document.getElementById('srch');if(s){s.focus();s.select();}}
+  if(e.key==='Escape'&&active===document.getElementById('srch')){document.getElementById('srch').value='';doSearch('');active.blur();}
+});
+
+// ── TAB BADGE ────────────────────────────────────────
+(function(){const u={{ urgent }};if(u>0)document.title=`(${u}🔴) {{ co.short_ar }} — المنافسات`;})();
+
+// ── REFRESH COUNTDOWN ────────────────────────────────
+(function(){
+  let s=300;const el=document.getElementById('rfCnt');if(!el)return;
+  const t=()=>{
+    if(s<=0){el.textContent='جاري التحديث...';return;}
+    const m=Math.floor(s/60),sc=s%60;
+    el.textContent=`تحديث: ${m}:${sc<10?'0':''}${sc}`;
+    el.className='rf-count'+(s<=30?' soon':'');
+    s--;setTimeout(t,1000);
+  };t();
+})();
+
+// ── POPULATE FILTER BUTTON COUNTS ────────────────────
+(function(){
+  let ru=0,rw=0,ro=0;
+  document.querySelectorAll('tbody tr').forEach(tr=>{
+    if(tr.classList.contains('ru'))ru++;
+    else if(tr.classList.contains('rw'))rw++;
+    else if(tr.classList.contains('ro'))ro++;
+  });
+  const fbr=document.getElementById('fbr');
+  const fbw=document.getElementById('fbw');
+  const fbg=document.getElementById('fbg');
+  if(fbr)fbr.textContent=`🔴 حرجة${ru?' ('+ru+')':''}`;
+  if(fbw)fbw.textContent=`🟡 تنبيه${rw?' ('+rw+')':''}`;
+  if(fbg)fbg.textContent=`🟢 مريحة${ro?' ('+ro+')':''}`;
+})();
+
+// ── BULK ASSIGN ──────────────────────────────────────
+function onRowCb(){
+  const all=document.querySelectorAll('.row-cb');
+  const checked=[...all].filter(c=>c.checked&&c.closest('tr').style.display!=='none');
+  const bb=document.getElementById('bulkBar');
+  const lbl=document.getElementById('bulkLbl');
+  const ca=document.getElementById('cbAll');
+  if(lbl)lbl.textContent=checked.length+' محددة';
+  if(bb)bb.classList.toggle('show',checked.length>0);
+  if(ca){
+    const vis=[...all].filter(c=>c.closest('tr').style.display!=='none');
+    ca.indeterminate=checked.length>0&&checked.length<vis.length;
+    ca.checked=vis.length>0&&checked.length===vis.length;
+  }
+}
+function toggleAll(cb){
+  const vis=document.querySelectorAll('tbody tr');
+  vis.forEach(tr=>{
+    if(tr.style.display==='none')return;
+    const c=tr.querySelector('.row-cb');
+    if(c)c.checked=cb.checked;
+    tr.classList.toggle('sel-row',cb.checked);
+  });
+  onRowCb();
+}
+document.querySelectorAll('.row-cb').forEach(c=>{
+  c.addEventListener('change',function(){
+    const tr=this.closest('tr');
+    if(tr)tr.classList.toggle('sel-row',this.checked);
+    onRowCb();
+  });
+});
+function clearSel(){
+  document.querySelectorAll('.row-cb').forEach(c=>{c.checked=false;});
+  document.querySelectorAll('tbody tr').forEach(tr=>tr.classList.remove('sel-row'));
+  const ca=document.getElementById('cbAll');if(ca){ca.checked=false;ca.indeterminate=false;}
+  const bb=document.getElementById('bulkBar');if(bb)bb.classList.remove('show');
+  const lbl=document.getElementById('bulkLbl');if(lbl)lbl.textContent='0 محددة';
+}
+function applyBulk(){
+  const eng=document.getElementById('bulkEng').value;
+  if(!eng){toast('اختر مهندساً أولاً',1);return;}
+  const ids=[...document.querySelectorAll('.row-cb:checked')].map(c=>+c.dataset.id).filter(Boolean);
+  if(!ids.length){toast('لم تحدد أي منافسة',1);return;}
+  requirePin(()=>{
+    const btn=document.querySelector('#bulkBar .bapply');
+    if(btn){btn.disabled=true;btn.textContent='⏳';}
+    fetch('/api/bulk_assign',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({engineer:eng,ids:ids})
+    }).then(r=>r.json()).then(d=>{
+      if(d.ok){toast(d.message||'✅ تم التعيين');clearSel();setTimeout(()=>location.reload(),1800);}
+      else toast(d.error||'فشل',1);
+    }).catch(()=>toast('خطأ في الاتصال',1))
+    .finally(()=>{if(btn){btn.disabled=false;btn.textContent='✅ تعيين';}});
+  });
+}
+
+let cid=null, didSub=null, resVal='pending';
+const M  = new bootstrap.Modal(document.getElementById('editModal'));
+const RM = new bootstrap.Modal(document.getElementById('resultModal'));
+
+function setSubmit(v){
+  didSub=v;
+  document.getElementById('btnYes').className='btn btn-sm '+(v?'btn-success':'btn-outline-success')+' flex-fill';
+  document.getElementById('btnNo').className='btn btn-sm '+(!v?'btn-secondary':'btn-outline-secondary')+' flex-fill';
+  document.getElementById('resultSection').style.display=v?'':'none';
+  document.getElementById('priceSection').style.display=v?'':'none';
+}
+function setResult(v){
+  resVal=v;
+  document.querySelectorAll('.result-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+v+"'")));
+}
+function openResult(id,t){
+  cid=id;didSub=null;resVal='pending';
+  document.getElementById('resultTitle').textContent=t;
+  ['ourPrice','winPrice'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('resultNotes').value='';
+  setSubmit(null);
+  document.getElementById('resultSection').style.display='';
+  document.getElementById('priceSection').style.display='';
+  fetch('/api/result/'+id).then(r=>r.json()).then(d=>{
+    if(d.existing){const ex=d.existing;setSubmit(ex.did_submit===1);setResult(ex.result||'pending');
+      if(ex.our_price)document.getElementById('ourPrice').value=ex.our_price;
+      if(ex.winning_price)document.getElementById('winPrice').value=ex.winning_price;
+      if(ex.notes)document.getElementById('resultNotes').value=ex.notes;}
+    RM.show();
+  }).catch(()=>RM.show());
+}
+function saveResult(){
+  if(didSub===null){toast('حدد هل قدّمنا أم لا',1);return;}
+  const b=document.getElementById('saveResultBtn');b.disabled=true;b.textContent='⏳';
+  fetch('/api/result/'+cid+'/save',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({did_submit:didSub,result:resVal,
+      our_price:document.getElementById('ourPrice').value,
+      win_price:document.getElementById('winPrice').value,
+      notes:document.getElementById('resultNotes').value})
+  }).then(r=>r.json()).then(d=>{if(d.ok){RM.hide();toast('✅ تم حفظ النتيجة');}else toast(d.error||'فشل',1);})
+  .catch(()=>toast('خطأ في الاتصال',1)).finally(()=>{b.disabled=false;b.textContent='💾 حفظ النتيجة';});
+}
+function openEdit(id,t){
+  requirePin(()=>{
+    cid=id;document.getElementById('modalTitle').textContent=t;
+    document.getElementById('engSelect').innerHTML='<option>جاري التحميل...</option>';
+    document.getElementById('dateInput').value='';
+    fetch('/api/tender/'+id).then(r=>r.json()).then(d=>{
+      const s=document.getElementById('engSelect');
+      s.innerHTML='<option value="">— لا تغيير —</option>';
+      d.engineers.forEach(n=>{const o=document.createElement('option');o.value=n;o.textContent=n;if(n===d.engineer)o.selected=true;s.appendChild(o);});
+      if(d.date)document.getElementById('dateInput').value=d.date;
+      const _dlb=document.getElementById('dateLockBtn');
+      if(_dlb){_dlb.textContent=d.date_locked?'🔒 تاريخ مقفول — انقر للفتح':'🔓 تاريخ مفتوح — انقر للقفل';_dlb.style.borderColor=d.date_locked?'#ffc107':'rgba(255,255,255,.25)';_dlb.style.color=d.date_locked?'#ffc107':'#aaa';}
+      const _lb=document.getElementById('lockBtn');
+      if(_lb){_lb.textContent=d.locked?'🔒 تعيين مقفول — انقر للفتح':'🔓 تعيين مفتوح — انقر للقفل';_lb.style.borderColor=d.locked?'#ffc107':'rgba(255,255,255,.25)';_lb.style.color=d.locked?'#ffc107':'#aaa';}
+      M.show();
+    }).catch(()=>toast('خطأ في التحميل',1));
+  });
+}
+
+// ── فتح نافذة التعديل تلقائياً لو جاي رابط من صفحة التفاصيل (?edit=<id>) ──
+// ملحوظة: استدعاء openEdit() مؤجَّل عبر setTimeout عمداً -- لو اتنادى فوراً هنا
+// (قبل نهاية تنفيذ السكربت بالكامل) بيطلع خطأ TDZ حقيقي لأن requirePin() بيستخدم
+// "let _pinCb" المُعرَّفة لاحقاً أسفل الملف -- ثبتنا الخطأ ده فعلياً على السيرفر الحي.
+(function(){
+  const _p = new URLSearchParams(location.search);
+  const _eid = _p.get('edit');
+  if(_eid){
+    setTimeout(function(){ openEdit(parseInt(_eid,10), ''); }, 400);
+    const _u = new URL(location.href);
+    _u.searchParams.delete('edit');
+    history.replaceState({}, '', _u.pathname + _u.search);
+  }
+})();
+
+  function toggleDateLock(){
+    if(!cid)return;
+    fetch('/api/tender/'+cid+'/toggle-date-lock',{method:'POST'})
+      .then(r=>r.json()).then(d=>{
+        const btn=document.getElementById('dateLockBtn');
+        if(btn){btn.textContent=d.locked?'🔒 تاريخ مقفول — انقر للفتح':'🔓 تاريخ مفتوح — انقر للقفل';btn.style.borderColor=d.locked?'#ffc107':'rgba(255,255,255,.2)';btn.style.color=d.locked?'#ffc107':'#aaa';}
+        toast(d.locked?'🔒 التاريخ مقفول — لن يتغير تلقائياً':'🔓 التاريخ مفتوح',0);
+      }).catch(()=>toast('خطأ',1));
+  }
+  
+  function toggleEngineerLock(){
+    if(!cid)return;
+    fetch('/api/tender/'+cid+'/toggle-lock',{method:'POST'})
+      .then(r=>r.json()).then(d=>{
+        const btn=document.getElementById('lockBtn');
+        if(btn){
+          btn.textContent=d.locked?'🔒 تعيين مقفول — انقر للفتح':'🔓 تعيين مفتوح — انقر للقفل';
+          btn.style.borderColor=d.locked?'#ffc107':'rgba(255,255,255,.25)';
+          btn.style.color=d.locked?'#ffc107':'#aaa';
+        }
+        toast(d.locked?'🔒 تعيين المهندس مقفول — لن يتغير تلقائياً':'🔓 تعيين المهندس مفتوح',0);
+      }).catch(()=>toast('خطأ في الاتصال',1));
+  }
+  function saveEdit(){
+  const eng=document.getElementById('engSelect').value;
+  const dt=document.getElementById('dateInput').value;
+  if(!eng&&!dt){toast('لم تقم بأي تعديل',1);return;}
+  const b=document.getElementById('saveBtn');b.disabled=true;b.textContent='⏳';
+  fetch('/api/tender/'+cid+'/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({engineer:eng,date:dt})})
+  .then(r=>r.json()).then(d=>{
+    if(d.ok){
+      // Success animation on button before closing modal
+      b.textContent='✅ تم';b.classList.add('did-save');
+      setTimeout(()=>{M.hide();toast('✅ تم الحفظ');setTimeout(()=>location.reload(),1600);},550);
+    } else toast(d.error||'فشل',1);
+  })
+  .catch(()=>toast('خطأ في الاتصال',1))
+  .finally(()=>{setTimeout(()=>{b.disabled=false;b.textContent='💾 حفظ';b.classList.remove('did-save');},600);});
+}
+let _toastTimer=null;
+function toast(m,err=0){
+  const t=document.getElementById('toast');
+  if(_toastTimer)clearTimeout(_toastTimer);
+  t.textContent=m;
+  t.className='tmsg'+(err?' err':'');
+  void t.offsetWidth;
+  t.classList.add('on');
+  _toastTimer=setTimeout(()=>{
+    t.style.transform='translateY(8px) scale(.95)';
+    t.style.opacity='0';
+    setTimeout(()=>{t.className='tmsg'+(err?' err':'');t.style.transform='';t.style.opacity='';},300);
+  }, err?3500:2800);
+}
+
+// ── PENDING MODAL ─────────────────────────────────
+const PM = new bootstrap.Modal(document.getElementById('pendingModal'));
+function openPending(){ PM.show(); }
+
+function approvePending(pid, eng) {
+  requirePin(()=>{
+    if (!confirm('اعتماد هذه المنافسة وتعيين المهندس: ' + (eng || '—') + '؟')) return;
+    fetch('/api/pending/' + pid + '/approve', {method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'approve'})
+    }).then(r=>r.json()).then(d=>{
+      if(d.ok){
+        const row=document.getElementById('prow-'+pid);
+        if(row){row.style.opacity='.3';row.style.pointerEvents='none';}
+        toast('✅ تم الاعتماد');
+        setTimeout(()=>{PM.hide();location.reload();},1800);
+      } else toast(d.error||'فشل',1);
+    }).catch(()=>toast('خطأ في الاتصال',1));
+  });
+}
+
+function rejectPending(pid) {
+  requirePin(()=>{
+    if (!confirm('رفض هذا الطلب؟')) return;
+    fetch('/api/pending/' + pid + '/approve', {method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'reject'})
+    }).then(r=>r.json()).then(d=>{
+      if(d.ok){
+        const row=document.getElementById('prow-'+pid);
+        if(row){row.style.opacity='.3';row.style.pointerEvents='none';}
+        toast('🗑️ تم الرفض');
+        setTimeout(()=>{PM.hide();location.reload();},1800);
+      } else toast(d.error||'فشل',1);
+    }).catch(()=>toast('خطأ في الاتصال',1));
+  });
+}
+
+// ── PIN GATE ──────────────────────────────────────────
+const _PIN='1010';
+let _pinCb=null;
+function requirePin(fn){
+  if(sessionStorage.getItem('pinOk')==='1'){fn();return;}
+  _pinCb=fn;
+  const m=document.getElementById('pinModal');
+  m.style.display='flex';
+  document.getElementById('pinInput').value='';
+  document.getElementById('pinErr').textContent='';
+  setTimeout(()=>document.getElementById('pinInput').focus(),80);
+}
+function _pinOk(){
+  const v=document.getElementById('pinInput').value;
+  if(v===_PIN){
+    sessionStorage.setItem('pinOk','1');
+    document.getElementById('pinModal').style.display='none';
+    if(_pinCb){const f=_pinCb;_pinCb=null;f();}
+  } else {
+    document.getElementById('pinErr').textContent='كلمة المرور غير صحيحة ❌';
+    document.getElementById('pinInput').value='';
+    document.getElementById('pinInput').focus();
+  }
+}
+function _pinCancel(){
+  document.getElementById('pinModal').style.display='none';
+  _pinCb=null;
+}
+
+// ─── ABOUT MENU (DASHBOARD) ───────────────────────────────
+function toggleAboutD(e){
+  e.stopPropagation();
+  const d=document.getElementById('aboutDropD');
+  d.style.display=d.style.display==='none'?'block':'none';
+}
+document.addEventListener('click',()=>{
+  const d=document.getElementById('aboutDropD');
+  if(d)d.style.display='none';
+});
+</script>
+<!-- COPYRIGHT FOOTER -->
+<div style="text-align:center;padding:1rem;color:rgba(255,255,255,.82);font-size:.68rem;font-family:'Tajawal',sans-serif;letter-spacing:.3px">
+  Copyright 2026 &copy; {{ co.footer_owner }} &mdash; <a href="{{ co.footer_url }}" target="_blank" style="color:rgba(255,255,255,.6);text-decoration:none">{{ (co.footer_url or "").replace("https://","").replace("http://","") }}</a>
+</div>
+
+<!-- PIN GATE MODAL -->
+<div id="pinModal" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(30,20,4,.82);align-items:center;justify-content:center">
+  <div style="background:var(--card);border:2px solid var(--amber);border-radius:16px;
+    padding:1.75rem 1.5rem;width:min(300px,88vw);text-align:center;
+    box-shadow:0 12px 40px rgba(0,0,0,.4)">
+    <div style="font-size:2rem;margin-bottom:.3rem">🔐</div>
+    <div style="font-weight:800;font-size:1rem;margin-bottom:.2rem;color:var(--text)">مطلوب كلمة المرور</div>
+    <div style="color:var(--muted);font-size:.77rem;margin-bottom:1rem">أدخل كلمة مرور التعديل للمتابعة</div>
+    <input type="password" id="pinInput" maxlength="6"
+      style="width:100%;text-align:center;font-size:1.5rem;letter-spacing:.4rem;
+        padding:.55rem;border:1.5px solid var(--border);border-radius:8px;
+        background:var(--field);color:var(--text);outline:none;direction:ltr;
+        transition:border-color .2s"
+      placeholder="••••"
+      onfocus="this.style.borderColor='var(--amber)'"
+      onblur="this.style.borderColor='var(--border)'"
+      onkeydown="if(event.key==='Enter')_pinOk()">
+    <div id="pinErr" style="color:var(--red);font-size:.75rem;margin-top:.35rem;min-height:1rem"></div>
+    <div style="display:flex;gap:.6rem;margin-top:.85rem">
+      <button onclick="_pinOk()" style="flex:1;background:linear-gradient(135deg,#8a4800,#b06000);
+        color:#fff4d8;border:none;border-radius:9px;padding:.55rem;cursor:pointer;
+        font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:700">تأكيد</button>
+      <button onclick="_pinCancel()" style="flex:1;background:transparent;color:var(--muted);
+        border:1px solid var(--border);border-radius:9px;padding:.55rem;cursor:pointer;
+        font-family:'Tajawal',sans-serif;font-size:.95rem">إلغاء</button>
+    </div>
+  </div>
+</div>
+</body></html>

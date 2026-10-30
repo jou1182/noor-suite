@@ -34,7 +34,8 @@ jobs:
       - name: Tests
         run: |
           set +e
-          python -m pytest -q packages platforms tools/tests tests/support tests/e2e
+          # Imported NMIS tests: first run is the owner's baseline (T047, NMIS-N10), not CI's.
+          python -m pytest -q packages platforms tools/tests tests/support tests/e2e --ignore=platforms/nmis/full
           code=$?
           # 5 = no tests collected (allowed while platforms are still empty)
           if [ "$code" -ne 0 ] && [ "$code" -ne 5 ]; then exit "$code"; fi

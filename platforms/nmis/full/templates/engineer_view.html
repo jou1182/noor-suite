@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>بوابة المهندسين — {{ co.short_ar }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#e6edf3;font-family:'Tajawal',system-ui,sans-serif;min-height:100vh}
+:root{
+  --bg:#0d1117;--card:#161b22;--border:#30363d;
+  --amber:#ffc107;--amber-d:#7a5200;--head:#1c2128;
+  --text:#e6edf3;--sub:#8b949e;--muted:#6e7681;
+  --green:#3fb950;--red:#f85149;--orange:#d29922;
+  --topbar:linear-gradient(135deg,#1c1100 0%,#2d1e00 100%)
+}
+/* TOP BAR */
+.topbar{background:var(--topbar);border-bottom:1px solid #3d2e00;
+  padding:.7rem 1.5rem;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:200}
+.brand{display:flex;align-items:center;gap:.65rem;font-weight:900;
+  font-size:1.1rem;color:#fff4d8}
+.brand-sub{color:rgba(255,215,140,.7);font-weight:500;font-size:.83rem}
+.tnav{display:flex;align-items:center;gap:.5rem}
+.tnav a{color:rgba(255,215,140,.8);text-decoration:none;font-size:.83rem;
+  padding:.3rem .65rem;border-radius:7px;transition:.15s}
+.tnav a:hover{background:rgba(255,255,255,.12);color:#fff}
+.tnav a.hi{color:#ffd060}
+/* PAGE */
+.page-wrap{padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
+/* FILTER BAR */
+.filter-bar{display:flex;align-items:center;gap:.85rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.eng-select{padding:.55rem 1rem;border-radius:9px;border:1px solid var(--border);
+  background:var(--card);color:var(--text);font-family:'Tajawal',sans-serif;
+  font-size:.92rem;cursor:pointer;outline:none;min-width:200px;
+  transition:border-color .15s}
+.eng-select:hover,.eng-select:focus{border-color:var(--amber)}
+.filter-lbl{color:var(--sub);font-size:.85rem;white-space:nowrap;font-weight:600}
+.filter-cnt{color:var(--sub);font-size:.8rem;
+  background:rgba(255,193,7,.1);border:1px solid rgba(255,193,7,.2);
+  border-radius:20px;padding:2px 10px}
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem;
+  padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.sec-hdr h2{font-size:1rem;font-weight:700;color:var(--amber)}
+.sec-hdr .sub{color:var(--sub);font-size:.8rem}
+/* TENDER GRID */
+.t-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem}
+@media(max-width:600px){.t-grid{grid-template-columns:1fr}}
+/* TENDER CARD */
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:1rem 1.1rem;transition:.2s;position:relative;overflow:hidden}
+.tcard:hover{border-color:rgba(255,193,7,.3);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.tcard.urgent{border-left:3px solid var(--red)}
+.tcard.soon{border-left:3px solid var(--orange)}
+.tcard.normal{border-left:3px solid rgba(255,193,7,.4)}
+.tcard.done{opacity:.7;border-left:3px solid var(--border)}
+.tc-name{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.4rem;
+  line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tc-meta{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.75rem}
+.tc-badge{font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600}
+.tc-badge.days-red{background:rgba(248,81,73,.15);color:#f85149}
+.tc-badge.days-orange{background:rgba(210,153,34,.15);color:#d29922}
+.tc-badge.days-green{background:rgba(63,185,80,.12);color:#3fb950}
+.tc-badge.days-grey{background:rgba(110,118,129,.15);color:#6e7681}
+.tc-badge.cat{background:rgba(255,193,7,.1);color:var(--amber)}
+.tc-badge.locked{background:rgba(248,81,73,.12);color:#f85149}
+.tc-status{font-size:.78rem;color:var(--sub);margin-bottom:.65rem}
+.tc-status .st-val{font-weight:700}
+.st-submitted{color:var(--amber)}
+.st-won{color:var(--green)}
+.st-lost{color:var(--red)}
+.st-pending{color:var(--muted)}
+/* ACTION BUTTONS */
+.tc-actions{display:flex;gap:.5rem}
+.act-btn{flex:1;padding:.45rem .3rem;border:1px solid;border-radius:8px;
+  font-family:'Tajawal',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;
+  transition:.2s;text-align:center}
+.act-btn.submit{border-color:rgba(255,193,7,.4);background:rgba(255,193,7,.08);color:var(--amber)}
+.act-btn.submit:hover,.act-btn.submit.sel{background:#ffc107;color:#000;border-color:#ffc107}
+.act-btn.won{border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.08);color:var(--green)}
+.act-btn.won:hover,.act-btn.won.sel{background:#3fb950;color:#000;border-color:#3fb950}
+.act-btn.lost{border-color:rgba(248,81,73,.4);background:rgba(248,81,73,.08);color:var(--red)}
+.act-btn.lost:hover,.act-btn.lost.sel{background:#f85149;color:#fff;border-color:#f85149}
+.act-btn:disabled{opacity:.45;cursor:default}
+/* EMPTY STATE */
+.empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty .icon{font-size:3rem;margin-bottom:.5rem}
+/* TOAST */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9000;
+  background:#2d2d2d;color:#fff;padding:.65rem 1.2rem;border-radius:10px;
+  font-size:.84rem;box-shadow:0 4px 16px rgba(0,0,0,.4);
+  opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+/* STATS STRIP */
+.stats-strip{display:flex;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap}
+.ss-card{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:.75rem 1.2rem;min-width:100px;text-align:center}
+.ss-num{font-size:1.6rem;font-weight:900;color:var(--amber);line-height:1}
+.ss-lbl{font-size:.72rem;color:var(--sub);margin-top:.2rem}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <span style="font-size:1.3rem">👷</span>
+    <span>بوابة المهندسين</span>
+    <span class="brand-sub">إدارة متابعة المنافسات</span>
+  </div>
+  <div class="tnav">
+    {% if kanban_on %}<a href="/tasks">🗂️ المهام</a>{% endif %}
+    <a href="/" class="hi">← اللوحة الرئيسية</a>
+    <a href="/results">📊 النتائج</a>
+    <a href="/logout">خروج ↩</a>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- STATS STRIP -->
+  <div class="stats-strip">
+    <div class="ss-card">
+      <div class="ss-num">{{ total_tenders }}</div>
+      <div class="ss-lbl">إجمالي المنافسات</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num" style="color:var(--orange)">{{ pending_tenders }}</div>
+      <div class="ss-lbl">لم تُقدَّم بعد</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num" style="color:var(--amber)">{{ submitted_tenders }}</div>
+      <div class="ss-lbl">تم التقديم</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num" style="color:var(--green)">{{ won_tenders }}</div>
+      <div class="ss-lbl">فزنا</div>
+    </div>
+    <div class="ss-card">
+      <div class="ss-num" style="color:var(--red)">{{ lost_tenders }}</div>
+      <div class="ss-lbl">خسرنا</div>
+    </div>
+  </div>
+
+  <!-- ENGINEER FILTER DROPDOWN -->
+  <div class="filter-bar">
+    <label class="filter-lbl" for="engSelect">👷 المهندس:</label>
+    <select class="eng-select" id="engSelect" onchange="filterEng(this.value)">
+      <option value="__all__">📋 الكل — {{ total_tenders }} منافسة</option>
+      {% for eng in engineers %}
+      <option value="{{ eng }}">{{ eng }} — {{ eng_counts[eng] }} منافسة</option>
+      {% endfor %}
+    </select>
+    <span class="filter-cnt" id="filterCnt"></span>
+  </div>
+
+  <!-- TENDER CARDS -->
+  <div id="cardsGrid" class="t-grid">
+    {% if tenders %}
+    {% for t in tenders %}
+    {% set days = t.days_left %}
+    {% set urgency = 'urgent' if days is not none and days <= 3 else ('soon' if days is not none and days <= 7 else ('done' if t.result else 'normal')) %}
+    {% set days_cls = 'days-red' if days is not none and days <= 3 else ('days-orange' if days is not none and days <= 7 else ('days-green' if days is not none and days > 7 else 'days-grey')) %}
+
+    <div class="tcard {{ urgency }}" data-eng="{{ t.assigned_engineer or '' }}" id="tcard-{{ t.id }}">
+      <a href="/tender/{{ t.id }}?from=engineer" class="tc-name" title="{{ t.title }}"
+         style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+                overflow:hidden;text-decoration:none;color:inherit;
+                transition:color .15s;cursor:pointer"
+         onmouseover="this.style.color='#ffc107'"
+         onmouseout="this.style.color=''">{{ t.title }}</a>
+
+      <div class="tc-meta">
+        {% if days is not none %}
+        <span class="tc-badge {{ days_cls }}">
+          {% if days < 0 %}انتهى{% elif days == 0 %}اليوم!{% elif days == 1 %}غداً!{% else %}{{ days }} يوم{% endif %}
+        </span>
+        {% endif %}
+        {% if t.business_type %}
+        <span class="tc-badge cat">{{ t.business_type }}</span>
+        {% endif %}
+        {% if t.engineer_locked %}
+        <span class="tc-badge locked">🔒 مغلق</span>
+        {% endif %}
+        {% if t.assigned_engineer %}
+        <span class="tc-badge eng" style="background:rgba(255,255,255,.07);color:var(--sub)">
+          👤 {{ t.assigned_engineer }}
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="tc-status">
+        الحالة:
+        {% if t.result == 'won' %}
+          <span class="st-val st-won">✅ فزنا</span>
+        {% elif t.result == 'lost' %}
+          <span class="st-val st-lost">❌ خسرنا</span>
+        {% elif t.did_submit %}
+          <span class="st-val st-submitted">📤 تم التقديم</span>
+        {% else %}
+          <span class="st-val st-pending">⏳ لم تُقدَّم</span>
+        {% endif %}
+        {% if t.submission_date %}
+        <span style="color:var(--muted);font-size:.72rem;margin-right:.4rem">
+          — {{ t.submission_date }}
+        </span>
+        {% endif %}
+      </div>
+
+      <div class="tc-actions">
+        <button class="act-btn submit {{ 'sel' if t.did_submit and not t.result }}"
+                onclick="setStatus({{ t.id }}, 'submit', this)"
+                {% if t.engineer_locked %}disabled title="المنافسة مغلقة"{% endif %}>
+          📤 قدّمنا
+        </button>
+        <button class="act-btn won {{ 'sel' if t.result == 'won' }}"
+                onclick="setStatus({{ t.id }}, 'won', this)"
+                {% if t.engineer_locked %}disabled title="المنافسة مغلقة"{% endif %}>
+          🏆 فزنا
+        </button>
+        <button class="act-btn lost {{ 'sel' if t.result == 'lost' }}"
+                onclick="setStatus({{ t.id }}, 'lost', this)"
+                {% if t.engineer_locked %}disabled title="المنافسة مغلقة"{% endif %}>
+          ❌ خسرنا
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty" style="grid-column:1/-1">
+      <div class="icon">👷</div>
+      <div>لا توجد منافسات مسنَدة للمهندسين</div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+function filterEng(eng) {
+  let visible = 0;
+  document.querySelectorAll('.tcard').forEach(card => {
+    const cardEng = (card.dataset.eng || '').trim();
+    const match   = (eng === '__all__') || (cardEng === eng.trim());
+    card.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  const cnt = document.getElementById('filterCnt');
+  if (cnt) cnt.textContent = (eng === '__all__') ? '' : visible + ' نتيجة';
+}
+
+function setStatus(tid, status, btn) {
+  const card = document.getElementById('tcard-' + tid);
+  const btns = card.querySelectorAll('.act-btn');
+  btns.forEach(b => b.disabled = true);
+
+  fetch('/api/eng/tender/' + tid + '/status', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({status: status})
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      // تحديث الأزرار المحددة
+      card.querySelectorAll('.act-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+      // تحديث نص الحالة
+      const stEl = card.querySelector('.tc-status');
+      const statusMap = {
+        'submit': '<span class="st-val st-submitted">📤 تم التقديم</span>',
+        'won':    '<span class="st-val st-won">✅ فزنا</span>',
+        'lost':   '<span class="st-val st-lost">❌ خسرنا</span>'
+      };
+      stEl.innerHTML = 'الحالة: ' + (statusMap[status] || '');
+      // تحديث urgency class
+      if (status === 'won' || status === 'lost') {
+        card.classList.remove('urgent', 'soon', 'normal');
+        card.classList.add('done');
+      }
+      showToast('✅ تم الحفظ');
+    } else {
+      showToast('⚠️ حدث خطأ: ' + (d.error || 'غير معروف'));
+    }
+  })
+  .catch(() => showToast('⚠️ تعذر الاتصال بالخادم'))
+  .finally(() => {
+    btns.forEach(b => {
+      if (!card.classList.contains('done')) b.disabled = false;
+    });
+  });
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body></html>

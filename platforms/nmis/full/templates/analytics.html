@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ co.short_ar }} — التحليلات</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* رموز افتراضية (يعيد تعريفها مظهر الشركة، ومنها الوضع الداكن) */
+:root{--ink:#16233B;--ink-2:#3A4A66;--ink-3:#6B7A93;--noor:#1F4C8F;--noor-t:#E6EEF8;--film:#F2F5F9;--sheet:#fff;
+  --rule:#CBD5E1;--rule-2:#E3E9F1;--lumen:#F4B63F;--lumen-t:#FDF3DB;--lumen-ink:#8A5A00;--late:#B42318;--late-t:#FDECEA;
+  --ok:#1F7A4C;--ok-t:#E4F3EB;--warn:#B25E09;--warn-t:#FDF0DC;--strong:#16233B;--hover:#EEF3FA;--on-fill:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--film);color:var(--ink);font-family:'Tajawal',sans-serif;font-size:14px;line-height:1.5;font-variant-numeric:tabular-nums}
+.main{padding:22px 28px 40px;min-width:0}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.eyebrow{font-size:12px;color:var(--ink-3)}
+h1{margin:0;font-size:28px;font-weight:800;text-wrap:balance}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{position:relative}
+.search input{background:var(--sheet);border:1px solid var(--rule);border-radius:9px;padding:9px 12px;min-width:260px;font:inherit;color:var(--ink)}
+.results{position:absolute;top:100%;inset-inline:0;margin-top:4px;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);z-index:50;max-height:320px;overflow:auto;display:none}
+.results a{display:block;padding:8px 12px;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule-2);font-size:13px}
+.results a:hover,.results a:focus{background:var(--hover)}
+.results small{color:var(--ink-3);display:block}
+.seg{display:inline-flex;background:var(--sheet);border:1px solid var(--rule);border-radius:9px;padding:3px}
+.seg button{border:0;background:none;font:inherit;font-weight:700;font-size:13px;color:var(--ink-2);padding:6px 12px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--noor);color:var(--on-fill)}
+.btn{border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:9px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer}
+.btn:hover{border-color:var(--noor)}
+/* شريط المؤشرات المسطّر */
+.strip{display:grid;grid-template-columns:repeat(6,1fr);background:var(--sheet);border:1.5px solid var(--strong);border-radius:4px;margin-bottom:18px}
+.strip a{display:block;padding:12px 16px;border-left:1px solid var(--rule);color:inherit;text-decoration:none;position:relative;min-width:0}
+.strip a:last-child{border-left:0}.strip a:hover{background:var(--hover)}
+.strip label{font-size:12px;color:var(--ink-3);display:block}
+.strip b{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.25;display:block}
+.strip small{display:block;font-size:12px;color:var(--ink-2)}
+.strip small b{display:inline;font-size:inherit;letter-spacing:0;line-height:inherit}
+.strip .go{position:absolute;top:10px;left:12px;color:var(--ink-3);font-size:12px}
+@media(max-width:1100px){.strip{grid-template-columns:repeat(3,1fr)}.strip a:nth-child(3n){border-left:0}.strip a:nth-child(-n+3){border-bottom:1px solid var(--rule)}}
+.c-ok{color:var(--ok)}.c-late{color:var(--late)}.c-warn{color:var(--warn)}
+/* الأسبوعان القادمان */
+.tw{background:var(--sheet);border:1.5px solid var(--strong);border-radius:4px;margin-bottom:18px}
+.tw-h{display:flex;align-items:center;gap:16px;padding:12px 16px;border-bottom:1.5px solid var(--strong);flex-wrap:wrap}
+.tw-h h2{margin:0;font-size:15px;font-weight:800}
+.kv{font-size:12.5px;color:var(--ink-2)}.kv b{color:var(--ink);font-size:15px}
+.days{display:grid;grid-template-columns:repeat(14,1fr);overflow-x:auto}
+.day{border-left:1px solid var(--rule-2);padding:8px 4px 6px;text-align:center;min-width:44px}
+.day:last-child{border-left:0}
+.day .dn{display:block;font-size:11px;color:var(--ink-3)}.day .dd{font-size:15px;font-weight:800}
+.day.we{background:var(--hover)}
+.day.peak{background:var(--lumen-t)}
+.bar{height:74px;display:flex;align-items:flex-end;justify-content:center;margin:6px 0 4px}
+.bar i{display:block;width:60%;border-radius:4px 4px 0 0;background:var(--noor);min-height:0}
+.day.peak .bar i{background:var(--lumen)}
+.day .n{font-size:12px;font-weight:700;color:var(--ink-2)}
+.gm{font-size:11px;color:var(--warn);font-weight:800;height:16px}
+.tw-f{display:flex;gap:12px;align-items:center;padding:9px 16px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-2);flex-wrap:wrap}
+.carrier{display:inline-flex;align-items:center;gap:6px;background:var(--film);border:1px solid var(--rule-2);border-radius:20px;padding:2px 10px 2px 4px;font-size:12px;color:var(--ink);text-decoration:none}
+.carrier.hot{border-color:var(--late);background:var(--late-t);color:var(--late)}
+.av{width:20px;height:20px;border-radius:50%;background:var(--noor-t);color:var(--noor);font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+/* البطاقات */
+.grid{display:grid;gap:18px;margin-bottom:18px}
+.g21{grid-template-columns:2fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g11{grid-template-columns:1fr 1fr}
+@media(max-width:1000px){.g21,.g3,.g11{grid-template-columns:1fr}}
+.card{background:var(--sheet);border:1px solid var(--rule-2);border-radius:10px;padding:16px 18px;min-width:0}
+.card h2{margin:0;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2 .tag{margin-inline-start:auto}
+.take{margin-top:10px;padding-top:9px;border-top:1px dashed var(--rule-2);font-size:12.5px;color:var(--ink-2)}
+.empty{color:var(--ink-3);font-size:13px;padding:18px 0;text-align:center}
+.tag{font-size:11.5px;font-weight:700;border-radius:20px;padding:2px 9px;background:var(--noor-t);color:var(--noor);white-space:nowrap}
+.tag.high{background:var(--late-t);color:var(--late)}.tag.medium{background:var(--warn-t);color:var(--warn)}.tag.low{background:var(--ok-t);color:var(--ok)}
+.tag.lum{background:var(--lumen-t);color:var(--lumen-ink)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--ink-2);margin-top:4px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-inline-end:5px;vertical-align:middle}
+.rank{list-style:none;padding:0;margin:10px 0 0}
+.rank li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--rule-2)}
+.rank li:first-child{border-top:0}
+.rank .k{font-size:12px;font-weight:800;color:var(--ink-3)}
+.rank a{font-weight:700;font-size:13.5px;color:var(--ink);text-decoration:none}.rank a:hover{color:var(--noor)}
+.rank .sub{font-size:11.5px;color:var(--ink-3)}
+.rank .pct{font-size:18px;font-weight:800;color:var(--ok)}
+.meter{height:5px;background:var(--rule-2);border-radius:5px;margin-top:4px}.meter i{display:block;height:100%;border-radius:5px;background:var(--ok)}
+.hbar{display:grid;grid-template-columns:minmax(80px,130px) 1fr 44px;gap:8px;align-items:center;font-size:12.5px;margin-top:8px;color:var(--ink);text-decoration:none}
+.hbar .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar .t{height:10px;background:var(--rule-2);border-radius:5px}.hbar .t i{display:block;height:100%;border-radius:5px;background:var(--noor)}
+a.hbar:hover .nm{color:var(--noor)}
+.hbar b{text-align:left}
+table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+th{font-size:11.5px;color:var(--ink-3);font-weight:700;text-align:right;padding:6px 8px;border-bottom:1.5px solid var(--strong)}
+td{padding:8px;border-bottom:1px solid var(--rule-2)}
+td a{color:var(--ink);text-decoration:none}td a:hover{color:var(--noor)}
+.waste{display:grid;grid-template-columns:repeat(3,1fr);border:1.5px solid var(--strong);border-radius:4px;margin-top:10px}
+.waste div{padding:10px 12px;border-left:1px solid var(--rule)}.waste div:last-child{border-left:0}
+.waste b{font-size:24px;font-weight:800;display:block}.waste label{font-size:11.5px;color:var(--ink-3)}
+.vs{display:grid;grid-template-columns:1fr 150px 1fr;margin-top:10px;border:1.5px solid var(--strong);border-radius:4px}
+.vs .hd{padding:8px 10px;border-bottom:1.5px solid var(--strong);text-align:center}
+.vs select{width:100%;font:inherit;font-weight:800;border:1px solid var(--rule);border-radius:8px;padding:6px 8px;background:var(--sheet);color:var(--ink)}
+.vs .row{padding:7px 12px;border-bottom:1px solid var(--rule-2);font-weight:700;text-align:center;min-height:36px}
+.vs .row:last-child{border-bottom:0}
+.vs .mid{background:var(--film);border-left:1px solid var(--rule);border-right:1px solid var(--rule)}
+.vs .mid .row{font-weight:500;color:var(--ink-3);font-size:12px}
+.vs .mid .hd{font-weight:800;color:var(--ink-3)}
+.better{color:var(--ok)}
+.loading{opacity:.55;transition:opacity .2s}
+svg text{font-family:'Tajawal',sans-serif}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+<main class="main" id="main" aria-busy="true">
+  <div class="head">
+    <div><div class="eyebrow">الفريق والتحليلات · يُحدَّث مع كل فحص للمنصة</div><h1>التحليلات</h1></div>
+    <div class="tools">
+      <div class="search">
+        <input id="q" type="search" placeholder="ابحث في المنافسات والجهات…" aria-label="بحث في المنافسات والجهات" autocomplete="off">
+        <div class="results" id="qres" role="listbox" aria-label="نتائج البحث"></div>
+      </div>
+      <div class="seg" role="group" aria-label="الفترة">
+        {% for k, label in periods.items() %}<button type="button" data-p="{{ k }}" aria-pressed="false">{{ label }}</button>{% endfor %}
+      </div>
+      <a class="btn" id="exp" href="/analytics/export.csv">⬇ تصدير</a>
+    </div>
+  </div>
+
+  <nav class="strip" id="kpis" aria-label="المؤشرات"></nav>
+
+  <section class="tw" aria-labelledby="twT">
+    <div class="tw-h" id="twH"><h2 id="twT">الأسبوعان القادمان</h2></div>
+    <div class="days" id="days"></div>
+    <div class="tw-f" id="twF"></div>
+  </section>
+
+  <div class="grid g21">
+    <section class="card"><h2 id="tlT">الخط الزمني</h2><div id="tl"></div></section>
+    <section class="card"><h2>أعلى 5 جهات بنسبة الفوز</h2><div id="top"></div></section>
+  </div>
+
+  <div class="grid g3">
+    <section class="card"><h2>الجهات المالكة — الجارية</h2><div id="dOwners"></div></section>
+    <section class="card"><h2>أنواع الأعمال — الجارية</h2><div id="dTypes"></div></section>
+    <section class="card"><h2>القطاعات</h2><div id="dSectors"></div></section>
+  </div>
+
+  <div class="grid g11">
+    <section class="card"><h2>مخاطرة الجهات — من يطرح ثم يلغي؟ <span class="tag medium">قبل قرار المشاركة</span></h2><div id="risk"></div></section>
+    <section class="card"><h2>الجهد المهدور على ملغاة ومحذوفة <span class="tag">من لوحة المهام</span></h2><div id="waste"></div></section>
+  </div>
+
+  <section class="card"><h2>مقارنة جهتين</h2><div id="vs"></div></section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const dash = v => v == null ? '—' : v;
+const pct = v => v == null ? '—' : v + '%';
+const LEVEL = {high: 'عالية', medium: 'متوسطة', low: 'منخفضة'};
+let DATA = null, PERIOD = 'year';
+
+function kpiCell(href, label, value, small, cls){
+  return `<a href="${href}"><span class="go" aria-hidden="true">↗</span><label>${label}</label><b class="${cls || ''}">${value}</b><small>${small}</small></a>`;
+}
+function renderKpis(k){
+  const delta = k.total_delta == null ? (k.total_prev ? '' : 'لا بيانات للسنة السابقة')
+    : `<span class="${k.total_delta >= 0 ? 'c-ok' : 'c-late'}" dir="ltr">${k.total_delta >= 0 ? '▲' : '▼'} ${Math.abs(k.total_delta)}%</span> عن السنة السابقة`;
+  $('kpis').innerHTML =
+    kpiCell('/', `منافسات · ${esc(DATA.period_label)}`, k.total, delta) +
+    kpiCell('/', 'جارية الآن', k.running, `${k.closing_week} تُغلق خلال أسبوع`) +
+    kpiCell('/results', 'قدّمنا', k.submitted, `نسبة التقديم ${pct(k.submit_rate)}`) +
+    kpiCell('/results', 'فزنا', k.won, `نسبة الفوز <b>${pct(k.win_rate)}</b> من المقدَّمة`, 'c-ok') +
+    kpiCell('/results', 'أُلغيت أو حُذفت', k.cancelled, `${pct(k.cancel_rate)} من الإجمالي`, 'c-late') +
+    kpiCell('/', 'ضمانات خلال 14 يوماً', k.guarantees14,
+      k.guarantee_next_days == null ? 'لا ضمانات قريبة' : (k.guarantee_next_days === 0 ? 'أقربها اليوم' : `أقربها بعد ${k.guarantee_next_days} يوم`), 'c-warn');
+}
+
+function renderTwoWeeks(tw){
+  const peak = tw.peak;
+  $('twH').innerHTML = `<h2 id="twT">الأسبوعان القادمان</h2>
+    <span class="kv">إغلاقات <b>${tw.closing_total}</b></span><span class="kv">ضمانات <b>${tw.guarantees_total}</b></span>
+    ${peak ? `<span class="kv">يوم الذروة <b>${esc(peak.weekday)} ${peak.day}</b> (${peak.closing} إغلاق)</span>` : '<span class="kv">لا إغلاقات قادمة</span>'}
+    <span class="tag lum" style="margin-inline-start:auto">◆ = ضمان مستحق</span>`;
+  const max = Math.max(1, ...tw.days.map(d => d.closing));
+  $('days').innerHTML = tw.days.map(d => {
+    const isPeak = peak && d.date === peak.date;
+    return `<div class="day${d.weekend ? ' we' : ''}${isPeak ? ' peak' : ''}" title="${esc(d.weekday)} ${esc(d.date)}: ${d.closing} إغلاق${d.guarantees ? '، ' + d.guarantees + ' ضمان' : ''}">
+      <span class="dn">${esc(d.weekday)}</span><span class="dd">${d.day}</span>
+      <div class="bar"><i style="height:${Math.round(100 * d.closing / max)}%"></i></div>
+      <span class="n">${d.closing}</span><div class="gm">${d.guarantees ? '◆'.repeat(Math.min(d.guarantees, 3)) : ''}</div></div>`;
+  }).join('');
+  $('twF').innerHTML = !peak ? '<span>لا ذروة في الأسبوعين القادمين.</span>' :
+    `<b>من يحمل يوم الذروة؟</b>` + (tw.carriers.length ? tw.carriers.map((c, i) =>
+      `<a class="carrier${i === 0 && c.count > 1 ? ' hot' : ''}" href="/tasks?engineer=${encodeURIComponent(c.name)}"><span class="av">${esc(c.name.charAt(0))}</span>م. ${esc(c.name)} — ${c.count} منافسة</a>`).join('')
+      : '<span>منافسات يوم الذروة بلا مهندس مسند.</span>') +
+    (tw.suggestion ? `<span style="margin-inline-start:auto">اقتراح: ${esc(tw.suggestion)}</span>` : '');
+}
+
+function renderTimeline(t){
+  $('tlT').innerHTML = `الخط الزمني — ${t.year}` + (t.has_prev ? ` <span class="tag">مقارنة بـ ${t.year - 1} (متقطع)</span>` : '');
+  const series = [['submitted', 'var(--noor)', 2.5, 'قدّمنا'], ['won', 'var(--ok)', 2.5, 'فزنا'], ['cancelled', 'var(--late)', 2, 'أُلغيت/حُذفت']];
+  if (t.has_prev) series.unshift(['prev_submitted', 'var(--rule)', 2, `قدّمنا ${t.year - 1}`, '5 5']);
+  const all = series.flatMap(s => t[s[0]]), max = Math.max(1, ...all);
+  if (!t.submitted.some(Boolean) && !t.cancelled.some(Boolean)) {
+    $('tl').innerHTML = '<div class="empty">لا نتائج مسجّلة لهذه السنة بعد — سجّل «قدّمنا/فزنا» من سجل النتائج أو بوابة المهندسين.</div>'; return;
+  }
+  const W = 720, H = 210, x = i => 700 - i * 60, y = v => 180 - (v / max) * 150;       // من اليمين: يناير أولاً
+  const grid = [30, 80, 130, 180].map(g => `<line x1="20" x2="710" y1="${g}" y2="${g}" style="stroke:var(--rule-2)"/>`).join('');
+  const lines = series.map(([k, c, w, , dsh]) => `<polyline fill="none" style="stroke:${c}" stroke-width="${w}" ${dsh ? `stroke-dasharray="${dsh}"` : ''}
+     points="${t[k].map((v, i) => `${x(i)},${y(v)}`).join(' ')}"/>`).join('');
+  const bi = t.busiest ? t.months.indexOf(t.busiest) : -1;
+  const mark = bi >= 0 ? `<circle cx="${x(bi)}" cy="${y(t.submitted[bi])}" r="5" style="fill:var(--lumen);stroke:var(--ink)" stroke-width="1.5"/>
+     <text x="${x(bi)}" y="${y(t.submitted[bi]) - 12}" text-anchor="middle" font-size="12" font-weight="800" style="fill:var(--ink)">${esc(t.busiest)}: الأنشط</text>` : '';
+  const labels = t.months.map((m, i) => `<text x="${x(i)}" y="203" text-anchor="middle" font-size="11" style="fill:var(--ink-3)">${esc(m)}</text>`).join('');
+  $('tl').innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="التقديم والفوز والإلغاء شهرياً">${grid}${lines}${mark}${labels}</svg>
+    <div class="legend">${series.map(([, c, , l]) => `<span><i style="background:${c}"></i>${l}</span>`).join('')}</div>
+    <div class="take">متوسط <b>${dash(t.monthly_avg)}</b> تقديم في الشهر النشط${t.busiest ? ` · <b>${esc(t.busiest)}</b> الأنشط` : ''} · فزنا <b>${t.won.reduce((a, b) => a + b, 0)}</b> هذه السنة</div>`;
+}
+
+function renderTop(tp){
+  if (!tp.rows.length) { $('top').innerHTML = '<div class="empty">لا تقديمات مسجّلة في هذه الفترة.</div>'; return; }
+  $('top').innerHTML = `<ul class="rank">${tp.rows.map((r, i) => `<li><span class="k">${i + 1}</span>
+    <div><a href="/owners">${esc(r.owner)}</a><div class="sub">فزنا ${r.won} من ${r.submitted} مقدَّمة</div><div class="meter"><i style="width:${r.rate}%"></i></div></div>
+    <span class="pct">${r.rate}%</span></li>`).join('')}</ul>` + (tp.insight ? `<div class="take">${esc(tp.insight)}</div>` : '');
+}
+
+function bars(list, opts){
+  if (!list.length) return '<div class="empty">لا بيانات في هذه الفترة.</div>';
+  const max = Math.max(...list.map(r => r.n));
+  return list.map(r => `<${opts.href ? `a href="${opts.href(r)}"` : 'div'} class="hbar"><span class="nm" title="${esc(r.k)}">${esc(r.k)}</span>
+     <div class="t"><i style="width:${Math.round(100 * r.n / max)}%;background:${opts.color}"></i></div><b>${opts.pct ? pct(r.pct) : r.n}</b></${opts.href ? 'a' : 'div'}>`).join('');
+}
+function renderDist(d){
+  $('dOwners').innerHTML = bars(d.owners, {color: 'var(--noor)', href: () => '/owners'}) + (d.insights.owners ? `<div class="take">${esc(d.insights.owners)}</div>` : '');
+  $('dTypes').innerHTML = bars(d.types, {color: 'var(--pri-l, #3A6DB5)'}) + (d.insights.types ? `<div class="take">${esc(d.insights.types)}</div>` : '');
+  $('dSectors').innerHTML = bars(d.sectors, {color: 'var(--strong)', pct: true});
+}
+
+function renderRisk(rows){
+  if (!rows.length) { $('risk').innerHTML = '<div class="empty">تحتاج كل جهة منافستين على الأقل لحساب مخاطرتها.</div>'; return; }
+  $('risk').innerHTML = `<table><thead><tr><th>الجهة</th><th>طرحت</th><th>أُلغيت/حُذفت</th><th>النسبة</th><th>المخاطرة</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td><a href="/owners">${esc(r.owner)}</a></td><td>${r.total}</td><td>${r.cancelled}</td><td>${r.rate}%</td>
+      <td><span class="tag ${r.level}">${LEVEL[r.level]}</span></td></tr>`).join('')}</tbody></table>
+    <div class="take">المخاطرة تظهر أيضاً في صفحة المنافسة نفسها ← تراها قبل أن يبدأ الفريق.</div>`;
+}
+
+function renderWaste(w){
+  if (!w.available) { $('waste').innerHTML = '<div class="empty">يحتاج لوحة المهام.</div>'; return; }
+  if (!w.tasks) { $('waste').innerHTML = '<div class="empty">لا مهام أُنجزت على منافسات أُلغيت في هذه الفترة 👍</div>'; return; }
+  $('waste').innerHTML = `<div class="waste"><div><b class="c-late">${w.tasks}</b><label>مهمة أُنجزت قبل الإلغاء</label></div>
+      <div><b>${w.engineers}</b><label>مهندسون عملوا عليها</label></div><div><b>${w.tenders}</b><label>منافسات</label></div></div>
+    <table><thead><tr><th>المنافسة</th><th>الجهة</th><th>مهام منجزة</th></tr></thead><tbody>
+    ${w.rows.map(r => `<tr><td><a href="/tender/${r.id}">${esc(r.title)}</a></td><td>${esc(r.owner)}</td>
+      <td>${r.tasks} · ${r.engineers.map(e => 'م. ' + esc(e)).join('، ')}</td></tr>`).join('')}</tbody></table>
+    ${w.insight ? `<div class="take">${esc(w.insight)}</div>` : ''}`;
+}
+
+function renderVs(owners){
+  if (owners.length < 2) { $('vs').innerHTML = '<div class="empty">تحتاج جهتين على الأقل.</div>'; return; }
+  const opt = sel => owners.map(o => `<option${o === sel ? ' selected' : ''}>${esc(o)}</option>`).join('');
+  const a0 = DATA.risk[0]?.owner || owners[0], b0 = (DATA.top_owners.rows[0]?.owner !== a0 && DATA.top_owners.rows[0]?.owner) || owners.find(o => o !== a0);
+  const rows = ['منافسات', 'نسبة التقديم', 'نسبة الفوز', 'الإلغاء', 'فرق سعرنا عن الفائز'];
+  $('vs').innerHTML = `<div class="vs">
+    <div><div class="hd"><select id="vsA" aria-label="الجهة الأولى">${opt(b0)}</select></div><div id="vsAc"></div></div>
+    <div class="mid"><div class="hd">VS</div>${rows.map(r => `<div class="row">${r}</div>`).join('')}</div>
+    <div><div class="hd"><select id="vsB" aria-label="الجهة الثانية">${opt(a0)}</select></div><div id="vsBc"></div></div></div>`;
+  const go = async () => {
+    const r = await (await fetch(`/api/analytics/compare?a=${encodeURIComponent($('vsA').value)}&b=${encodeURIComponent($('vsB').value)}`)).json();
+    const cells = (s, o) => {
+      const better = (k, hi) => s[k] != null && o[k] != null && (hi ? s[k] > o[k] : s[k] < o[k]) ? ' better' : '';
+      const gap = s.price_gap == null ? '—' : `<span dir="ltr">${s.price_gap > 0 ? '+' : ''}${s.price_gap}%</span>`;
+      return `<div class="row">${s.total}</div><div class="row${better('submit_rate', 1)}">${pct(s.submit_rate)}</div>
+        <div class="row${better('win_rate', 1)}">${pct(s.win_rate)}</div><div class="row${better('cancel_rate', 0)}">${pct(s.cancel_rate)}</div>
+        <div class="row${better('price_gap', 0)}">${gap}</div>`;
+    };
+    $('vsAc').innerHTML = cells(r.a, r.b); $('vsBc').innerHTML = cells(r.b, r.a);
+  };
+  $('vsA').onchange = go; $('vsB').onchange = go; go();
+}
+
+// بحث عام: المنافسات بالعنوان أو الجهة
+$('q').addEventListener('input', e => {
+  const q = e.target.value.trim(), box = $('qres');
+  if (!DATA || q.length < 2) { box.style.display = 'none'; return; }
+  const hits = DATA.search.filter(t => (t.title + ' ' + t.owner).includes(q)).slice(0, 12);
+  box.innerHTML = hits.map(t => `<a href="/tender/${t.id}" role="option">${esc(t.title)}<small>${esc(t.owner)}</small></a>`).join('')
+    || '<div class="empty">لا نتائج</div>';
+  box.style.display = 'block';
+});
+document.addEventListener('click', e => { if (!e.target.closest('.search')) $('qres').style.display = 'none'; });
+
+async function load(period){
+  PERIOD = period;
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === period ? 'true' : 'false'));
+  $('exp').href = '/analytics/export.csv?period=' + period;
+  try { localStorage.setItem('analyticsPeriod', period); } catch(e) {}
+  $('main').classList.add('loading');
+  try {
+    const r = await fetch('/api/analytics?period=' + period);
+    DATA = await r.json();
+    renderKpis(DATA.kpis); renderTwoWeeks(DATA.two_weeks); renderTimeline(DATA.timeline); renderTop(DATA.top_owners);
+    renderDist(DATA.dist); renderRisk(DATA.risk); renderWaste(DATA.waste); renderVs(DATA.owners);
+  } catch(e) {
+    $('kpis').innerHTML = '<div class="empty" style="grid-column:1/-1">تعذّر تحميل التحليلات — أعد تحميل الصفحة أو سجّل الدخول من جديد.</div>';
+  } finally { $('main').classList.remove('loading'); $('main').setAttribute('aria-busy', 'false'); }
+}
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => load(b.dataset.p)));
+let start = 'year';
+try { start = localStorage.getItem('analyticsPeriod') || 'year'; } catch(e) {}
+if (!['month', 'q', 'year', 'all'].includes(start)) start = 'year';
+load(start);
+</script>
+</body>
+</html>

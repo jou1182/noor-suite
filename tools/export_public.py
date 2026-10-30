@@ -18,6 +18,11 @@ import subprocess
 import sys
 from pathlib import Path
 
+try:
+    from tools.name_replacement import replacement_pattern as shared_replacement_pattern
+except ModuleNotFoundError:  # direct script entry point
+    from name_replacement import replacement_pattern as shared_replacement_pattern
+
 REPO = Path(__file__).resolve().parents[1]
 SCANNER_SPEC = importlib.util.spec_from_file_location("noor_export_scanner", REPO / "tools/scan_public_repo.py")
 if SCANNER_SPEC is None or SCANNER_SPEC.loader is None:
@@ -94,24 +99,7 @@ def text_content(data: bytes) -> tuple[str, bytes] | None:
 
 
 def replacement_pattern(names: list[str]) -> tuple[re.Pattern[str], dict[str, str]]:
-    variants = sorted({variant for name in names for variant in scanner._name_variants(name)},
-                      key=lambda variant: (-len(variant), variant))
-    patterns = []
-    replacements = {}
-    for index, variant in enumerate(variants):
-        group = f"name{index}"
-        if ARABIC.search(variant):
-            body = f"{scanner.ARABIC_MARKS.pattern}*".join(map(re.escape, variant))
-            expression = f"(?<![{ARABIC_LETTERS}]){body}(?![{ARABIC_LETTERS}])"
-        elif variant.isascii():
-            body = (r"[ \t\-_.]?".join(map(re.escape, variant))
-                    if variant.isalnum() else re.escape(variant))
-            expression = rf"(?<![A-Za-z0-9]){body}(?![A-Za-z0-9])"
-        else:
-            expression = re.escape(variant)
-        patterns.append(f"(?P<{group}>{expression})")
-        replacements[group] = "الهوية السابقة" if ARABIC.search(variant) else "former-identity"
-    return re.compile("|".join(patterns), re.I), replacements
+    return shared_replacement_pattern(names, "الهوية السابقة", "former-identity")
 
 
 def replace_names(out: Path, files: list[str], names: list[str]) -> tuple[int, int, int]:

@@ -6,6 +6,13 @@
     "config/identity/noor/fonts/Tajawal-Regular.ttf": "386997fcfcd22020b47265f9c02587791867e4df5f74a36be36ad6264a50d321",
     "config/identity/noor/fonts/Tajawal-Bold.ttf": "ca2c8ca040b6725b6b058c8470fe5bbf5c4c2b77356fe8c38c41716decb206bd"
   },
+  "approved_findings": {
+    "platforms/nmis/full/tests/test_engineer_accounts.py": {
+      "sha256": "fb7b5d34324df7eb74d15fa12330c7691ad1331312a5b2f09eab860b99ea7e21",
+      "rules": ["path.unc"],
+      "reason": "Unicode escapes of Arabic letters in a test string, not a network path; owner approval at staging (T045)"
+    }
+  },
   "name_exempt_paths": [
     ".specify/memory/",
     "specs/",

@@ -176,6 +176,26 @@ def test_unknown_binary_fails_and_only_a_pinned_hash_passes():
     assert scan.scan_blob(blob + b"!", "assets/x.bin", [], pinned)[0].rule == "file.binary_unscanned"
 
 
+def test_approved_finding_is_dropped_only_for_exact_bytes_and_approvable_rules(tmp_path):
+    import hashlib
+    import json
+    (tmp_path / "tools").mkdir()
+    data = ("x = '" + UNC + "'\nkey = '" + AWS + "'\n").encode()
+    approved = {"approved_findings": {
+        "src/a.py": {"sha256": hashlib.sha256(data).hexdigest(), "rules": ["path.unc"]},
+        "src/b.py": {"sha256": hashlib.sha256(data).hexdigest(), "rules": ["path.unc", "secret.aws"]}}}
+    (tmp_path / "tools" / "scan_allowlist.json").write_text(json.dumps(approved), encoding="utf-8")
+    loaded = scan.load_approved_findings(tmp_path)
+    assert list(loaded) == ["src/a.py"]  # an entry naming a non-approvable rule is ignored whole
+    found = scan.scan_blob(data, "src/a.py", [])
+    assert {f.rule for f in found} >= {"path.unc", "secret.aws"}
+    kept = {f.rule for f in scan._drop_approved(found, "src/a.py", data, loaded)}
+    assert "path.unc" not in kept and "secret.aws" in kept
+    changed = data + b"\n"
+    assert "path.unc" in {f.rule for f in scan._drop_approved(
+        scan.scan_blob(changed, "src/a.py", []), "src/a.py", changed, loaded)}
+
+
 def test_binary_without_an_early_nul_is_not_read_as_text():
     blob = b"\xff\xfe" * 6000 + b"\x00"  # NUL only after the first 8 KB
     assert [f.rule for f in scan.scan_blob(blob, "assets/a.txt", [])] == ["file.binary_unscanned"]

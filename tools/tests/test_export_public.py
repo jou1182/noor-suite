@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import subprocess
 from pathlib import Path
 
@@ -15,6 +16,35 @@ assert SPEC and SPEC.loader
 export_public = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(export_public)
 REAL_SCAN_EXPORT = export_public.scan_export
+
+
+def test_shared_replacement_matches_original_bytes():
+    from tools.name_replacement import replacement_pattern
+
+    names = ["OldBrand", "السنديان"]
+    variants = sorted({variant for name in names for variant in export_public.scanner._name_variants(name)},
+                      key=lambda variant: (-len(variant), variant))
+    patterns = []
+    values = {}
+    for index, variant in enumerate(variants):
+        group = f"name{index}"
+        if export_public.ARABIC.search(variant):
+            body = f"{export_public.scanner.ARABIC_MARKS.pattern}*".join(map(re.escape, variant))
+            expression = f"(?<![{export_public.ARABIC_LETTERS}]){body}(?![{export_public.ARABIC_LETTERS}])"
+        elif variant.isascii():
+            body = (r"[ \t\-_.]?".join(map(re.escape, variant))
+                    if variant.isalnum() else re.escape(variant))
+            expression = rf"(?<![A-Za-z0-9]){body}(?![A-Za-z0-9])"
+        else:
+            expression = re.escape(variant)
+        patterns.append(f"(?P<{group}>{expression})")
+        values[group] = "الهوية السابقة" if export_public.ARABIC.search(variant) else "former-identity"
+    original = re.compile("|".join(patterns), re.I)
+    shared, replacements = replacement_pattern(names, "الهوية السابقة", "former-identity")
+    content = "OldBrand AL_OLDBRAND السنديان سِنْدَيَان".encode("utf-8")
+    old_output = original.sub(lambda match: values[match.lastgroup], content.decode("utf-8")).encode("utf-8")
+    new_output = shared.sub(lambda match: replacements[match.lastgroup], content.decode("utf-8")).encode("utf-8")
+    assert new_output == old_output
 
 
 @pytest.fixture

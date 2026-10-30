@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة التحكم</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#8a4800;--bg-card:#fdf8ee;--amber:#c8a028;--text:#1e1404;--muted:#7a5e28;--border:#c8a028;--red:#b02828;--green:#1a6b3c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(160deg,#3d1c00 0%,#6a3000 100%);min-height:100vh;font-family:'Tajawal',sans-serif;color:var(--text)}
+.topbar{background:linear-gradient(135deg,#3d1c00,#6a3000 60%,#8a4800);border-bottom:2px solid #5a2800;padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:.5rem;flex-wrap:wrap}
+.brand{color:#ffd88a;font-weight:900;font-size:1rem;display:flex;align-items:center;gap:.6rem}
+.badge-a{background:rgba(255,180,50,.15);border:1px solid rgba(255,180,50,.3);color:#ffd060;font-size:.68rem;font-weight:700;padding:2px 9px;border-radius:12px}
+.tnav{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.tnav a{color:rgba(255,215,140,.75);text-decoration:none;font-size:.82rem;padding:.3rem .6rem;border-radius:7px;transition:.15s}
+.tnav a:hover{background:rgba(255,255,255,.12);color:#fff}
+.tnav a.d{color:rgba(255,130,110,.8)}
+.page{padding:1.4rem;max-width:1100px;margin:0 auto}
+.ph{color:#ffd88a;font-size:1.35rem;font-weight:900;margin-bottom:.25rem}
+.ps{color:rgba(255,215,140,.55);font-size:.82rem;margin-bottom:1.6rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.85rem;margin-bottom:1.7rem}
+.sb{background:rgba(253,248,238,.07);border:1px solid rgba(200,160,40,.3);border-radius:11px;padding:.9rem 1.1rem;text-align:center}
+.sn{font-size:1.85rem;font-weight:900;color:#ffd060;line-height:1}
+.sl{color:rgba(255,215,140,.6);font-size:.73rem;margin-top:.25rem}
+.sb.ok .sn{color:#6ee08a}.sb.ok{border-color:rgba(50,200,100,.4)}
+.sb.warn .sn{color:#ffaa60}.sb.warn{border-color:rgba(255,140,60,.4)}
+.sec{background:var(--bg-card);border:1px solid var(--border);border-radius:13px;margin-bottom:1.15rem;overflow:hidden;border-top:3px solid var(--gold)}
+.sh{background:#f5e870;border-bottom:1px solid var(--border);padding:.75rem 1.2rem;display:flex;align-items:center;gap:.55rem;font-weight:800;font-size:.93rem;color:var(--text)}
+.sb2{padding:1.3rem 1.4rem}
+.fg{display:flex;flex-direction:column;gap:.28rem}
+.fg label{font-size:.74rem;font-weight:700;color:var(--muted);letter-spacing:.3px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.9rem}
+input[type=text],input[type=url],input[type=password],input[type=email]{background:#fdf5c0;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.62rem .9rem;font-family:'Tajawal',sans-serif;font-size:.9rem;outline:none;transition:.18s;width:100%}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(138,72,0,.12)}
+.btn{display:inline-flex;align-items:center;gap:.4rem;border:none;border-radius:9px;padding:.62rem 1.15rem;font-family:'Tajawal',sans-serif;font-size:.87rem;font-weight:700;cursor:pointer;transition:.18s;text-decoration:none}
+.p{background:linear-gradient(135deg,#5a2800,#8a4800);color:#fff4d8}
+.p:hover{background:linear-gradient(135deg,#6e3200,#a05200)}
+.g{background:transparent;border:1px solid var(--border);color:var(--gold)}
+.g:hover{background:rgba(138,72,0,.07)}
+.s{background:linear-gradient(135deg,#1a4b22,#1a6b3c);color:#c8ffd4}
+.divl{border:none;border-top:1px solid var(--border);margin:1.1rem 0}
+.lw{display:flex;align-items:center;gap:1.4rem;flex-wrap:wrap}
+.lp{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.7rem;width:130px;text-align:center}
+.lp img{max-width:100px;max-height:70px;object-fit:contain}
+.lpc{font-size:.68rem;color:var(--muted);margin-top:.35rem}
+.la{display:flex;flex-direction:column;gap:.55rem}
+.fi{display:none}
+.fl{display:inline-flex;align-items:center;gap:.4rem;cursor:pointer;background:#fdf5c0;border:1px dashed var(--border);border-radius:8px;padding:.55rem .9rem;font-size:.84rem;color:var(--muted);transition:.18s}
+.fl:hover{border-color:var(--gold);color:var(--gold)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:.4rem;vertical-align:middle}
+.dg{background:#3fb850}.dr{background:#e34949}
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(60px);background:#1e1404;color:#ffd88a;padding:.7rem 1.4rem;border-radius:10px;font-size:.88rem;font-weight:600;opacity:0;transition:.3s;z-index:999;border:1px solid rgba(200,160,40,.3);pointer-events:none;white-space:nowrap;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{border-color:rgba(50,200,100,.4);color:#80ff9a}
+#toast.err{border-color:rgba(255,80,80,.4);color:#ff9a9a}
+
+/* ── Knowledge Base section ───────────────────────────── */
+.kfile{background:#fdf5c0;border:1px solid rgba(200,160,40,.3);border-radius:9px;
+  padding:.65rem 1rem;cursor:pointer;transition:.15s;margin-bottom:.45rem;
+  display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.kfile:hover{border-color:#8a4800;background:#fdedb0;transform:translateY(-1px)}
+.kfname{font-weight:700;font-size:.88rem;color:#1e1404;word-break:break-all}
+.kfmeta{font-size:.70rem;color:#7a5e28;white-space:nowrap}
+#kContent{background:#fdf5c0;border:1px solid #c8a028;color:#1e1404;
+  border-radius:8px;padding:.7rem;font-family:'Tajawal',monospace;font-size:.87rem;
+  resize:vertical;outline:none;width:100%;transition:.18s;direction:rtl;
+  text-align:right;line-height:1.6;min-height:240px}
+#kContent:focus{border-color:#8a4800;box-shadow:0 0 0 3px rgba(138,72,0,.12)}
+.ktools{display:flex;gap:.55rem;margin-top:.8rem;flex-wrap:wrap;align-items:center}
+.kb-empty{color:#7a5e28;font-size:.82rem;padding:.6rem 0;text-align:center;
+  background:rgba(200,160,40,.06);border-radius:8px;border:1px dashed rgba(200,160,40,.3)}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+<div class="topbar">
+  <div class="brand">
+    <img src="{{ logo_uri }}" alt="logo" style="height:30px;mix-blend-mode:lighten;opacity:.9">
+    <span>{{ cfg.get('system_title','النظام') }}</span>
+    <span class="badge-a">&#9881; لوحة التحكم</span>
+  </div>
+  <nav class="tnav">
+    {% if kanban_on %}<a href="/tasks">🗂️ المهام</a>{% endif %}
+    <a href="/">&#8592; اللوحة الرئيسية</a>
+    <a href="/admin/db-backup" class="g" style="font-size:.78rem">&#128190; نسخ احتياطي</a>
+    <a href="/admin/logout" class="d">خروج &#8617;</a>
+  </nav>
+</div>
+<div class="page">
+  <div class="ph">&#9881; لوحة التحكم الرئيسية</div>
+  <div class="ps">إدارة هوية النظام · الشعار · كلمات المرور · حالة الخادم</div>
+  <div class="stats">
+    <div class="sb {{ 'ok' if stats.get('bot')=='active' else 'warn' }}">
+      <div class="sn"><span class="dot {{ 'dg' if stats.get('bot')=='active' else 'dr' }}"></span>{{ stats.get('bot','?') }}</div>
+      <div class="sl">حالة البوت</div>
+    </div>
+    <div class="sb"><div class="sn">{{ stats.get('tenders',0) }}</div><div class="sl">مناقصات نشطة</div></div>
+    <div class="sb"><div class="sn">{{ stats.get('engineers',0) }}</div><div class="sl">مهندسون نشطون</div></div>
+    <div class="sb {{ 'warn' if stats.get('pending',0)>0 else '' }}"><div class="sn">{{ stats.get('pending',0) }}</div><div class="sl">تغييرات معلقة</div></div>
+    <div class="sb"><div class="sn" style="font-size:1.2rem">{{ version }}</div><div class="sl">إصدار النظام</div></div>
+  </div>
+  <div class="sec">
+    <div class="sh">&#127970; هوية الشركة والنظام</div>
+    <div class="sb2">
+      <form id="idForm">
+      <div class="fgrid">
+        <div class="fg"><label>اسم الشركة (عربي)</label><input type="text" name="company_name_ar" value="{{ cfg.get('company_name_ar','') }}"></div>
+        <div class="fg"><label>Company Name (English)</label><input type="text" name="company_name_en" value="{{ cfg.get('company_name_en','') }}" dir="ltr"></div>
+        <div class="fg"><label>عنوان النظام</label><input type="text" name="system_title" value="{{ cfg.get('system_title','') }}"></div>
+        <div class="fg"><label>العنوان الفرعي</label><input type="text" name="system_subtitle" value="{{ cfg.get('system_subtitle','') }}"></div>
+        <div class="fg"><label>صاحب حقوق النشر</label><input type="text" name="footer_owner" value="{{ cfg.get('footer_owner','') }}"></div>
+        <div class="fg"><label>رابط الموقع</label><input type="url" name="footer_url" value="{{ cfg.get('footer_url','') }}" dir="ltr"></div>
+      </div>
+      <hr class="divl">
+      <button type="button" class="btn p" onclick="saveId()">&#128190; حفظ هوية الشركة</button>
+      </form>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sh">&#128444; شعار الشركة</div>
+    <div class="sb2">
+      <div class="lw">
+        <div class="lp"><img id="lgPrev" src="/logo?t=1" alt="الشعار"><div class="lpc">الشعار الحالي</div></div>
+        <div class="la">
+          <label class="fl" for="lgFile">&#128193; رفع شعار جديد (PNG/JPG)</label>
+          <input type="file" id="lgFile" class="fi" accept="image/png,image/jpeg,image/webp" onchange="uploadLogo(this)">
+          <button type="button" class="btn g" onclick="resetLogo()">&#8617; استعادة الشعار الأصلي</button>
+          <span style="font-size:.71rem;color:var(--muted)">الحد الأقصى 500 كيلوبايت</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sh">&#128273; كلمة مرور لوحة المتابعة</div>
+    <div class="sb2">
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">كلمة المرور التي يستخدمها جميع مستخدمي اللوحة الرئيسية.</p>
+      <div class="fgrid" style="max-width:500px">
+        <div class="fg"><label>كلمة المرور الجديدة</label><input type="password" id="np" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"></div>
+        <div class="fg"><label>تأكيد كلمة المرور</label><input type="password" id="np2" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"></div>
+      </div>
+      <hr class="divl">
+      <button type="button" class="btn p" onclick="chPwd()">&#128274; تغيير كلمة المرور</button>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sh">&#128737; كلمة مرور المشرف</div>
+    <div class="sb2">
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">
+        كلمة مرورك الشخصية لهذه اللوحة.
+        البريد المرتبط: <strong style="color:var(--gold);direction:ltr;unicode-bidi:embed">{{ admin_email }}</strong>
+      </p>
+      <div class="fgrid" style="max-width:560px">
+        <div class="fg"><label>كلمة المرور الحالية</label><input type="password" id="ca" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"></div>
+        <div class="fg"><label>الجديدة (8 أحرف على الأقل)</label><input type="password" id="na" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"></div>
+        <div class="fg"><label>تأكيد الجديدة</label><input type="password" id="na2" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"></div>
+      </div>
+      <hr class="divl">
+      <button type="button" class="btn p" onclick="chAdminPwd()">&#128737; تغيير كلمة مرور المشرف</button>
+    </div>
+  </div>
+  
+  <div class="sec" id="kSec">
+    <div class="sh">&#128218; قاعدة المعرفة &mdash; سياق الذكاء الاصطناعي</div>
+    <div class="sb2">
+      <p style="font-size:.8rem;color:var(--muted);margin-bottom:1rem">
+        هذه الملفات تُحقن كسياق في كل محادثة مع GPT-4o. عدّلها لتحسين دقة الردود.
+      </p>
+
+      <!-- File list -->
+      <div id="kFileList"><div class="kb-empty">&#8987; جارٍ التحميل...</div></div>
+
+      <!-- Editor (hidden by default) -->
+      <div id="kEditor" style="display:none;margin-top:1.1rem;border-top:1px solid rgba(200,160,40,.25);padding-top:1rem">
+        <div class="fgrid" style="margin-bottom:.6rem">
+          <div class="fg">
+            <label>اسم الملف (.md يُضاف تلقائياً)</label>
+            <input type="text" id="kFileName" dir="ltr" placeholder="مثال: 07_تعليمات_خاصة">
+          </div>
+        </div>
+        <div class="fg">
+          <label>المحتوى (Markdown)</label>
+          <textarea id="kContent" placeholder="# عنوان&#10;&#10;أكتب المحتوى هنا..."></textarea>
+        </div>
+        <div class="ktools">
+          <button type="button" class="btn p" onclick="kSave()">&#128190; حفظ الملف</button>
+          <button type="button" class="btn s" onclick="kCancel()">&#8617; إلغاء</button>
+          <button type="button" class="btn" id="kDelBtn"
+            style="background:#b02828;color:#fff;border-radius:9px;padding:.62rem 1.15rem;
+                   font-family:Tajawal,sans-serif;font-size:.87rem;font-weight:700;cursor:pointer;
+                   border:none;margin-right:auto;display:none"
+            onclick="kDelete()">&#128465; حذف الملف</button>
+        </div>
+      </div>
+
+      <!-- Action bar -->
+      <div class="ktools" style="margin-top:1.1rem;border-top:1px solid rgba(200,160,40,.2);padding-top:.9rem">
+        <button type="button" class="btn g" onclick="kNew()">&#43; ملف جديد</button>
+        <button type="button" class="btn s" id="kReloadBtn" onclick="kReload()">&#128260; إعادة تحميل قاعدة المعرفة في البوت</button>
+        <span id="kReloadMsg" style="font-size:.75rem;color:var(--muted)"></span>
+      </div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sh">&#128295; أدوات الصيانة</div>
+    <div class="sb2">
+      <div style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:center">
+        <a href="/admin/db-backup" class="btn s">&#128190; نسخة احتياطية</a>
+        <a href="/export/csv" class="btn g">&#128202; تصدير CSV</a>
+        <a href="/" class="btn g">&#128203; اللوحة الرئيسية</a>
+      </div>
+      <hr class="divl">
+      <div style="font-size:.78rem;color:var(--muted)">الإصدار: <strong>{{ version }}</strong></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+function toast(m,t="ok"){const el=document.getElementById("toast");el.textContent=m;el.className="show "+t;setTimeout(()=>el.className="",3600);}
+function saveId(){const fd=new FormData(document.getElementById("idForm"));fetch("/admin/save-identity",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{toast(d.msg,d.ok?"ok":"err");if(d.ok)setTimeout(()=>location.reload(),1800);});}
+function uploadLogo(inp){if(!inp.files[0])return;const fd=new FormData();fd.append("logo",inp.files[0]);toast("جارٍ الرفع...","ok");fetch("/admin/upload-logo",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{toast(d.msg,d.ok?"ok":"err");if(d.ok)document.getElementById("lgPrev").src="/logo?t="+Date.now();});}
+function resetLogo(){fetch("/admin/reset-logo",{method:"POST"}).then(r=>r.json()).then(d=>{toast(d.msg,d.ok?"ok":"err");if(d.ok)document.getElementById("lgPrev").src="/logo?t="+Date.now();});}
+function chPwd(){const fd=new FormData();fd.append("new_pwd",document.getElementById("np").value);fd.append("new_pwd2",document.getElementById("np2").value);fetch("/admin/change-password",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{toast(d.msg,d.ok?"ok":"err");if(d.ok){document.getElementById("np").value="";document.getElementById("np2").value="";}});}
+function chAdminPwd(){const fd=new FormData();fd.append("cur_apwd",document.getElementById("ca").value);fd.append("new_apwd",document.getElementById("na").value);fd.append("new_apwd2",document.getElementById("na2").value);fetch("/admin/change-admin-password",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{toast(d.msg,d.ok?"ok":"err");if(d.ok){document.getElementById("ca").value="";document.getElementById("na").value="";document.getElementById("na2").value="";setTimeout(()=>location.href="/admin/logout",1600);}});}
+
+/* ── Knowledge Base management ──────────────── */
+var _kEditing = false;
+
+async function kLoad(){
+  const el = document.getElementById('kFileList');
+  if(!el) return;
+  try{
+    const r = await fetch('/admin/knowledge');
+    const d = await r.json();
+    if(!d.ok){ el.innerHTML='<div class="kb-empty">خطأ: '+d.error+'</div>'; return; }
+    if(!d.files||!d.files.length){
+      el.innerHTML='<div class="kb-empty">لا توجد ملفات معرفة. أنشئ ملفاً جديداً.</div>';
+      return;
+    }
+        el.innerHTML = d.files.map(function(f){
+      var sf = JSON.stringify(f.name).replace(/"/g, '&quot;');
+      return '<div class="kfile" onclick="kEdit(' + sf + ')">'
+        + '<span class="kfname">'+f.name.replace(/_/g,' ')+'</span>'
+        + '<span class="kfmeta">'+f.size+' &bull; '+f.modified+'</span>'
+        + '</div>';
+    }).join('');
+  }catch(e){ el.innerHTML='<div class="kb-empty">تعذّر التحميل</div>'; }
+}
+
+async function kEdit(fname){
+  try{
+    const r = await fetch('/admin/knowledge/read?file='+encodeURIComponent(fname));
+    const d = await r.json();
+    if(!d.ok){ toast(d.error,'err'); return; }
+    var inp = document.getElementById('kFileName');
+    inp.value = fname.endsWith('.md') ? fname.slice(0,-3) : fname;
+    inp.readOnly = true;
+    inp.style.opacity = '.6';
+    document.getElementById('kContent').value = d.content;
+    document.getElementById('kDelBtn').style.display = '';
+    document.getElementById('kEditor').style.display = '';
+    _kEditing = true;
+    document.getElementById('kEditor').scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(e){ toast('خطأ في التحميل','err'); }
+}
+
+async function kSave(){
+  var fname = document.getElementById('kFileName').value.trim();
+  var content = document.getElementById('kContent').value;
+  if(!fname){ toast('أدخل اسم الملف','err'); return; }
+  var fd = new FormData();
+  fd.append('file', fname);
+  fd.append('content', content);
+  try{
+    const r = await fetch('/admin/knowledge/save',{method:'POST',body:fd});
+    const d = await r.json();
+    toast(d.msg, d.ok?'ok':'err');
+    if(d.ok){ kLoad(); kCancel(); }
+  }catch(e){ toast('خطأ في الحفظ','err'); }
+}
+
+function kNew(){
+  var inp = document.getElementById('kFileName');
+  inp.value = '';
+  inp.readOnly = false;
+  inp.style.opacity = '1';
+  document.getElementById('kContent').value = '# عنوان الملف\n\n';
+  document.getElementById('kDelBtn').style.display = 'none';
+  document.getElementById('kEditor').style.display = '';
+  _kEditing = false;
+  inp.focus();
+  document.getElementById('kEditor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function kCancel(){
+  document.getElementById('kEditor').style.display = 'none';
+  _kEditing = false;
+}
+
+async function kDelete(){
+  var fname = document.getElementById('kFileName').value.trim();
+  if(!fname) return;
+  if(!confirm('هل تريد حذف: ' + fname + '.md ?')) return;
+  var fd = new FormData();
+  fd.append('file', fname);
+  try{
+    const r = await fetch('/admin/knowledge/delete',{method:'POST',body:fd});
+    const d = await r.json();
+    toast(d.msg, d.ok?'ok':'err');
+    if(d.ok){ kLoad(); kCancel(); }
+  }catch(e){ toast('خطأ في الحذف','err'); }
+}
+
+async function kReload(){
+  var btn = document.getElementById('kReloadBtn');
+  var msg = document.getElementById('kReloadMsg');
+  if(btn) btn.disabled = true;
+  if(msg) msg.textContent = 'جارٍ إعادة التحميل...';
+  try{
+    const r = await fetch('/admin/knowledge/reload',{method:'POST'});
+    const d = await r.json();
+    toast(d.msg, d.ok?'ok':'err');
+    if(msg) msg.textContent = d.ok ? 'تم ✅' : 'فشل ❌';
+  }catch(e){
+    if(msg) msg.textContent = 'خطأ في الاتصال';
+  }
+  if(btn) btn.disabled = false;
+}
+
+// Load on page start
+kLoad();
+</script>
+</body></html>

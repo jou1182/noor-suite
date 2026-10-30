@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ co.short_ar }} — سجل النتائج</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:{{ co.theme_bg }};--field:{{ co.theme_field }};--card:{{ co.theme_card }};--hover:{{ co.theme_hover }};--head:{{ co.theme_head }};--border:#c8a028;--border2:#a07820;--text:#1e1404;--sub:#4a3810;--muted:#7a5e28;--amber:{{ co.theme_primary }};--amber-l:{{ co.theme_primary_l }};--amber-d:{{ co.theme_primary_d }};--blue:#1a5a9a;--green:#247848;--yellow:#a06800;--red:#b02828;--orange:#a84e1a}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;margin:0}
+.topbar{background:linear-gradient(135deg,#5a2800 0%,#8a4800 55%,#b06000 100%);border-bottom:2px solid #6e3200;padding:.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;color:#fff4d8}
+.brand{font-weight:900;font-size:1.15rem;display:flex;align-items:center;gap:.55rem;letter-spacing:-.2px;color:#fff4d8}
+.tnav a{color:rgba(255,215,140,.8);text-decoration:none;font-size:.83rem;padding:.3rem .65rem;border-radius:7px;transition:.15s}
+.tnav a:hover{background:rgba(255,255,255,.12);color:#fff}
+.tnav a.hi{color:#ffd060}
+.tnav{display:flex;align-items:center;gap:.5rem}
+.stats-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}}
+.scard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.5rem 1.75rem;position:relative;overflow:hidden;transition:.2s;cursor:default;text-align:right}
+.scard:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(100,60,0,.2)}
+.scard.t-green{border-color:rgba(90,171,120,.3)}
+.scard.t-red{border-color:rgba(196,82,82,.3)}
+.scard.t-yellow{border-color:rgba(200,144,64,.3)}
+.scard.t-blue{border-color:rgba(126,179,232,.3)}
+.stat-hero{padding:2.2rem 2rem}
+.snum{font-size:3.5rem;font-weight:900;line-height:.9;letter-spacing:-2px;margin-top:.35rem}
+.stat-hero .snum{font-size:clamp(4.2rem,5.5vw,6rem);letter-spacing:-3px}
+.slbl{color:var(--sub);font-size:.78rem;letter-spacing:.4px;margin-bottom:.3rem;font-weight:600}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.phead{background:var(--head);border-bottom:1px solid var(--border);border-right:3px solid var(--amber);padding:.75rem 1rem;font-weight:700;font-size:.84rem;display:flex;align-items:center;justify-content:space-between}
+.pbody{padding:.85rem}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--head);border-bottom:1px solid var(--border)}
+thead th{padding:.55rem .8rem;font-weight:700;font-size:.82rem;color:var(--sub);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+tbody tr{border-bottom:1px solid rgba(180,140,40,.25);transition:background .1s}
+tbody tr:hover{background:var(--hover)}
+tbody td{padding:.5rem .8rem;vertical-align:middle;font-size:.88rem}
+.rbadge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.74rem;font-weight:700}
+.rb-won{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.rb-lost{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+.rb-pend{background:rgba(227,179,65,.15);color:var(--yellow);border:1px solid rgba(227,179,65,.3)}
+.rb-canc{background:rgba(139,148,158,.1);color:var(--muted);border:1px solid var(--border)}
+.ecard{background:var(--hover);border:1px solid var(--border);border-radius:10px;padding:.7rem .85rem;margin-bottom:.55rem}
+.eavatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;color:#fff;flex-shrink:0}
+.ebar{height:5px;border-radius:3px;background:rgba(160,112,0,.18);margin-top:5px;overflow:hidden}
+.ebar-fill{height:100%;width:100%;border-radius:3px;transform-origin:right center;transform:scaleX(0);transition:transform .75s cubic-bezier(.25,1,.5,1)}
+.win-ring{width:100px;height:100px;margin:0 auto .5rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.scard{opacity:0}.panel{opacity:0}
+tbody tr{transition:background .1s}
+/* v5.7.4: rows are NEVER hidden by CSS — see dashboard note */
+/* v5.7.3: same exemption — dynamic modal rows must never start invisible */
+.modal tbody tr{opacity:1!important;transform:none!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+/* ════ v5.8.0 MOBILE: results table -> cards ════ */
+@media(max-width:768px){
+  body{font-size:15px}
+  .topbar{flex-wrap:wrap;padding:.55rem .8rem;gap:.35rem}
+  .topbar a{min-height:40px;display:inline-flex;align-items:center;font-size:.78rem}
+  .stats-grid{grid-template-columns:1fr 1fr!important;gap:.5rem}
+  .scard{padding:1rem 1.1rem}
+  .snum{font-size:2.4rem}
+  .stat-hero .snum{font-size:clamp(2.6rem,9vw,3.6rem)}
+  .rfilt{gap:.35rem}
+  .rfbtn{min-height:38px;display:inline-flex;align-items:center;touch-action:manipulation}
+  .rsrch{min-width:100%;max-width:100%}
+  /* the main results table becomes stacked cards */
+  #resTable table, .panel table.rmain{display:block}
+  table thead{display:none}
+  table tbody{display:block}
+  table tbody tr.rrow{
+    display:block;border:1px solid var(--border);border-radius:11px;
+    padding:.7rem .85rem;margin-bottom:.6rem;background:var(--card);
+    box-shadow:0 1px 4px rgba(120,70,0,.06)}
+  table tbody tr.rrow td{
+    display:flex;justify-content:space-between;align-items:center;gap:.6rem;
+    padding:.28rem 0;border:none;text-align:right!important;font-size:.85rem}
+  table tbody tr.rrow td[data-label]::before{
+    content:attr(data-label);color:var(--muted);font-size:.72rem;font-weight:700;flex-shrink:0}
+  /* first cell = title, full width, no label, bold */
+  table tbody tr.rrow td:first-child{
+    display:block;border-bottom:1px solid var(--border);padding-bottom:.45rem;margin-bottom:.25rem;
+    font-weight:700;color:var(--amber-d);line-height:1.5}
+  table tbody tr.rrow td .wchip{margin-right:.3rem}
+  /* touch-friendly edit button */
+  table tbody tr.rrow td[data-label="تعديل"] button{width:38px!important;height:38px!important}
+}
+/* clickable cards */
+.scard.clickable{cursor:pointer}
+.scard.clickable:hover{transform:translateY(-5px)!important;box-shadow:0 14px 36px rgba(100,60,0,.28)!important}
+.scard.clickable:active{transform:translateY(-1px)!important}
+.scard-hint{font-size:.65rem;color:var(--muted);margin-top:.55rem;opacity:.75;letter-spacing:.2px}
+/* about dropdown */
+.about-wrap{position:relative;display:inline-flex}
+.about-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,200,100,.25);color:rgba(255,215,140,.85);padding:.3rem .75rem;border-radius:7px;font-family:'Tajawal',sans-serif;font-size:.82rem;cursor:pointer;transition:.15s;white-space:nowrap}
+.about-btn:hover{background:rgba(255,255,255,.18);color:#fff}
+.about-drop{position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#3d1800 0%,#6e3200 60%,#8a4800 100%);border:1px solid rgba(255,200,80,.25);border-radius:14px;padding:1.4rem 1.6rem;min-width:260px;z-index:9998;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:fadeIn .18s ease;text-align:center}
+.about-drop::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);border:7px solid transparent;border-bottom:7px solid rgba(255,200,80,.25);border-top:none}
+.about-heart{font-size:2.2rem;margin-bottom:.5rem;line-height:1}
+.about-line{color:rgba(255,220,150,.85);font-size:.88rem;line-height:1.7}
+.about-name{color:#ffd060;font-weight:800;font-size:1rem;margin-top:.55rem;letter-spacing:.3px}
+
+/* ── Real-time indicator ───────────────────────────────── */
+.rt-indicator{display:inline-flex;align-items:center;gap:.35rem;font-size:.72rem;
+  color:rgba(255,215,140,.7);padding:.25rem .6rem;border-radius:12px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+#rt-dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:#e34949;transition:.4s}
+/* ── Toast notification ────────────────────────────────── */
+#rt-toast{position:fixed;bottom:1.4rem;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#1e1404;color:#ffd88a;padding:.65rem 1.3rem;border-radius:10px;
+  font-size:.85rem;font-weight:600;border:1px solid rgba(200,160,40,.35);
+  z-index:9999;pointer-events:none;white-space:nowrap;max-width:90vw;
+  transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:0}
+#rt-toast.rt-toast-show{transform:translateX(-50%) translateY(0);opacity:1}
+#rt-toast.rt-warn{border-color:rgba(255,80,80,.4);color:#ff9a9a}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+
+<div class="topbar">
+  <div class="brand">
+    <div style="background:#fff;border-radius:9px;padding:5px 12px;display:inline-flex;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.22);flex-shrink:0">
+      <img src="{{ logo_uri }}" alt="{{ co.name_ar }}" style="height:44px;width:auto;display:block">
+    </div>
+    <span>{{ co.system_title }}</span>
+    <span class="brand-sub">سجل النتائج</span>
+  </div>
+  <div class="tnav">
+    {% if kanban_on %}<a href="/tasks">🗂️ المهام</a>{% endif %}
+    <a href="/" class="hi">← اللوحة الرئيسية</a>
+    <a href="/engineer-view">👷 المهندسين</a>
+    <a href="/owners">🏢 الجهات</a>
+    <div class="about-wrap">
+      <button class="about-btn" onclick="toggleAbout(event)">عن ▾</button>
+      <div id="aboutDrop" class="about-drop" style="display:none">
+        <div class="about-heart">❤️</div>
+        <div class="about-line">صُنع بكل حب</div>
+        <div class="about-line">من فريق العروض الفنية</div>
+        <div class="about-line">لشركة {{ co.short_ar }}</div>
+        <div class="about-name">م. يوسف سليم</div>
+      </div>
+    </div>
+    <a href="/logout">
+    <span class="rt-indicator"><span id="rt-dot"></span><span id="rt-lbl">...</span></span>خروج ↩</a>
+  </div>
+</div>
+
+<div style="padding:1.25rem 1.5rem;max-width:1700px;margin:0 auto">
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="scard {% if win_rate>=60 %}t-green{% elif win_rate>=30 %}t-yellow{% else %}t-red{% endif %} stat-hero clickable" onclick="showList('won')" title="اضغط لعرض قائمة الفوز">
+      <div class="slbl">نسبة الفوز — من النتائج المعروفة</div>
+      <div class="snum" style="color:{% if decided == 0 %}var(--muted){% elif win_rate>=60 %}var(--green){% elif win_rate>=30 %}var(--yellow){% else %}var(--red){% endif %}">{% if decided %}{{ win_rate }}%{% else %}—{% endif %}</div>
+      <div class="scard-hint">{% if decided %}من {{ decided }} نتيجة معروفة ({{ won }} فوز / {{ lost }} خسارة){% else %}لا نتائج معروفة بعد — النتائج نادراً ما تُعلن{% endif %}</div>
+    </div>
+    <div class="scard t-green clickable" onclick="showList('won')" title="اضغط لعرض قائمة الفوز">
+      <div class="slbl">فوز مؤكد</div>
+      <div class="snum" style="color:var(--green)">{{ won }}</div>
+      <div class="scard-hint">🏆 اضغط للتفاصيل</div>
+    </div>
+    <div class="scard t-yellow clickable" onclick="showList('submitted')" title="اضغط لعرض قائمة العروض المقدمة">
+      <div class="slbl">قدّمنا عرضاً</div>
+      <div class="snum" style="color:var(--yellow)">{{ submits }}</div>
+      <div class="scard-hint">📤 اضغط للتفاصيل</div>
+    </div>
+    <div class="scard t-blue clickable" onclick="showList('all')" title="اضغط لعرض جميع المسجلات">
+      <div class="slbl">إجمالي المسجّلة</div>
+      <div class="snum" style="color:var(--blue)">{{ total }}</div>
+      <div class="scard-hint">📋 اضغط للتفاصيل</div>
+    </div>
+  </div>
+
+  <style>
+  .qbtn{border-radius:7px;padding:.25rem .6rem;font-size:.7rem;font-weight:800;cursor:pointer;
+    font-family:'Tajawal',sans-serif;transition:.15s;border:1px solid}
+  .qwin{background:rgba(36,120,72,.1);color:var(--green);border-color:rgba(36,120,72,.35)}
+  .qwin:hover{background:rgba(36,120,72,.22)}
+  .qlose{background:rgba(200,40,40,.08);color:var(--red);border-color:rgba(200,40,40,.3)}
+  .qlose:hover{background:rgba(200,40,40,.18)}
+  .qunk{background:rgba(120,110,90,.08);color:var(--muted);border-color:rgba(120,110,90,.3)}
+  .qunk:hover{background:rgba(120,110,90,.18)}
+  .rb-unk{background:rgba(120,110,90,.12);color:var(--muted);border:1px solid rgba(120,110,90,.28)}
+  .rfilt{display:flex;gap:.45rem;align-items:center;flex-wrap:wrap;margin-bottom:.9rem}
+  .rfbtn{border-radius:999px;padding:.3rem .85rem;font-size:.75rem;font-weight:700;cursor:pointer;
+    font-family:'Tajawal',sans-serif;border:1px solid var(--border);background:var(--card);color:var(--sub);transition:.15s}
+  .rfbtn:hover{background:var(--hover)}
+  .rfbtn.on{background:rgba(184,106,0,.15);color:var(--amber);border-color:rgba(184,106,0,.45)}
+  .rsrch{flex:1;min-width:180px;max-width:320px;border:1px solid var(--border);border-radius:999px;
+    padding:.32rem .9rem;font-size:.78rem;font-family:'Tajawal',sans-serif;background:var(--card);color:inherit;outline:none}
+  .wchip{font-size:.6rem;font-weight:700;margin-top:2px;display:block}
+  </style>
+
+  {% if followup %}
+  <div class="panel mb-3" style="border-color:rgba(200,40,40,.35)">
+    <div class="phead" style="background:rgba(200,40,40,.07)">
+      <span>⏰ متابعة مطلوبة — عروض بلا نتيجة منذ 3 أسابيع فأكثر</span>
+      <span style="color:var(--red);font-weight:800;font-size:.85rem">{{ followup|length }}</span>
+    </div>
+    <div class="pbody" style="padding:.5rem .95rem">
+      {% for f in followup %}
+      <div style="display:flex;align-items:center;gap:.6rem;padding:.42rem .1rem;
+                  {% if not loop.last %}border-bottom:1px dashed var(--border);{% endif %}flex-wrap:wrap">
+        <span style="background:rgba(200,40,40,.1);color:var(--red);border:1px solid rgba(200,40,40,.3);
+                     border-radius:6px;padding:.14rem .5rem;font-size:.68rem;font-weight:800;white-space:nowrap">
+          ⏳ {{ f.waiting_days }} يوم</span>
+        <span style="flex:1;font-size:.8rem;font-weight:600;min-width:220px">{{ f.title }}</span>
+        <span style="color:var(--muted);font-size:.72rem">{{ (f.owner or '')[:26] }}</span>
+        <span style="display:flex;gap:.35rem">
+          <button class="qbtn qwin"  onclick="quickRes({{ f.rec_id }},'won')">🏆 فزنا</button>
+          <button class="qbtn qlose" onclick="quickRes({{ f.rec_id }},'lost')">❌ خسرنا</button>
+          <button class="qbtn qunk"  onclick="quickRes({{ f.rec_id }},'unknown')" title="الجهة لم تعلن النتيجة — أقفل المتابعة">⚪ لم تُعلن</button>
+        </span>
+      </div>
+      {% endfor %}
+      <div style="font-size:.7rem;color:var(--muted);padding-top:.45rem">
+        💡 النتائج لا تُعلن دائماً في السوق — إن عرفت سجّلها، وإن تعذر فاضغط «لم تُعلن» لإقفال المتابعة بلا إزعاج. النسب تُحسب من المعروف فقط</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="rfilt">
+    <button class="rfbtn on" id="rf-all"     onclick="resFilt('all')">الكل ({{ rows|length }})</button>
+    <button class="rfbtn" id="rf-pending" onclick="resFilt('pending')">⏳ معلقة ({{ pending_res }})</button>
+    <button class="rfbtn" id="rf-won"     onclick="resFilt('won')">🏆 فوز ({{ won }})</button>
+    <button class="rfbtn" id="rf-lost"    onclick="resFilt('lost')">❌ خسارة ({{ lost }})</button>
+    <button class="rfbtn" id="rf-unknown" onclick="resFilt('unknown')">⚪ لم تُعلن ({{ unknown }})</button>
+    <button class="rfbtn" id="rf-nosub"   onclick="resFilt('nosub')">لم نقدّم</button>
+    <input class="rsrch" id="rSrch" placeholder="🔍 بحث بالاسم أو الجهة..." oninput="resFilt(null)">
+  </div>
+
+  <div class="row g-3">
+
+    <!-- ENGINEER WIN RATES + CHART -->
+    <div class="col-12 col-md-4">
+      <div class="panel mb-3">
+        <div class="phead">📊 نسبة فوز — دونات</div>
+        <div class="pbody" style="padding:.75rem 1rem">
+          <canvas id="winChart" style="max-height:190px"></canvas>
+        </div>
+      </div>
+      <div class="panel mb-3">
+        <div class="phead">📈 الخط الزمني — آخر 8 أشهر</div>
+        <div class="pbody" style="padding:.7rem .9rem;height:185px">
+          <canvas id="tlChart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="phead">👷 نسبة فوز كل مهندس</div>
+        <div class="pbody">
+          {% set acolors = ['#388bfd','#a371f7','#d29922','#f85149','#3fb950','#e3b341','#58a6ff','#ffa657'] %}
+          {% if eng_stats %}
+          {% for name, s in eng_stats.items()|sort(attribute='1.rate',reverse=True) %}
+          {% set ai = loop.index0 % 8 %}
+          <div class="ecard">
+            <div style="display:flex;align-items:center;gap:.65rem">
+              <div class="eavatar" style="background:{{ acolors[ai] }}">{{ name[2:3] if name.startswith('ال') else name[:1] }}</div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                  <span style="font-weight:600;font-size:.87rem">{{ name }}</span>
+                  <span style="color:var(--sub);font-size:.82rem;font-weight:600"
+                        title="فوز/معروفة النتيجة — وإجمالي المقدمة {{ s.submitted }}">{{ s.won }}/{{ s.decided }}{% if s.submitted > s.decided %} <span style="color:var(--muted);font-size:.7rem">({{ s.submitted }})</span>{% endif %}</span>
+                </div>
+                <div class="ebar">
+                  <div class="ebar-fill" data-w="{{ s.rate }}" style="background:{{ s.hex }}"></div>
+                </div>
+              </div>
+              <span style="font-size:.82rem;font-weight:700;color:{{ s.hex }};min-width:34px;text-align:left">{{ s.rate }}%</span>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <p style="color:var(--muted);text-align:center;padding:1rem">لا توجد بيانات بعد</p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if owner_stats %}
+      <div class="panel" style="margin-top:1rem">
+        <div class="phead">🏢 نسبة الفوز حسب الجهة</div>
+        <div class="pbody">
+          {% for o in owner_stats %}
+          <div class="owner-row">
+            <span class="owner-name" title="{{ o.name }}">{{ o.name[:26] }}{% if o.name|length > 26 %}…{% endif %}</span>
+            <span style="color:var(--sub);font-size:.72rem;font-weight:700;white-space:nowrap"
+                  title="فوز/معروفة النتيجة — وإجمالي المقدمة {{ o.submitted }}">{{ o.won }}/{{ o.decided }}{% if o.submitted > o.decided %} <span style="color:var(--muted);font-size:.62rem">({{ o.submitted }})</span>{% endif %}</span>
+            <span style="min-width:38px;text-align:left;font-size:.78rem;font-weight:800;
+              color:{% if o.rate >= 50 %}var(--green){% elif o.rate > 0 %}var(--yellow){% else %}var(--muted){% endif %}">{{ o.rate }}%</span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- RESULTS TABLE -->
+    <div class="col-12 col-md-8">
+      <div class="panel">
+        <div class="phead">
+          <span>📋 آخر النتائج المسجّلة</span>
+          <span style="color:var(--muted);font-size:.72rem">{{ rows|length }} سجل
+            <span style="font-size:.6rem;opacity:.65;background:rgba(138,72,0,.1);border:1px solid var(--border);
+                  border-radius:5px;padding:1px 6px;margin-right:.45rem" title="إصدار الصفحة التي يعرضها متصفحك الآن">v{{ version }}</span>
+          </span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="rmain">
+            <thead>
+              <tr>
+                <th>المنافسة</th>
+                <th style="width:95px;text-align:center">النتيجة</th>
+                <th style="width:98px;text-align:center">تاريخ التقديم</th>
+                <th style="width:115px">سعرنا</th>
+                <th style="width:115px">سعر الفائز</th>
+                <th style="width:80px">المهندس</th>
+                <th style="width:50px;text-align:center">تعديل</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in rows %}
+              {% if r.result=='won' %}{% set bc='rb-won' %}{% set ic='🏆 فوز' %}
+              {% elif r.result=='lost' %}{% set bc='rb-lost' %}{% set ic='❌ خسارة' %}
+              {% elif r.result=='cancelled' %}{% set bc='rb-canc' %}{% set ic='🚫 ملغي' %}
+              {% elif r.result=='unknown' %}{% set bc='rb-unk' %}{% set ic='⚪ لم تُعلن' %}
+              {% else %}{% set bc='rb-pend' %}{% set ic='⏳ معلق' %}{% endif %}
+              <tr class="rrow" data-res="{{ r.result or 'pending' }}" data-sub="{{ 1 if r.did_submit else 0 }}"
+                  data-t="{{ ((r.title or '') ~ ' ' ~ (r.owner or ''))|e }}">
+                <td>
+                  <span title="{{ (r.title or '')|e }}" style="line-height:1.5;word-break:break-word">{{ r.title or '—' }}</span>
+                  {% if not r.did_submit %}<span style="background:rgba(139,148,158,.1);color:var(--muted);border-radius:4px;padding:1px 5px;font-size:.65rem;margin-right:3px">لم نقدّم</span>{% endif %}
+                </td>
+                <td data-label="النتيجة" style="text-align:center"><span class="rbadge {{ bc }}">{{ ic }}</span>
+                  {% if r.waiting_days is not none and r.waiting_days >= 21 %}
+                  <span class="wchip" style="color:var(--red)">منذ {{ r.waiting_days }} يوم ⚠️</span>
+                  {% elif r.waiting_days is not none and r.waiting_days > 0 %}
+                  <span class="wchip" style="color:var(--muted)">منذ {{ r.waiting_days }} يوم</span>
+                  {% endif %}
+                </td>
+                <td data-label="تاريخ التقديم" style="text-align:center;font-size:.78rem;color:var(--sub)">
+                  {% if r.submission_date and r.submission_date != 'N/A' %}
+                    {{ r.submission_date[:10] }}
+                  {% else %}—{% endif %}
+                </td>
+                <td data-label="سعرنا" style="color:var(--muted)">{% if r.our_price %}{{ "{:,.0f}".format(r.our_price) }} ﷼{% else %}—{% endif %}</td>
+                <td data-label="سعر الفائز" style="color:var(--muted)">{% if r.winning_price %}{{ "{:,.0f}".format(r.winning_price) }} ﷼{% else %}—{% endif %}
+                  {% if r.price_gap is not none %}
+                  <span class="wchip" style="color:{% if r.price_gap > 0 %}var(--red){% else %}var(--green){% endif %}"
+                        title="الفرق بين سعرنا وسعر الفائز">فرقنا {{ '%+.1f'|format(r.price_gap) }}%</span>
+                  {% endif %}
+                </td>
+                <td data-label="المهندس">{% if r.assigned_engineer %}<span style="color:var(--amber-l);font-size:.79rem">{{ r.assigned_engineer }}</span>{% else %}—{% endif %}</td>
+                <td data-label="تعديل" style="text-align:center">
+                  {% if r.master_id %}
+                  <button data-t="{{ (r.title or '')|e }}" onclick="openResEdit({{ r.master_id }}, this.dataset.t)"
+                    style="width:28px;height:28px;border:1px solid var(--border);background:transparent;
+                           color:var(--muted);border-radius:7px;cursor:pointer;
+                           display:inline-flex;align-items:center;justify-content:center;
+                           font-size:.78rem;transition:.15s"
+                    onmouseover="this.style.background='rgba(88,166,255,.1)';this.style.color='var(--blue)';this.style.borderColor='rgba(88,166,255,.4)'"
+                    onmouseout="this.style.background='transparent';this.style.color='var(--muted)';this.style.borderColor='var(--border)'"
+                    title="تعديل النتيجة">✏️</button>
+                  {% else %}—{% endif %}
+                </td>
+              </tr>
+              {% else %}
+              <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2.5rem">
+                لم يتم تسجيل أي نتائج بعد<br>
+                <span style="font-size:.8rem">استخدم زر 📝 في اللوحة الرئيسية لتسجيل أول نتيجة</span>
+              </td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT EDIT MODAL -->
+<div class="modal fade" id="reModal" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:var(--card);border:1px solid var(--border);color:var(--text)">
+      <div class="modal-header" style="background:var(--head);border-bottom:1px solid var(--border)">
+        <h6 class="modal-title" style="font-size:.95rem">✏️ تعديل نتيجة المنافسة</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+      </div>
+      <div class="modal-body">
+        <p id="reTitle" style="color:var(--muted);font-size:.82rem;margin-bottom:1rem;padding:.5rem .75rem;background:var(--hover);border-radius:7px;border:1px solid var(--border)"></p>
+        <div class="mb-3">
+          <label style="color:var(--muted);font-size:.81rem;display:block;margin-bottom:.3rem">هل قدّمنا عرضاً؟</label>
+          <div style="display:flex;gap:.5rem">
+            <button id="reBtnYes" onclick="reSetSubmit(true)" type="button" class="btn btn-sm btn-outline-success" style="flex:1">✅ نعم، قدّمنا</button>
+            <button id="reBtnNo"  onclick="reSetSubmit(false)" type="button" class="btn btn-sm btn-outline-secondary" style="flex:1">❌ لم نقدّم</button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label style="color:var(--muted);font-size:.81rem;display:block;margin-bottom:.3rem">النتيجة</label>
+          <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+            <button type="button" class="btn btn-sm btn-outline-success re-result-btn" onclick="reSetResult('won')">🏆 فزنا</button>
+            <button type="button" class="btn btn-sm btn-outline-danger re-result-btn" onclick="reSetResult('lost')">❌ خسرنا</button>
+            <button type="button" class="btn btn-sm btn-outline-warning re-result-btn" onclick="reSetResult('pending')">⏳ معلق</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary re-result-btn" onclick="reSetResult('unknown')">⚪ لم تُعلن</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary re-result-btn" onclick="reSetResult('cancelled')">🚫 ملغي</button>
+          </div>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label style="color:var(--muted);font-size:.81rem;display:block;margin-bottom:.3rem">سعرنا المقدَّم (ريال)</label>
+            <input type="number" id="reOurPrice" style="width:100%;background:var(--field);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.45rem .75rem;font-family:'Tajawal',sans-serif" placeholder="0.00" step="0.01">
+          </div>
+          <div class="col-6">
+            <label style="color:var(--muted);font-size:.81rem;display:block;margin-bottom:.3rem">سعر الفائز (اختياري)</label>
+            <input type="number" id="reWinPrice" style="width:100%;background:var(--field);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.45rem .75rem;font-family:'Tajawal',sans-serif" placeholder="0.00" step="0.01">
+          </div>
+        </div>
+        <div>
+          <label style="color:var(--muted);font-size:.81rem;display:block;margin-bottom:.3rem">ملاحظات</label>
+          <textarea id="reNotes" style="width:100%;background:var(--field);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:.5rem .75rem;font-family:'Tajawal',sans-serif;resize:vertical" rows="2" placeholder="أي تفاصيل إضافية..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid var(--border)">
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">إلغاء</button>
+        <button id="reSaveBtn" class="btn btn-success btn-sm px-4" onclick="reSave()">💾 حفظ</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="reToastWrap" style="position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999">
+  <div id="reToast" style="background:#e8f5ea;color:var(--green);border:1px solid rgba(36,120,72,.3);
+    padding:.6rem 1.5rem;border-radius:10px;font-size:.87rem;box-shadow:0 6px 28px rgba(100,60,0,.15);
+    opacity:0;transform:translateY(12px) scale(.96);
+    transition:opacity .28s cubic-bezier(.22,1,.36,1),transform .32s cubic-bezier(.22,1,.36,1);
+    pointer-events:none;white-space:nowrap"></div>
+</div>
+
+<!-- LIST MODAL -->
+<div class="modal fade" id="listModal" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:14px;overflow:hidden">
+      <div class="modal-header" style="background:var(--head);border-bottom:1px solid var(--border);padding:.85rem 1.1rem">
+        <h6 class="modal-title" id="listModalTitle" style="font-size:.95rem;font-weight:800;margin:0">📋 القائمة</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(.4) sepia(1) saturate(2) hue-rotate(0deg)" aria-label="إغلاق"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div style="overflow-x:auto;max-height:58vh">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--head);position:sticky;top:0;z-index:1;border-bottom:1px solid var(--border)">
+                <th style="padding:.6rem .9rem;font-size:.78rem;color:var(--sub);font-weight:700;white-space:nowrap">#</th>
+                <th style="padding:.6rem .9rem;font-size:.78rem;color:var(--sub);font-weight:700">المنافسة</th>
+                <th style="padding:.6rem .9rem;font-size:.78rem;color:var(--sub);font-weight:700;text-align:center;width:105px">النتيجة</th>
+                <th style="padding:.6rem .9rem;font-size:.78rem;color:var(--sub);font-weight:700;text-align:center;width:95px">تاريخ التقديم</th>
+                <th style="padding:.6rem .9rem;font-size:.78rem;color:var(--sub);font-weight:700;width:80px">المهندس</th>
+              </tr>
+            </thead>
+            <tbody id="listModalBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top:1px solid var(--border);padding:.65rem 1.1rem;display:flex;align-items:center;justify-content:space-between">
+        <span id="listModalCount" style="color:var(--muted);font-size:.79rem;font-weight:600"></span>
+        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="font-family:'Tajawal',sans-serif">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function quickRes(rec, res){
+  const label = res === 'won' ? 'فوز 🏆' : (res === 'lost' ? 'خسارة ❌' : 'لم تُعلن ⚪ (إقفال المتابعة)');
+  if(!confirm('تأكيد تسجيل النتيجة: ' + label + '؟')) return;
+  fetch('/api/result-rec/' + rec + '/quick', {method:'POST',
+    headers:{'Content-Type':'application/json'}, body: JSON.stringify({result:res})})
+    .then(r => r.json()).then(j => { if(j.ok) location.reload(); else alert('تعذر الحفظ'); })
+    .catch(() => alert('خطأ في الاتصال'));
+}
+let _rf = 'all';
+function resFilt(f){
+  if(f !== null){ _rf = f;
+    document.querySelectorAll('.rfbtn').forEach(b => b.classList.remove('on'));
+    const btn = document.getElementById('rf-' + f); if(btn) btn.classList.add('on');
+  }
+  const q = (document.getElementById('rSrch').value || '').trim();
+  document.querySelectorAll('tr.rrow').forEach(tr => {
+    const res = tr.dataset.res, sub = tr.dataset.sub, txt = tr.dataset.t || '';
+    let show = true;
+    if(_rf === 'pending') show = (res === 'pending' && sub === '1');
+    else if(_rf === 'won') show = (res === 'won');
+    else if(_rf === 'lost') show = (res === 'lost');
+    else if(_rf === 'unknown') show = (res === 'unknown');
+    else if(_rf === 'nosub') show = (sub === '0');
+    if(show && q) show = txt.includes(q);
+    tr.style.display = show ? '' : 'none';
+  });
+}
+new Chart(document.getElementById('tlChart').getContext('2d'), {
+  type:'bar',
+  data:{labels:{{ timeline.labels|tojson }}, datasets:[
+    {label:'قدّمنا', data:{{ timeline.sub|tojson }},  backgroundColor:'rgba(184,106,0,.5)',  borderRadius:4},
+    {label:'فوز',    data:{{ timeline.won|tojson }},  backgroundColor:'rgba(36,120,72,.85)', borderRadius:4},
+    {label:'خسارة',  data:{{ timeline.lost|tojson }}, backgroundColor:'rgba(200,40,40,.75)', borderRadius:4}]},
+  options:{maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom', labels:{font:{family:'Tajawal', size:10}, boxWidth:10}}},
+    scales:{y:{beginAtZero:true, ticks:{precision:0, font:{size:10}}},
+            x:{ticks:{font:{size:9}}}}}
+});
+new Chart(document.getElementById('winChart').getContext('2d'), {
+  type:'doughnut',
+  data:{
+    labels:['فوز','خسارة','معلق/غير مقدّم'],
+    datasets:[{
+      data:[{{ won }}, {{ lost }}, Math.max(0, {{ total }}-{{ won }}-{{ lost }})],
+      backgroundColor:['rgba(63,185,80,.65)','rgba(248,81,73,.65)','rgba(139,148,158,.25)'],
+      borderColor:['#3fb950','#f85149','#484f58'],
+      borderWidth:1.5,hoverOffset:6
+    }]
+  },
+  options:{
+    cutout:'70%',
+    plugins:{
+      legend:{position:'bottom',labels:{color:'#7a5e28',font:{family:'Tajawal',size:11},boxWidth:10,padding:12}},
+      tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}`}}
+    }
+  }
+});
+
+// ── RESULT EDIT (re-uses openResult flow via master_id) ─
+let reCid=null, reDidSub=null, reResVal='pending';
+
+function openResEdit(masterId, title){
+  requirePin(()=>{
+    reCid = masterId; reDidSub = null; reResVal = 'pending';
+    document.getElementById('reTitle').textContent = title;
+    ['reOurPrice','reWinPrice'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('reNotes').value='';
+    reSetSubmit(null);
+    fetch('/api/result/'+masterId).then(r=>r.json()).then(d=>{
+      if(d.existing){
+        const ex=d.existing;
+        reSetSubmit(ex.did_submit===1);
+        reSetResult(ex.result||'pending');
+        if(ex.our_price)document.getElementById('reOurPrice').value=ex.our_price;
+        if(ex.winning_price)document.getElementById('reWinPrice').value=ex.winning_price;
+        if(ex.notes)document.getElementById('reNotes').value=ex.notes;
+      }
+      new bootstrap.Modal(document.getElementById('reModal')).show();
+    }).catch(()=>new bootstrap.Modal(document.getElementById('reModal')).show());
+  });
+}
+function reSetSubmit(v){
+  reDidSub=v;
+  document.getElementById('reBtnYes').className='btn btn-sm '+(v?'btn-success':'btn-outline-success')+' flex-fill';
+  document.getElementById('reBtnNo').className='btn btn-sm '+(!v?'btn-secondary':'btn-outline-secondary')+' flex-fill';
+}
+function reSetResult(v){
+  reResVal=v;
+  document.querySelectorAll('.re-result-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+v+"'")));
+}
+function reSave(){
+  if(reDidSub===null){reToast('حدد هل قدّمنا أم لا',1);return;}
+  const b=document.getElementById('reSaveBtn');b.disabled=true;b.textContent='⏳';
+  fetch('/api/result/'+reCid+'/save',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({did_submit:reDidSub,result:reResVal,
+      our_price:document.getElementById('reOurPrice').value,
+      win_price:document.getElementById('reWinPrice').value,
+      notes:document.getElementById('reNotes').value})
+  }).then(r=>r.json()).then(d=>{
+    if(d.ok){
+      bootstrap.Modal.getInstance(document.getElementById('reModal')).hide();
+      reToast('✅ تم الحفظ');
+      setTimeout(()=>location.reload(),1600);
+    } else reToast(d.error||'فشل',1);
+  }).catch(()=>reToast('خطأ في الاتصال',1))
+  .finally(()=>{b.disabled=false;b.textContent='💾 حفظ';});
+}
+let _reTT;
+function reToast(m,err=0){
+  const t=document.getElementById('reToast');
+  if(!t)return;
+  if(_reTT)clearTimeout(_reTT);
+  t.textContent=m;t.className='tmsg'+(err?' err':'');
+  void t.offsetWidth; t.classList.add('on');
+  _reTT=setTimeout(()=>{t.style.opacity='0';setTimeout(()=>{t.className='tmsg'+(err?' err':'');t.style.opacity='';},300);},err?3500:2800);
+}
+
+// ── ROWS DATA (all records for list modals) ──────────
+const ALL_ROWS = {{ rows | tojson }};
+
+// ── SHOW LIST MODAL ───────────────────────────────────
+function showList(filter){
+ try {
+  const titles = {
+    all:       '📋 إجمالي المسجّلة',
+    submitted: '📤 قدّمنا عرضاً',
+    won:       '🏆 فوز مؤكد'
+  };
+  let filtered;
+  if      (filter === 'won')       filtered = ALL_ROWS.filter(r => r.result === 'won');
+  else if (filter === 'submitted') filtered = ALL_ROWS.filter(r => r.did_submit);
+  else                             filtered = ALL_ROWS;
+
+  document.getElementById('listModalTitle').textContent = titles[filter] || '📋 القائمة';
+  document.getElementById('listModalCount').textContent  = filtered.length + ' سجل';
+
+  const rLabel = {won:'🏆 فوز', lost:'❌ خسارة', pending:'⏳ معلق', cancelled:'🚫 ملغي', unknown:'⚪ لم تُعلن'};
+  const rColor = {won:'var(--green)', lost:'var(--red)', pending:'var(--yellow)', cancelled:'var(--muted)', unknown:'var(--muted)'};
+
+  const tbody = document.getElementById('listModalBody');
+  tbody.textContent = '';
+  const mkTd = (styles) => { const td = document.createElement('td'); td.style.cssText = styles; return td; };
+  if(!filtered.length){
+    const tr = document.createElement('tr');
+    tr.style.setProperty('opacity', '1', 'important');
+    const td = mkTd('text-align:center;padding:2.5rem;color:#9a8a60;font-size:.88rem');
+    td.colSpan = 5; td.textContent = 'لا توجد سجلات في هذه الفئة';
+    tr.appendChild(td); tbody.appendChild(tr);
+  } else {
+    filtered.forEach((r, i) => {
+      try {
+        const res = r.result || 'pending';
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid rgba(180,140,40,.2)';
+        tr.style.setProperty('opacity', '1', 'important');
+        tr.style.setProperty('transform', 'none', 'important');
+        const td1 = mkTd('padding:.48rem .9rem;color:#9a8a60;font-size:.74rem;vertical-align:middle');
+        td1.textContent = String(i + 1);
+        const td2 = mkTd('padding:.48rem .9rem;font-size:.84rem;vertical-align:middle;color:#1e1404;line-height:1.5;word-break:break-word');
+        td2.textContent = r.title || '—';
+        if(!r.did_submit){
+          const ns = document.createElement('span');
+          ns.style.cssText = 'background:rgba(139,148,158,.12);color:#9a8a60;border-radius:4px;padding:1px 5px;font-size:.62rem;margin-right:5px;white-space:nowrap';
+          ns.textContent = 'لم نقدّم';
+          td2.appendChild(ns);
+        }
+        const td3 = mkTd('padding:.48rem .9rem;text-align:center;vertical-align:middle');
+        const chip = document.createElement('span');
+        const colMap = {won:'#247848', lost:'#c22828', pending:'#8a6400', cancelled:'#9a8a60', unknown:'#8a8070'};
+        const c = colMap[res] || '#9a8a60';
+        chip.style.cssText = 'display:inline-block;padding:2px 9px;border-radius:12px;font-size:.71rem;font-weight:700;white-space:nowrap;color:' + c + ';background:' + c + '22;border:1px solid ' + c + '44';
+        chip.textContent = rLabel[res] || res;
+        td3.appendChild(chip);
+        const td4 = mkTd('padding:.48rem .9rem;text-align:center;font-size:.76rem;color:#6a5a30;vertical-align:middle');
+        td4.textContent = (r.submission_date && r.submission_date !== 'N/A') ? String(r.submission_date).substring(0,10) : '—';
+        const td5 = mkTd('padding:.48rem .9rem;font-size:.8rem;color:#b86a00;vertical-align:middle');
+        td5.textContent = r.assigned_engineer || '—';
+        tr.append(td1, td2, td3, td4, td5);
+        tbody.appendChild(tr);
+      } catch(rowErr) {
+        const tr = document.createElement('tr');
+        tr.style.setProperty('opacity', '1', 'important');
+        const td = mkTd('color:#c22828;padding:.4rem .9rem;font-size:.7rem');
+        td.colSpan = 5; td.textContent = 'تعذر عرض سجل: ' + rowErr.message;
+        tr.appendChild(td); tbody.appendChild(tr);
+      }
+    });
+  }
+  new bootstrap.Modal(document.getElementById('listModal')).show();
+ } catch(e) {
+   console.error('showList failed:', e);
+   try {
+     const tb = document.getElementById('listModalBody');
+     if (tb) {
+       tb.textContent = '';
+       const tr = document.createElement('tr');
+       const td = document.createElement('td');
+       td.colSpan = 5;
+       td.style.cssText = 'color:#c22828;padding:1.2rem;font-size:.75rem;text-align:right;direction:rtl;line-height:1.8';
+       td.textContent = '🐞 خطأ في العرض داخل متصفحك: [' + (e.name||'Error') + '] ' + e.message
+                      + ' — التقط صورة لهذه الرسالة وأرسلها للدعم. المتصفح: '
+                      + navigator.userAgent.substring(0, 90);
+       tr.appendChild(td); tb.appendChild(tr);
+     }
+     new bootstrap.Modal(document.getElementById('listModal')).show();
+   } catch(_) {}
+ }
+}
+
+// ── ABOUT MENU ────────────────────────────────────────
+function toggleAbout(e){
+  e.stopPropagation();
+  const d = document.getElementById('aboutDrop');
+  d.style.display = d.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', () => {
+  const d = document.getElementById('aboutDrop');
+  if(d) d.style.display = 'none';
+});
+
+// ── Results page entrance animations ──────────────────
+(function(){
+  const E4 = t => 1 - Math.pow(1-t, 4);
+
+  document.querySelectorAll('.scard').forEach((c, i) => {
+    c.style.animation = `fadeUp .5s cubic-bezier(.25,1,.5,1) ${40+i*90}ms both`;
+    const num = c.querySelector('.snum');
+    if (num) {
+      const raw = num.textContent.trim();
+      const target = parseInt(raw, 10) || 0;
+      if (target > 0) {
+        num.textContent = '0';
+        const s = performance.now(), dur = 850;
+        const tick = n => {
+          const p = Math.min((n-s)/dur, 1);
+          num.textContent = Math.round(target * E4(p)) + (raw.endsWith('%') ? '%' : '');
+          if (p < 1) requestAnimationFrame(tick);
+          else num.textContent = raw;
+        };
+        setTimeout(() => requestAnimationFrame(tick), 40 + i*90 + 20);
+      }
+    }
+  });
+
+  document.querySelectorAll('.panel').forEach((p, i) => {
+    p.style.animation = `fadeIn .42s ease-out ${300+i*70}ms both`;
+  });
+
+  document.querySelectorAll('tbody tr').forEach((tr, i) => {
+    const d = 330 + Math.min(i, 15) * 25;
+    tr.style.opacity = '0';
+    tr.style.transform = 'translateX(6px)';
+    setTimeout(() => {
+      tr.style.transition = 'opacity .28s ease, transform .35s cubic-bezier(.25,1,.5,1)';
+      tr.style.opacity = '1';
+      tr.style.transform = 'translateX(0)';
+      setTimeout(() => { tr.style.transition = 'background .1s'; }, 400);
+    }, d);
+  });
+
+  document.querySelectorAll('.ebar-fill[data-w]').forEach((el, i) => {
+    setTimeout(() => {
+      el.style.transform = 'scaleX(' + (parseInt(el.dataset.w, 10) / 100) + ')';
+    }, 480 + i * 80);
+  });
+})();
+
+// ── PIN GATE ──────────────────────────────────────────
+const _PIN='1010';
+let _pinCb=null;
+function requirePin(fn){
+  if(sessionStorage.getItem('pinOk')==='1'){fn();return;}
+  _pinCb=fn;
+  const m=document.getElementById('pinModal');
+  m.style.display='flex';
+  document.getElementById('pinInput').value='';
+  document.getElementById('pinErr').textContent='';
+  setTimeout(()=>document.getElementById('pinInput').focus(),80);
+}
+function _pinOk(){
+  const v=document.getElementById('pinInput').value;
+  if(v===_PIN){
+    sessionStorage.setItem('pinOk','1');
+    document.getElementById('pinModal').style.display='none';
+    if(_pinCb){const f=_pinCb;_pinCb=null;f();}
+  } else {
+    document.getElementById('pinErr').textContent='كلمة المرور غير صحيحة ❌';
+    document.getElementById('pinInput').value='';
+    document.getElementById('pinInput').focus();
+  }
+}
+function _pinCancel(){
+  document.getElementById('pinModal').style.display='none';
+  _pinCb=null;
+}
+
+</script>
+<!-- COPYRIGHT FOOTER -->
+<div style="text-align:center;padding:1rem;color:rgba(255,255,255,.82);font-size:.68rem;font-family:'Tajawal',sans-serif;letter-spacing:.3px">
+  Copyright 2026 &copy; {{ co.footer_owner }} &mdash; <a href="{{ co.footer_url }}" target="_blank" style="color:rgba(255,255,255,.6);text-decoration:none">{{ (co.footer_url or "").replace("https://","").replace("http://","") }}</a>
+</div>
+
+<!-- PIN GATE MODAL -->
+<div id="pinModal" style="display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(30,20,4,.82);align-items:center;justify-content:center">
+  <div style="background:var(--card);border:2px solid var(--amber);border-radius:16px;
+    padding:1.75rem 1.5rem;width:min(300px,88vw);text-align:center;
+    box-shadow:0 12px 40px rgba(0,0,0,.4)">
+    <div style="font-size:2rem;margin-bottom:.3rem">🔐</div>
+    <div style="font-weight:800;font-size:1rem;margin-bottom:.2rem;color:var(--text)">مطلوب كلمة المرور</div>
+    <div style="color:var(--muted);font-size:.77rem;margin-bottom:1rem">أدخل كلمة مرور التعديل للمتابعة</div>
+    <input type="password" id="pinInput" maxlength="6"
+      style="width:100%;text-align:center;font-size:1.5rem;letter-spacing:.4rem;
+        padding:.55rem;border:1.5px solid var(--border);border-radius:8px;
+        background:var(--field);color:var(--text);outline:none;direction:ltr;
+        transition:border-color .2s"
+      placeholder="••••"
+      onfocus="this.style.borderColor='var(--amber)'"
+      onblur="this.style.borderColor='var(--border)'"
+      onkeydown="if(event.key==='Enter')_pinOk()">
+    <div id="pinErr" style="color:var(--red);font-size:.75rem;margin-top:.35rem;min-height:1rem"></div>
+    <div style="display:flex;gap:.6rem;margin-top:.85rem">
+      <button onclick="_pinOk()" style="flex:1;background:linear-gradient(135deg,#8a4800,#b06000);
+        color:#fff4d8;border:none;border-radius:9px;padding:.55rem;cursor:pointer;
+        font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:700">تأكيد</button>
+      <button onclick="_pinCancel()" style="flex:1;background:transparent;color:var(--muted);
+        border:1px solid var(--border);border-radius:9px;padding:.55rem;cursor:pointer;
+        font-family:'Tajawal',sans-serif;font-size:.95rem">إلغاء</button>
+    </div>
+  </div>
+</div>
+<div id="rt-toast"></div>
+
+<script>
+/* Real-time SSE Client */
+(function(){
+  var dot    = document.getElementById('rt-dot');
+  var lbl    = document.getElementById('rt-lbl');
+  var toastEl= document.getElementById('rt-toast');
+  var toastT = null;
+
+  function setStatus(ok){
+    if(!dot||!lbl) return;
+    dot.style.background = ok ? '#3fb850' : '#e34949';
+    dot.style.boxShadow  = ok ? '0 0 0 3px rgba(63,184,80,.25)' : 'none';
+    lbl.textContent      = ok ? 'مباشر' : 'غير متصل';
+  }
+
+  function showToast(msg, type){
+    if(!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.className   = 'rt-toast-show rt-' + (type||'info');
+    clearTimeout(toastT);
+    toastT = setTimeout(function(){ toastEl.className=''; }, 5000);
+  }
+
+  function refreshStats(){
+    fetch('/api/stats').then(function(r){ return r.json(); }).then(function(d){
+      var el;
+      if((el=document.getElementById('stat-active')))  el.textContent = d.active  || 0;
+      if((el=document.getElementById('stat-pending'))) el.textContent = d.pending || 0;
+      if((el=document.getElementById('stat-closed')))  el.textContent = d.closed  || 0;
+    }).catch(function(){});
+  }
+
+  var LABELS = {
+    'tender_approved': '✅ تمت الموافقة على مناقصة',
+    'tender_rejected': '❌ تم رفض مناقصة',
+    'new_tender':      '🆕 مناقصة جديدة اكتُشفت',
+    'date_changed':    '📅 تغيير موعد مناقصة',
+    'bot_paused':      '⏸️ البوت متوقف مؤقتاً',
+    'bot_resumed':     '▶️ البوت يعمل مجدداً',
+  };
+
+  function connect(){
+    var es = new EventSource('/api/stream');
+    es.onopen = function(){ setStatus(true); };
+    es.onmessage = function(e){
+      try{
+        var ev = JSON.parse(e.data);
+        if(ev.type === 'ping' || ev.type === 'connected' || ev.type === 'tasks_changed'){ setStatus(true); return; }
+        var label = LABELS[ev.type] || ev.type;
+        var detail = ev.data && ev.data.title ? ' — ' + ev.data.title.substring(0,30) : '';
+        showToast(label + detail, ev.type.indexOf('reject') > -1 ? 'warn' : 'info');
+        refreshStats();
+      } catch(err){}
+    };
+    es.onerror = function(){
+      setStatus(false);
+      es.close();
+      setTimeout(connect, 5000);
+    };
+  }
+
+  connect();
+  refreshStats();
+  setInterval(refreshStats, 30000);
+})();
+</script>
+</body></html>

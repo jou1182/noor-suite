@@ -1,0 +1,135 @@
+[
+  {
+    "id": "n0-password-defaults",
+    "decision": "N0",
+    "kind": "replace",
+    "files": ["web_auth.py"],
+    "pattern": "os\\.(?:environ\\.get|getenv)\\s*\\(\\s*((['\"])[A-Za-z_][A-Za-z0-9_]*\\2)\\s*,\\s*(['\"])[^'\"]+\\3\\s*\\)",
+    "replacement": "os.environ[\\1]",
+    "expect": { "exact": 2 },
+    "done_check": { "environ_key_contains": "pass" }
+  },
+  {
+    "id": "n0-no-secret-defaults",
+    "decision": "N0",
+    "kind": "forbid",
+    "files": ["*.py", "**/*.py"],
+    "pattern": "os\\.(?:environ\\.get|getenv)\\s*\\(\\s*['\"][A-Za-z_]*(?i:PASS|SECRET|TOK[E]N|KEY)[A-Za-z_]*['\"]\\s*,\\s*(['\"])[^'\"]+\\1\\s*\\)"
+  },
+  {
+    "id": "n5-vault-env",
+    "decision": "N5",
+    "kind": "replace",
+    "files": ["bot_core.py", "web_auth.py", "web_core.py"],
+    "pattern": "(?m)^from security_vault import decrypt_val[\\t\\r ]*$",
+    "replacement": "def decrypt_val(value):  # N5: secrets come from environment variables only; no local vault\n    if value is not None and str(value).startswith(\"FERNET:\"):\n        raise RuntimeError(\"encrypted secret values are not supported; set the plain value in the environment\")\n    return value",
+    "expect": { "exact": 3 },
+    "done_pattern": "(?m)^def decrypt_val\\(value\\):  # N5:"
+  },
+  {
+    "id": "n5-vault-imports",
+    "decision": "N5",
+    "kind": "forbid",
+    "files": ["*.py", "**/*.py"],
+    "pattern": "security_vault"
+  },
+  {
+    "id": "n6-loopback-host",
+    "decision": "N6",
+    "kind": "replace",
+    "files": ["web_dashboard.py"],
+    "pattern": "(?m)^([^\\r\\n#]*\\.run\\([^\\r\\n#)]*?)(?<![A-Za-z0-9_])host\\s*=\\s*(['\"])::\\2",
+    "replacement": "host=\"127.0.0.1\"",
+    "keep_group": 1,
+    "expect": { "exact": 1 },
+    "done_check": { "call": "run", "keyword": "host", "value": "127.0.0.1" }
+  },
+  {
+    "id": "n6-port",
+    "decision": "N6",
+    "kind": "replace",
+    "files": ["web_core.py", "bot_tasks.py"],
+    "pattern": "os\\.getenv\\(\\s*(['\"])DASHBOARD_PORT\\1\\s*,\\s*(['\"])\\d+\\2\\s*\\)",
+    "replacement": "\"5311\"",
+    "expect": { "exact": 2 },
+    "done_pattern": "(?m)^\\s*(?:PORT\\s*=\\s*int\\(\\s*\"5311\"[\\t ]*\\)|port\\s*=\\s*\"5311\")"
+  },
+  {
+    "id": "n6-port-env",
+    "decision": "N6",
+    "kind": "forbid",
+    "files": ["*.py", "**/*.py"],
+    "pattern": "DASHBOARD_PORT"
+  },
+  {
+    "id": "n6-no-wildcard-host",
+    "decision": "N6",
+    "kind": "forbid",
+    "files": ["*.py", "**/*.py"],
+    "pattern": "(['\"])(?:::|0\\.0\\.0\\.0)\\1"
+  },
+  {
+    "id": "n7-bot-gate",
+    "decision": "N7",
+    "kind": "replace",
+    "files": ["bot_core.py"],
+    "pattern": "(?m)^(bot = telebot\\.TeleBot\\(TELEGRAM_TOK[E]N\\))[\\t\\r ]*$(?!\\r?\\nif os\\.getenv\\(\"NOOR_TELEGRAM_ENABLED\"\\))",
+    "replacement": "\nif os.getenv(\"NOOR_TELEGRAM_ENABLED\") != \"1\":  # N7: off unless a separate test bot is enabled explicitly\n    raise RuntimeError(\"Telegram bot disabled; set NOOR_TELEGRAM_ENABLED=1 with a separate test bot\")",
+    "keep_group": 1,
+    "expect": { "exact": 1 },
+    "done_pattern": "(?m)^if os\\.getenv\\(\"NOOR_TELEGRAM_ENABLED\"\\) != \"1\":  # N7:"
+  },
+  {
+    "id": "n7-web-gate",
+    "decision": "N7",
+    "kind": "replace",
+    "files": ["web_core.py"],
+    "pattern": "(?m)^([\\t ]*TELEGRAM_TOK[E]N = decrypt_val\\(os\\.getenv\\(\"TELEGRAM_TOK[E]N\", \"\"\\)\\))[\\t\\r ]*$",
+    "replacement": " if os.getenv(\"NOOR_TELEGRAM_ENABLED\") == \"1\" else \"\"  # N7",
+    "keep_group": 1,
+    "expect": { "exact": 1 },
+    "done_pattern": "if os\\.getenv\\(\"NOOR_TELEGRAM_ENABLED\"\\) == \"1\" else \"\"  # N7"
+  },
+  {
+    "id": "n4-identity",
+    "decision": "N4",
+    "kind": "identity",
+    "loose": true,
+    "files": ["**"]
+  },
+  {
+    "id": "n4-logo",
+    "decision": "N4",
+    "kind": "replace",
+    "files": ["web_core.py"],
+    "pattern": "(?m)^(_LOGO_PNG_B64\\s*=\\s*)\"[A-Za-z0-9+/=]{2000,}\"",
+    "replacement": "\"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=\"",
+    "keep_group": 1,
+    "expect": { "exact": 1 },
+    "done_pattern": "(?m)^_LOGO_PNG_B64\\s*=\\s*\"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=\""
+  },
+  {
+    "id": "n4-embedded-blob",
+    "decision": "N4",
+    "kind": "forbid",
+    "files": ["*.py", "**/*.py"],
+    "pattern": "[A-Za-z0-9+/=]{2000,}"
+  },
+  {
+    "id": "n4-owner-email",
+    "decision": "N4",
+    "kind": "replace",
+    "files": ["web_core.py"],
+    "pattern": "os\\.getenv\\(\\s*\"ADMIN_EMAIL\"[\\t ]*,\\s*\"[^@\\s\"]+@[^\\s\"]+\"[\\t ]*\\)",
+    "replacement": "os.getenv(\"ADMIN_EMAIL\", \"\")",
+    "expect": { "exact": 1 },
+    "done_pattern": "os\\.getenv\\(\\s*\"ADMIN_EMAIL\"[\\t ]*,\\s*\"\"[\\t ]*\\)"
+  },
+  {
+    "id": "n4-no-personal-email",
+    "decision": "N4",
+    "kind": "forbid",
+    "files": ["**"],
+    "pattern": "[A-Za-z0-9._%+-]+@(?:gmail|hotmail|outlook|yahoo|icloud)\\.com"
+  }
+]

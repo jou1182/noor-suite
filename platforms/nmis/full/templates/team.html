@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ co.short_ar }} — المهندسون والتقييم</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:{{ co.theme_bg }}; --card:{{ co.theme_card }}; --hover:{{ co.theme_hover }}; --head:{{ co.theme_head }};
+  --pri:{{ co.theme_primary }}; --pri-l:{{ co.theme_primary_l }}; --pri-d:{{ co.theme_primary_d }};
+  --text:#1b2233; --sub:#4d5870; --muted:#7c869b; --line:rgba(40,60,100,.16);
+  --red:#c62f2f; --orange:#c46a12; --green:#23804c; --gold:#b7791f;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;min-height:100vh}
+.wrap{padding:1rem 1.4rem 2rem}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:#fff;margin-bottom:1rem}
+.top h1{margin:0;font-size:1.35rem;font-weight:800}
+.top .sub{color:rgba(255,255,255,.65);font-size:.83rem;margin-top:.2rem}
+.seg{display:inline-flex;background:rgba(255,255,255,.1);border-radius:10px;padding:3px;gap:3px}
+.seg button{border:0;background:transparent;color:#fff;font:inherit;font-weight:700;padding:.45rem .9rem;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--pri-d)}
+.pdf{display:inline-flex;gap:6px;align-items:center}
+.pdf select{border:1px solid rgba(128,140,160,.35);border-radius:8px;padding:.45rem .6rem;font:inherit;background:var(--field,#fff);color:var(--text,#1b2233)}
+.pdf a{background:var(--pri);color:#fff;font-weight:700;text-decoration:none;padding:.5rem .9rem;border-radius:8px;white-space:nowrap}
+.pdf a:hover,.pdf a:focus-visible{filter:brightness(1.12)}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1rem}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border-radius:12px;padding:.9rem 1rem}
+.kpi .l{color:var(--sub);font-size:.8rem;font-weight:700}
+.kpi .v{font-size:1.9rem;font-weight:800;margin-top:.2rem;font-variant-numeric:tabular-nums}
+.kpi .v.bad{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.9rem}
+.eng{background:var(--card);border-radius:14px;padding:1rem;display:flex;flex-direction:column;gap:.7rem;position:relative}
+.eng.top-rated{box-shadow:0 0 0 2px var(--gold) inset}
+.who{display:flex;align-items:center;gap:.7rem}
+.av{width:46px;height:46px;border-radius:50%;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;flex-shrink:0}
+.who .n{font-weight:800;font-size:1.05rem}
+.badge{position:absolute;top:.8rem;left:.8rem;background:#fdf3dc;color:var(--gold);border-radius:20px;padding:.1rem .6rem;font-size:.72rem;font-weight:800}
+.load .row{display:flex;justify-content:space-between;font-size:.78rem;color:var(--sub);margin-bottom:.25rem}
+.bar{height:8px;background:var(--hover);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;text-align:center}
+.stats div{background:var(--hover);border-radius:9px;padding:.45rem .2rem}
+.stats b{display:block;font-size:1.1rem;font-variant-numeric:tabular-nums}
+.stats span{font-size:.7rem;color:var(--sub)}
+.foot{display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--sub)}
+.foot a{color:var(--pri);font-weight:800;text-decoration:none}
+.late{color:var(--red);font-weight:800}
+.note{color:rgba(255,255,255,.55);font-size:.78rem;margin-top:1rem}
+.empty{color:#fff;opacity:.7;text-align:center;padding:2rem}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>👷 المهندسون والتقييم</h1>
+      <div class="sub">تُحسب المؤشرات تلقائياً من كروت المهام وتقييمات الإدارة ونتائج الترسية — <span id="range"></span></div>
+    </div>
+    <div class="tools">
+      <div class="seg" role="group" aria-label="الفترة">
+        {% for k, label in periods.items() %}<button type="button" data-p="{{ k }}" aria-pressed="false">{{ label }}</button>{% endfor %}
+      </div>
+      <div class="pdf" title="صفحة للفريق + صفحة لكل مهندس — للإدارة فقط">
+        <select id="pdfMonth" aria-label="شهر التقرير">{% for v, label in report_months %}<option value="{{ v }}">{{ label }}</option>{% endfor %}</select>
+        <a id="pdfLink" href="/team/report.pdf?month={{ report_months[0][0] }}">⬇ تقرير PDF</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="l">مهام منتهية</div><div class="v" id="kDone">—</div></div>
+    <div class="kpi"><div class="l">الالتزام بالمواعيد (الفريق)</div><div class="v" id="kOnTime">—</div></div>
+    <div class="kpi"><div class="l">متوسط تقييم الجودة</div><div class="v" id="kQuality">—</div></div>
+    <div class="kpi"><div class="l">مهام متأخرة الآن</div><div class="v" id="kLate">—</div></div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="note">«في الموعد» = المنتهية قبل استحقاقها أو في يومه. الجودة = متوسط تقييم الإدارة للمهام المنتهية في الفترة. «فزنا بها» من سجل النتائج.</div>
+</div>
+
+<script>
+const COLORS = ['#0f2e54', '#4c1a89', '#2a6ab5', '#7c2d12', '#0f766e', '#9d174d', '#6d28d9', '#1e40af'];
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+const dash = v => v == null ? '—' : v;
+
+async function load(period){
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === period ? 'true' : 'false'));
+  try { localStorage.setItem('teamPeriod', period); } catch(e) {}
+  let j;
+  try {
+    const r = await fetch('/api/team?period=' + encodeURIComponent(period));
+    j = await r.json();
+  } catch(e) { document.getElementById('grid').innerHTML = '<div class="empty">تعذّر تحميل البيانات — أعد تسجيل دخول الإدارة</div>'; return; }
+  document.getElementById('range').textContent = `${j.period_label} (${j.from} ← ${j.to})`;
+  const t = j.totals;
+  document.getElementById('kDone').textContent = t.done;
+  document.getElementById('kOnTime').textContent = t.on_time == null ? '—' : t.on_time + '%';
+  document.getElementById('kQuality').textContent = t.quality == null ? '—' : t.quality + ' ★';
+  const kl = document.getElementById('kLate'); kl.textContent = t.late; kl.classList.toggle('bad', t.late > 0);
+  document.getElementById('grid').innerHTML = j.engineers.map((e, i) => {
+    const pct = Math.min(100, Math.round(100 * e.load / Math.max(1, e.capacity)));
+    const barColor = pct >= 80 ? '#d97706' : 'var(--pri-l)';
+    return `<article class="eng${e.top ? ' top-rated' : ''}">
+      ${e.top ? '<span class="badge">⭐ الأعلى تقييماً</span>' : ''}
+      <div class="who"><span class="av" style="background:${COLORS[i % COLORS.length]}">${esc(e.name.charAt(0))}</span>
+        <div><div class="n">م. ${esc(e.name)}</div><div style="font-size:.78rem;color:var(--sub)">${e.open} مهمة مفتوحة${e.late ? ` · <span class="late">${e.late} متأخرة</span>` : ''}</div></div></div>
+      <div class="load"><div class="row"><span>الحمل الحالي (منافسات)</span><span>${e.load} / ${e.capacity}</span></div>
+        <div class="bar"><i style="width:${pct}%;background:${barColor}"></i></div></div>
+      <div class="stats">
+        <div><b>${e.done}</b><span>منتهية</span></div>
+        <div><b>${e.on_time == null ? '—' : e.on_time + '%'}</b><span>في الموعد</span></div>
+        <div><b>${e.quality == null ? '—' : e.quality}</b><span>الجودة${e.rated_n ? ` (${e.rated_n})` : ''}</span></div>
+        <div><b>${e.won}</b><span>فزنا بها</span></div>
+      </div>
+      <div class="foot"><span>الالتزام: ${dash(e.commitment)}${e.commitment == null ? '' : ' / 5'}</span>
+        <a href="/tasks?engineer=${encodeURIComponent(e.name)}">عرض مهامه على اللوحة ←</a></div>
+    </article>`;
+  }).join('') || '<div class="empty">لا يوجد مهندسون نشطون</div>';
+}
+
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => load(b.dataset.p)));
+document.getElementById('pdfMonth').addEventListener('change', e => { document.getElementById('pdfLink').href = '/team/report.pdf?month=' + e.target.value; });
+let start = 'month';
+try { start = localStorage.getItem('teamPeriod') || 'month'; } catch(e) {}
+if (!['month', 'q', 'year'].includes(start)) start = 'month';
+load(start);
+</script>
+</body>
+</html>

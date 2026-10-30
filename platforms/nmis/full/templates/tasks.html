@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ co.short_ar }} — لوحة المهام</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:{{ co.theme_bg }}; --card:{{ co.theme_card }}; --hover:{{ co.theme_hover }}; --head:{{ co.theme_head }};
+  --pri:{{ co.theme_primary }}; --pri-l:{{ co.theme_primary_l }}; --pri-d:{{ co.theme_primary_d }};
+  --text:#1b2233; --sub:#4d5870; --muted:#7c869b; --line:rgba(40,60,100,.16);
+  --red:#c62f2f; --orange:#c46a12; --green:#23804c; --blue:#2a64b5;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;min-height:100vh}
+button,input,select,textarea{font-family:inherit;font-size:inherit}
+.top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.4rem .6rem;color:#fff;flex-wrap:wrap}
+.top h1{margin:0;font-size:1.35rem;font-weight:800}
+.top .sub{color:rgba(255,255,255,.65);font-size:.83rem;margin-top:.15rem}
+.live{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6effa0;margin-inline-start:.4rem;vertical-align:middle}
+.live.off{background:#aaa}
+.btn{border:0;border-radius:9px;padding:.55rem 1rem;cursor:pointer;font-weight:700;transition:filter .15s,background-color .15s}
+.btn-pri{background:var(--pri);color:#fff}
+.btn-pri:hover{filter:brightness(1.12)}
+.btn-ghost{background:rgba(255,255,255,.12);color:#fff}
+.btn-light{background:var(--head);color:var(--text)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(198,47,47,.4)}
+/* filters */
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;padding:0 1.4rem .9rem;align-items:center}
+.filters select,.filters input{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:.45rem .7rem;min-width:150px;max-width:320px;color:var(--text)}
+.chip{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:.35rem .8rem;cursor:pointer;font-size:.82rem}
+.chip.on{background:#fff;color:var(--pri-d);font-weight:700}
+.stats{margin-inline-start:auto;color:rgba(255,255,255,.75);font-size:.82rem}
+/* board */
+.board{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:1rem;padding:0 1.4rem 2rem;align-items:start}
+@media(max-width:900px){.board{grid-template-columns:1fr}}
+.col{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;display:flex;flex-direction:column;min-height:200px}
+.col-h{display:flex;align-items:center;gap:.5rem;padding:.75rem .9rem;color:#fff;font-weight:800;border-bottom:1px solid rgba(255,255,255,.1)}
+.col-h .dot{width:10px;height:10px;border-radius:50%}
+.col-h .n{margin-inline-start:auto;background:rgba(255,255,255,.15);border-radius:12px;padding:0 .55rem;font-size:.8rem}
+.col-b{padding:.6rem;display:flex;flex-direction:column;gap:.55rem;min-height:120px;flex:1;border-radius:0 0 14px 14px;transition:background .15s}
+.col-b.over{background:rgba(255,255,255,.12)}
+.empty{color:rgba(255,255,255,.45);text-align:center;font-size:.82rem;padding:1.2rem 0}
+.card{background:var(--card);border-radius:11px;padding:.7rem .8rem;cursor:grab;box-shadow:0 2px 6px rgba(0,0,0,.12);
+  border-right:4px solid var(--muted);transition:transform .12s,box-shadow .12s;position:relative}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(0,0,0,.2)}
+.card.dragging{opacity:.45}
+.card.p-high{border-right-color:var(--red)} .card.p-medium{border-right-color:var(--orange)} .card.p-normal{border-right-color:var(--blue)}
+.card .t{font-weight:800;font-size:.93rem;line-height:1.35;margin-bottom:.3rem}
+.card .tn{color:var(--sub);font-size:.78rem;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;margin-top:.5rem}
+.tag{font-size:.73rem;border-radius:7px;padding:.12rem .45rem;background:var(--hover);color:var(--sub);white-space:nowrap}
+.tag.eng{background:var(--head);color:var(--pri-d);font-weight:700}
+.tag.late{background:#fde2e2;color:var(--red);font-weight:700}
+.tag.soon{background:#fdf0dc;color:var(--orange);font-weight:700}
+.tag.ok{background:#e0f3e8;color:var(--green)}
+.card .mv{position:absolute;top:.45rem;left:.45rem;display:flex;gap:2px;opacity:0;transition:opacity .15s}
+.card:hover .mv,.card:focus-within .mv{opacity:1}
+@media(hover:none){.card .mv{opacity:1}}
+.mv button{border:0;background:var(--hover);border-radius:6px;width:24px;height:22px;cursor:pointer;color:var(--sub);font-size:.8rem;line-height:1}
+.add-inline{margin:.2rem .6rem .7rem;background:transparent;border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.75);border-radius:9px;padding:.45rem;cursor:pointer}
+.add-inline:hover{background:rgba(255,255,255,.08)}
+/* editor drawer (opens from the left — the right side belongs to the menu) */
+.shade{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:950;display:none}
+.shade.open{display:block}
+.ed{position:fixed;top:0;bottom:0;left:0;width:min(440px,100vw);background:var(--card);z-index:960;box-shadow:6px 0 30px rgba(0,0,0,.3);
+  transform:translateX(-100%);transition:transform .25s cubic-bezier(.25,1,.5,1);display:flex;flex-direction:column;overscroll-behavior:contain}
+.ed.open{transform:none}
+.ed-h{padding:1rem 1.2rem;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:var(--head)}
+.ed-h h2{margin:0;font-size:1.05rem}
+.ed-b{padding:1rem 1.2rem;overflow-y:auto;flex:1}
+.fld{margin-bottom:.8rem}
+.fld label{display:block;font-size:.8rem;color:var(--sub);font-weight:700;margin-bottom:.25rem}
+.fld input,.fld select,.fld textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:.5rem .65rem;background:#fff;color:var(--text)}
+.fld textarea{min-height:110px;resize:vertical}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.seg{display:flex;gap:.3rem}
+.seg button{flex:1;border:1px solid var(--line);background:#fff;border-radius:8px;padding:.4rem;cursor:pointer}
+.seg button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.ed-f{padding:.8rem 1.2rem;border-top:1px solid var(--line);display:flex;gap:.5rem;align-items:center}
+.err{color:var(--red);font-size:.82rem;min-height:1.1em;margin-inline-start:auto}
+.act{border-top:1px solid var(--line);margin-top:.6rem;padding-top:.6rem}
+.rate{border:1px solid rgba(183,121,31,.45);background:#fffaf0;border-radius:11px;padding:.7rem .8rem;margin:.4rem 0 .8rem}
+.rate h3{font-size:.88rem;margin:0 0 .5rem;color:#8a5a12}
+.rate .rw{display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem;font-size:.84rem;font-weight:700;color:var(--sub)}
+.stars{display:inline-flex;direction:ltr;gap:2px}
+.stars button{border:0;background:transparent;font-size:1.35rem;line-height:1;cursor:pointer;color:#d6cdb8;padding:0 1px}
+.stars button.on{color:#e0a100}
+.rate textarea{width:100%;min-height:60px;border:1px solid var(--line);border-radius:8px;padding:.4rem .55rem;margin:.3rem 0}
+.rate .when{font-size:.72rem;color:var(--muted)}
+.rate.flash{animation:rflash 1.4s ease 2}
+@keyframes rflash{50%{box-shadow:0 0 0 3px rgba(224,161,0,.55)}}
+.tag.star{background:#fdf3dc;color:#8a5a12;font-weight:800}
+.act h3{font-size:.85rem;margin:0 0 .4rem;color:var(--sub)}
+.act-i{font-size:.78rem;color:var(--sub);padding:.3rem 0;border-bottom:1px dashed var(--line)}
+.act-i b{color:var(--text)}
+.act-i span{color:var(--muted);font-size:.72rem}
+.toast{position:fixed;bottom:1.2rem;left:50%;transform:translateX(-50%);background:#1b2233;color:#fff;padding:.55rem 1.1rem;border-radius:10px;z-index:999;display:none;font-size:.85rem}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+
+<div class="top">
+  <div>
+    <h1>🗂️ لوحة المهام <span class="live off" id="live" title="التحديث الحي"></span></h1>
+    <div class="sub">اسحب الكرت بين الأعمدة — أو استخدم الأسهم على الكرت · ⚙️ مهام القالب تُنشأ تلقائياً لكل منافسة وتتحرك مع مراحلها</div>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <button class="btn btn-ghost" onclick="load()" title="تحديث" aria-label="تحديث اللوحة">⟳</button>
+    <button class="btn btn-pri" onclick="openEditor(null,'todo')">＋ مهمة جديدة</button>
+  </div>
+</div>
+
+<div class="filters">
+  <select id="fEng" onchange="render()" aria-label="تصفية حسب المهندس">
+    <option value="">كل المهندسين</option>
+    {% for e in engineers %}<option>{{ e }}</option>{% endfor %}
+    <option value="__none">— بدون إسناد —</option>
+  </select>
+  <select id="fTender" onchange="render()" aria-label="تصفية حسب المنافسة"><option value="">كل المنافسات</option></select>
+  <input id="fQ" type="search" placeholder="بحث في المهام…" oninput="render()" aria-label="بحث في المهام" autocomplete="off">
+  <button class="chip" id="fLate" onclick="this.classList.toggle('on');render()">⏰ المتأخرة فقط</button>
+  <span class="stats" id="stats"></span>
+</div>
+
+<div class="board" id="board"></div>
+
+<div class="shade" id="shade" onclick="closeEditor()"></div>
+<aside class="ed" id="ed" aria-label="تفاصيل المهمة">
+  <div class="ed-h"><h2 id="edTitle">مهمة جديدة</h2><button class="btn btn-light" onclick="closeEditor()" aria-label="إغلاق التفاصيل">✕</button></div>
+  <div class="ed-b">
+    <div class="fld"><label>المنافسة *</label><select id="eTender"></select></div>
+    <div class="fld"><label>المهمة *</label><input id="eTitle" list="commonTasks" maxlength="200" placeholder="مثال: التسعير وجدول الكميات">
+      <datalist id="commonTasks">{% for t in common_tasks %}<option value="{{ t }}">{% endfor %}</datalist></div>
+    <div class="fld"><label>المهندس المسؤول</label>
+      <select id="eEng"><option value="">— بدون إسناد —</option>{% for e in engineers %}<option>{{ e }}</option>{% endfor %}</select></div>
+    <div class="fld"><label>الأولوية</label>
+      <div class="seg" id="ePri">
+        <button type="button" data-v="high">🔴 عالية</button><button type="button" data-v="medium">🟠 متوسطة</button><button type="button" data-v="normal">🔵 عادية</button>
+      </div></div>
+    <div class="row2">
+      <div class="fld"><label>تاريخ البدء</label><input id="eStart" type="date"></div>
+      <div class="fld"><label>تاريخ الاستحقاق</label><input id="eDue" type="date"></div>
+    </div>
+    <div class="fld"><label>الحالة</label>
+      <div class="seg" id="eStatus">
+        <button type="button" data-v="todo">لم تبدأ</button><button type="button" data-v="doing">قيد التنفيذ</button><button type="button" data-v="done">منتهية</button>
+      </div></div>
+    <div class="fld"><label>ملاحظات</label><textarea id="eNotes" maxlength="4000" placeholder="أي ملاحظات أو عوائق…"></textarea></div>
+    {% if is_admin %}
+    <div class="rate" id="rateBox" style="display:none">
+      <h3>⭐ تقييم الإدارة</h3>
+      <div class="rw">جودة العمل <span class="stars" data-k="quality"></span></div>
+      <div class="rw">الالتزام بالموعد <span class="stars" data-k="commitment"></span></div>
+      <textarea id="rNote" maxlength="1000" placeholder="ملاحظة الإدارة (اختياري)…"></textarea>
+      <div style="display:flex;align-items:center;gap:.5rem"><button type="button" class="btn btn-pri" id="rSave" onclick="saveRating()">حفظ التقييم</button>
+        <span class="when" id="rWhen"></span></div>
+    </div>
+    {% endif %}
+    <div class="act" id="actBox" style="display:none"><h3>سجل النشاط</h3><div id="actList"></div></div>
+  </div>
+  <div class="ed-f">
+    <button class="btn btn-pri" id="eSave" onclick="saveTask()">حفظ</button>
+    <button class="btn btn-danger" id="eDel" onclick="deleteTask()" style="display:none">حذف</button>
+    <span class="err" id="eErr"></span>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const TENDERS = {{ tenders|tojson }};
+const STATUS_LABEL = {{ status_labels|tojson }};   // tasks_core.STATUS_LABEL — مصدر واحد للأسماء
+const COLS = [
+  {k:'todo',  label:STATUS_LABEL.todo,  color:'#9aa6bd'},
+  {k:'doing', label:STATUS_LABEL.doing, color:'#f0a030'},
+  {k:'done',  label:STATUS_LABEL.done,  color:'#3fbf74'}
+];
+const PRI_LABEL = {high:'عالية', medium:'متوسطة', normal:'عادية'};
+let TASKS = [], TODAY = '{{ today }}', cur = null, dragId = null, lastLoad = 0;
+const IS_ADMIN = {{ 'true' if is_admin else 'false' }}, RATING = {quality: 0, commitment: 0};
+const ME = {{ (me or '')|tojson }};   // حساب مهندس شخصي: مهامه فقط، بلا حذف أو إسناد
+
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(m){ const t = document.getElementById('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', 2600); }
+async function api(url, body){
+  const opt = body === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)};
+  const r = await fetch(url, opt);
+  let j = {};
+  try { j = await r.json(); } catch(e) { j = {ok:false, msg:'انتهت الجلسة — أعد تسجيل الدخول'}; }
+  if (!r.ok || !j.ok) throw new Error(j.msg || (j.error === 'session_expired' ? 'انتهت الجلسة — أعد تسجيل الدخول' : 'تعذّر تنفيذ العملية'));
+  return j;
+}
+function daysTo(d){ if(!d) return null; return Math.round((new Date(d) - new Date(TODAY)) / 86400000); }
+function dueTag(t){
+  if (t.status === 'done') return t.done_at ? `<span class="tag ok">✓ ${esc(t.done_at)}</span>` : '';
+  const n = daysTo(t.due_date); if (n === null) return '';
+  if (n < 0)  return `<span class="tag late">⏰ متأخرة ${-n} يوم</span>`;
+  if (n === 0) return `<span class="tag soon">⏰ اليوم</span>`;
+  if (n <= 2) return `<span class="tag soon">⏳ بعد ${n} يوم</span>`;
+  return `<span class="tag">📅 ${esc(t.due_date)}</span>`;
+}
+
+function fillTenderSelects(){
+  const opts = TENDERS.map(t => `<option value="${t.id}">${esc(t.title)}${t.owner ? ' — ' + esc(t.owner) : ''}</option>`).join('');
+  document.getElementById('fTender').insertAdjacentHTML('beforeend', opts);
+  document.getElementById('eTender').innerHTML = '<option value="">— اختر المنافسة —</option>' + opts;
+}
+
+function filtered(){
+  const eng = document.getElementById('fEng').value, tn = document.getElementById('fTender').value;
+  const q = document.getElementById('fQ').value.trim().toLowerCase(), late = document.getElementById('fLate').classList.contains('on');
+  return TASKS.filter(t =>
+    (!eng || (eng === '__none' ? !t.engineer : t.engineer === eng)) &&
+    (!tn || String(t.tender_row_id) === tn) &&
+    (!q || (t.title + ' ' + (t.tender_title || '') + ' ' + (t.notes || '') + ' ' + (t.engineer || '')).toLowerCase().includes(q)) &&
+    (!late || (t.status !== 'done' && t.due_date && daysTo(t.due_date) < 0)));
+}
+
+function cardHtml(t){
+  const i = COLS.findIndex(c => c.k === t.status);
+  return `<div class="card p-${esc(t.priority)}" draggable="true" data-id="${t.id}" tabindex="0" title="الأولوية: ${PRI_LABEL[t.priority] || ''}">
+    <div class="mv">
+      ${i > 0 ? `<button type="button" data-mv="${COLS[i-1].k}" title="إلى «${COLS[i-1].label}»" aria-label="انقل إلى «${COLS[i-1].label}»">→</button>` : ''}
+      ${i < COLS.length - 1 ? `<button type="button" data-mv="${COLS[i+1].k}" title="إلى «${COLS[i+1].label}»" aria-label="انقل إلى «${COLS[i+1].label}»">←</button>` : ''}
+    </div>
+    <div class="t">${esc(t.title)}</div>
+    <div class="tn">📄 ${esc(t.tender_title || 'منافسة محذوفة')}</div>
+    <div class="meta">
+      ${t.engineer ? `<span class="tag eng">👷 ${esc(t.engineer)}</span>` : '<span class="tag">بدون إسناد</span>'}
+      ${dueTag(t)}
+      ${t.notes ? '<span class="tag" title="بها ملاحظات">📝</span>' : ''}
+      ${t.template_key ? '<span class="tag" title="من قالب المنافسة — تتحرك تلقائياً مع مراحلها">⚙️</span>' : ''}
+      ${t.rating_quality ? `<span class="tag star" title="تقييم الإدارة: الجودة ${t.rating_quality}/5 · الالتزام ${t.rating_commitment}/5">★ ${t.rating_quality}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+function render(){
+  const list = filtered();
+  const board = document.getElementById('board');
+  board.innerHTML = COLS.map(c => {
+    const items = list.filter(t => t.status === c.k);
+    return `<section class="col">
+      <div class="col-h"><span class="dot" style="background:${c.color}"></span>${c.label}<span class="n">${items.length}</span></div>
+      <div class="col-b" data-status="${c.k}">${items.map(cardHtml).join('') || '<div class="empty">لا توجد مهام</div>'}</div>
+      ${c.k === 'todo' ? '<button class="add-inline" onclick="openEditor(null,\'todo\')">＋ إضافة مهمة</button>' : ''}
+    </section>`;
+  }).join('');
+  const late = TASKS.filter(t => t.status !== 'done' && t.due_date && daysTo(t.due_date) < 0).length;
+  document.getElementById('stats').textContent = `${TASKS.length} مهمة · ${TASKS.filter(t => t.status === 'done').length} منتهية` + (late ? ` · ${late} متأخرة` : '');
+  const tn = document.getElementById('fTender').value;
+  if (tn) {
+    const mine = TASKS.filter(t => String(t.tender_row_id) === tn), done = mine.filter(t => t.status === 'done').length;
+    document.getElementById('stats').textContent = `تقدّم المنافسة: ${done}/${mine.length} (${mine.length ? Math.round(100 * done / mine.length) : 0}%)`;
+  }
+  wire();
+}
+
+function wire(){
+  document.querySelectorAll('.card').forEach(el => {
+    const id = +el.dataset.id;
+    el.addEventListener('click', e => { if (e.target.closest('[data-mv]')) return; openEditor(id); });
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') openEditor(id); });
+    el.addEventListener('dragstart', e => { dragId = id; el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(id)); });
+    el.addEventListener('dragend', () => { el.classList.remove('dragging'); dragId = null; });
+    el.querySelectorAll('[data-mv]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); move(id, b.dataset.mv, null); }));
+  });
+  document.querySelectorAll('.col-b').forEach(zone => {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('over');
+      if (dragId == null) return;
+      // الترتيب = عدد الكروت التي يقع منتصفها فوق نقطة الإفلات
+      const cards = [...zone.querySelectorAll('.card')].filter(c => +c.dataset.id !== dragId);
+      let pos = cards.findIndex(c => { const r = c.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; });
+      if (pos < 0) pos = cards.length;
+      // الموضع بين الكروت الظاهرة فقط → نحوّله لموضع في العمود الكامل
+      const before = cards[pos] ? +cards[pos].dataset.id : null;
+      move(dragId, zone.dataset.status, before);
+    });
+  });
+}
+
+async function move(id, status, beforeId){
+  const t = TASKS.find(x => x.id === id); if (!t) return;
+  const col = TASKS.filter(x => x.status === status && x.id !== id).sort((a, b) => a.position - b.position || a.id - b.id);
+  let position = beforeId == null ? col.length : Math.max(0, col.findIndex(x => x.id === beforeId));
+  try {
+    await api(`/api/tasks/${id}/move`, {status, position});
+    const justDone = status === 'done' && t.status !== 'done';
+    if (justDone) toast('✅ أُنجزت: ' + t.title + (IS_ADMIN ? ' — قيّمها الآن' : ''));
+    await load();
+    if (justDone && IS_ADMIN) openEditor(id, null, true);
+  } catch(e) { toast('⚠️ ' + e.message); }
+}
+
+async function load(){
+  lastLoad = Date.now();
+  try { const j = await api('/api/tasks'); TASKS = j.tasks; TODAY = j.today || TODAY; render(); if (cur) refreshActivity(); else if (location.hash) openFromHash(); }
+  catch(e) { toast('⚠️ ' + e.message); }
+}
+
+function setSeg(id, v){ document.querySelectorAll(`#${id} button`).forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+function getSeg(id){ const b = document.querySelector(`#${id} button.on`); return b ? b.dataset.v : null; }
+['ePri', 'eStatus'].forEach(id => document.getElementById(id).addEventListener('click', e => { const b = e.target.closest('button'); if (b) setSeg(id, b.dataset.v); }));
+
+function openEditor(id, status, focusRating){
+  cur = id ? TASKS.find(t => t.id === id) : null;
+  document.getElementById('eErr').textContent = '';
+  document.getElementById('edTitle').textContent = cur ? 'تفاصيل المهمة' : 'مهمة جديدة';
+  const tf = document.getElementById('fTender').value;
+  document.getElementById('eTender').value = cur ? cur.tender_row_id : (tf || '');
+  if (cur && !TENDERS.some(x => String(x.id) === String(cur.tender_row_id))) {
+    document.getElementById('eTender').insertAdjacentHTML('beforeend', `<option value="${cur.tender_row_id}">${esc(cur.tender_title || 'منافسة مغلقة')}</option>`);
+    document.getElementById('eTender').value = cur.tender_row_id;
+  }
+  document.getElementById('eTitle').value = cur ? cur.title : '';
+  const ef = document.getElementById('fEng').value;
+  document.getElementById('eEng').value = cur ? (cur.engineer || '') : (ef && ef !== '__none' ? ef : '');
+  setSeg('ePri', cur ? cur.priority : 'normal');
+  setSeg('eStatus', cur ? cur.status : (status || 'todo'));
+  document.getElementById('eStart').value = cur ? (cur.start_date || '') : TODAY;
+  document.getElementById('eDue').value = cur ? (cur.due_date || '') : '';
+  document.getElementById('eNotes').value = cur ? (cur.notes || '') : '';
+  document.getElementById('eDel').style.display = cur && !ME ? '' : 'none';
+  if (ME) {
+    const mine = !cur || cur.engineer === ME;
+    if (!cur) document.getElementById('eEng').value = ME;
+    document.getElementById('eEng').disabled = true;
+    document.getElementById('eSave').disabled = !mine;
+    document.getElementById('eErr').textContent = mine ? '' : 'مهمة زميل — للاطلاع فقط';
+  }
+  document.getElementById('actBox').style.display = cur ? '' : 'none';
+  if (cur) refreshActivity();
+  showRating(focusRating);
+  document.getElementById('ed').classList.add('open'); document.getElementById('shade').classList.add('open');
+  setTimeout(() => document.getElementById(cur ? 'eNotes' : 'eTitle').focus(), 260);
+}
+function closeEditor(){ cur = null; document.getElementById('ed').classList.remove('open'); document.getElementById('shade').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditor(); });
+
+async function refreshActivity(){
+  if (!cur) return;
+  try {
+    const j = await api(`/api/tasks/${cur.id}/activity`);
+    document.getElementById('actList').innerHTML = j.activity.map(a =>
+      `<div class="act-i"><b>${esc(a.actor)}</b> — ${esc(a.details)}<br><span>${esc(a.at)}</span></div>`).join('') || '<div class="act-i">لا يوجد نشاط</div>';
+  } catch(e) {}
+}
+
+async function saveTask(){
+  const body = {
+    tender_row_id: document.getElementById('eTender').value,
+    title: document.getElementById('eTitle').value.trim(),
+    engineer: document.getElementById('eEng').value,
+    priority: getSeg('ePri') || 'normal',
+    start_date: document.getElementById('eStart').value,
+    due_date: document.getElementById('eDue').value,
+    notes: document.getElementById('eNotes').value
+  };
+  const status = getSeg('eStatus') || 'todo';
+  const err = document.getElementById('eErr'); err.textContent = '';
+  if (!body.tender_row_id) { err.textContent = 'اختر المنافسة'; return; }
+  if (!body.title) { err.textContent = 'اكتب اسم المهمة'; return; }
+  const btn = document.getElementById('eSave'); btn.disabled = true;
+  try {
+    if (cur) {
+      await api(`/api/tasks/${cur.id}`, body);
+      if (status !== cur.status) await api(`/api/tasks/${cur.id}/move`, {status});
+      toast('✔ حُفظت المهمة');
+    } else {
+      body.status = status;
+      await api('/api/tasks', body);
+      toast('✔ أُضيفت المهمة');
+    }
+    closeEditor(); await load();
+  } catch(e) { err.textContent = e.message; }
+  finally { btn.disabled = false; }
+}
+
+async function deleteTask(){
+  if (!cur || !confirm('حذف المهمة «' + cur.title + '» نهائياً؟')) return;
+  try { await api(`/api/tasks/${cur.id}/delete`, {}); toast('🗑 حُذفت المهمة'); closeEditor(); await load(); }
+  catch(e) { document.getElementById('eErr').textContent = e.message; }
+}
+
+// تحديث حي: أي تعديل من شاشة أخرى يُعيد تحميل اللوحة
+function connectLive(){
+  if (!window.EventSource) return;
+  const es = new EventSource('/api/stream'), dot = document.getElementById('live');
+  let t = null;
+  es.onopen = () => dot.classList.remove('off');
+  es.onerror = () => dot.classList.add('off');
+  es.onmessage = ev => {
+    let m; try { m = JSON.parse(ev.data); } catch(e) { return; }
+    // تعديل من هذه الشاشة أعاد التحميل للتو — لا تحميل ثانٍ لنفس الحدث
+    if (m.type === 'tasks_changed' && Date.now() - lastLoad > 1500) { clearTimeout(t); t = setTimeout(load, 250); }
+  };
+}
+
+// ── تقييم الإدارة (المهام المنتهية فقط) ──
+function drawStars(){
+  document.querySelectorAll('.stars').forEach(box => {
+    const k = box.dataset.k;
+    box.innerHTML = [1, 2, 3, 4, 5].map(n => `<button type="button" data-n="${n}" class="${n <= RATING[k] ? 'on' : ''}" aria-label="${n} من 5">★</button>`).join('');
+  });
+}
+document.querySelectorAll('.stars').forEach(box => box.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  RATING[box.dataset.k] = +b.dataset.n; drawStars();
+}));
+function showRating(flash){
+  const box = document.getElementById('rateBox'); if (!box) return;
+  const on = !!(cur && cur.status === 'done');
+  box.style.display = on ? '' : 'none';
+  if (!on) return;
+  RATING.quality = cur.rating_quality || 0; RATING.commitment = cur.rating_commitment || 0;
+  document.getElementById('rNote').value = cur.rating_note || '';
+  document.getElementById('rWhen').textContent = cur.rating_at ? 'آخر تقييم: ' + cur.rating_at : 'لم تُقيَّم بعد';
+  drawStars();
+  if (flash) { box.classList.remove('flash'); void box.offsetWidth; box.classList.add('flash'); setTimeout(() => box.scrollIntoView({block: 'center', behavior: 'smooth'}), 280); }
+}
+async function saveRating(){
+  if (!cur) return;
+  const err = document.getElementById('eErr'); err.textContent = '';
+  if (!RATING.quality || !RATING.commitment) { err.textContent = 'اختر النجوم للجودة والالتزام'; return; }
+  try {
+    await api(`/api/tasks/${cur.id}/rating`, {quality: RATING.quality, commitment: RATING.commitment, note: document.getElementById('rNote').value});
+    toast('⭐ حُفظ التقييم'); const id = cur.id; await load(); cur = TASKS.find(x => x.id === id) || null; showRating(false);
+  } catch(e) { err.textContent = e.message; }
+}
+
+fillTenderSelects();
+// رابط من الجرس: /tasks#task-12 يفتح المهمة بعد التحميل
+window.addEventListener('hashchange', openFromHash);
+function openFromHash(){ const m = /^#task-(\d+)$/.exec(location.hash); if (m && TASKS.some(t => t.id === +m[1])) { openEditor(+m[1]); history.replaceState(null, '', location.pathname + location.search); } }
+(function(){ const pick = {{ pick_engineer|tojson }}; const sel = document.getElementById('fEng');
+  if (pick && [...sel.options].some(o => o.value === pick || o.text === pick)) sel.value = pick; })();
+load();
+connectLive();
+</script>
+</body>
+</html>

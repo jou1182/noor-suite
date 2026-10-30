@@ -13,9 +13,13 @@ from .fingerprint import inventory
 OPAQUE_RE = re.compile(r"^([0-9a-f]{64})\s+(visual|path|session)\s+(.+)$")
 HARD_STOPS = ("secret.", "name.blocked", "meta.blocked_name", "meta.unverifiable_",
               "file.too_large", "file.unscannable_docx", "file.symlink")
+VISUAL_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".svg",
+                   ".ttf", ".otf", ".woff", ".woff2"}
 
 
 def _approved(state: dict, finding: scanner.Finding, report: scanner.ScanReport) -> bool:
+    if finding.rule == "file.binary_unscanned" and Path(finding.path).suffix.casefold() not in VISUAL_SUFFIXES:
+        return False
     kind = ("visual" if finding.rule == "file.binary_unscanned" else
             "path" if finding.rule.startswith("path.") else
             "session" if finding.rule == "data.session" else None)
@@ -58,7 +62,8 @@ def mark(repo: Path, platform: str, stamp: str, list_file: str) -> str:
     state = read_state(private)
     approved: dict[str, dict[str, dict[str, str]]] = {}
     approved_at = now()
-    for line in Path(list_file).read_text(encoding="utf-8").splitlines():
+    # utf-8-sig: Windows PowerShell 5.1 writes a BOM with -Encoding UTF8.
+    for line in Path(list_file).read_text(encoding="utf-8-sig").splitlines():
         item = line.strip()
         if not item or item.startswith("#"):
             continue

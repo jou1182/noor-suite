@@ -1,0 +1,21 @@
+# متطلبات نظام النور — مطابقة لما يستوردهV الكود فعلياً (تحقق 2026-07-12)
+Flask==3.1.3
+pandas==2.2.3
+openpyxl==3.1.5
+requests==2.33.1
+cryptography==47.0.0
+selenium==4.43.0
+webdriver-manager==4.0.2
+pyTelegramBotAPI==4.33.0
+schedule==1.2.2
+openai==2.36.0
+paramiko==4.0.0
+python-dotenv==1.2.2
+reportlab==4.5.0
+arabic-reshaper==3.0.1
+python-bidi==0.6.11
+
+# صوت الذكاء الاصطناعي (اختياري — يعمل النظام بدونها بدون ردود صوتية)
+google-generativeai==0.8.6
+pydub==0.25.1
+imageio-ffmpeg==0.6.0

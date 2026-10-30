@@ -328,6 +328,30 @@ def load_binary_allowlist(repo: Path) -> dict[str, str]:
     return dict(json.loads(path.read_text(encoding="utf-8")).get("binary", {}))
 
 
+APPROVABLE_RULES = ("path.", "data.session")
+
+
+def load_approved_findings(repo: Path) -> dict[str, dict]:
+    """{"approved_findings": {"<repo path>": {"sha256": ..., "rules": [...], "reason": ...}}}.
+
+    For owner-approved false positives in imported snapshots, whose bytes cannot carry an inline
+    scan:allow without breaking their digest. Pinned to the exact bytes; path/session rules only.
+    """
+    path = repo / "tools" / "scan_allowlist.json"
+    if not path.is_file():
+        return {}
+    approved = json.loads(path.read_text(encoding="utf-8")).get("approved_findings", {})
+    return {key: value for key, value in approved.items()
+            if all(rule.startswith(APPROVABLE_RULES) for rule in value.get("rules", []))}
+
+
+def _drop_approved(findings: list[Finding], rel: str, data: bytes, approved: dict[str, dict]) -> list[Finding]:
+    entry = approved.get(rel)
+    if not entry or hashlib.sha256(data).hexdigest() != entry.get("sha256"):
+        return findings
+    return [f for f in findings if f.rule not in entry.get("rules", [])]
+
+
 def load_name_exemptions(repo: Path) -> list[str]:
     path = repo / "tools" / "scan_allowlist.json"
     if not path.is_file():
@@ -368,6 +392,7 @@ def scan_tree(root: Path, blocklist: list[str], *, repo_exemptions: bool = False
     root = root.resolve()
     repo = (repo or root).resolve()
     names = load_name_exemptions(repo) if repo_exemptions else []
+    approved = load_approved_findings(repo) if repo_exemptions else {}
     pins = {key.casefold(): value for key, value in load_binary_allowlist(repo).items()} if repo_exemptions else {}
     candidates: list[Path] = []
     walked: set[Path] = set()
@@ -436,7 +461,8 @@ def scan_tree(root: Path, blocklist: list[str], *, repo_exemptions: bool = False
         hashes[unicodedata.normalize("NFC", rel)] = digest
         if _is_binary(data, rel):
             binary.append({"path": rel, "opaque_id": opaque_id, "sha256": digest})
-        blob_findings = scan_blob(data, rel, blocklist, pins, allow_inline=repo_exemptions)
+        blob_findings = _drop_approved(scan_blob(data, rel, blocklist, pins, allow_inline=repo_exemptions),
+                                       rel, data, approved)
         if repo_exemptions and _name_exempt(rel, names):
             blob_findings = [f for f in blob_findings if f.rule != "name.blocked"]
         findings.extend(blob_findings)
@@ -565,6 +591,7 @@ def scan_history(repo: Path, blocklist: list[str],
         else:
             wanted.append(sha)
     exemptions = load_name_exemptions(repo)
+    approved = load_approved_findings(repo)
     for sha in wanted:
         data = _git(repo, "cat-file", "blob", sha, binary=True)
         rel = f"{blobs[sha]}@{sha[:10]}"
@@ -573,7 +600,7 @@ def scan_history(repo: Path, blocklist: list[str],
             report.file_ids[rel] = opaque_id
             if _is_binary(data, blobs[sha]):
                 report.binary_assets_for_visual_review.append({"path": rel, "opaque_id": opaque_id})
-        blob_findings = scan_blob(data, rel, blocklist, binary_allow)
+        blob_findings = _drop_approved(scan_blob(data, rel, blocklist, binary_allow), blobs[sha], data, approved)
         if _name_exempt(blobs[sha], exemptions):
             blob_findings = [f for f in blob_findings if f.rule != "name.blocked"]
         metadata = [Finding(f.rule, rel, f.line, f.masked)

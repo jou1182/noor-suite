@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ co.short_ar }} — فريق المهندسين</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:{{ co.theme_bg }}; --card:{{ co.theme_card }}; --hover:{{ co.theme_hover }}; --head:{{ co.theme_head }};
+  --pri:{{ co.theme_primary }}; --pri-d:{{ co.theme_primary_d }};
+  --text:#1b2233; --sub:#4d5870; --muted:#7c869b; --line:rgba(40,60,100,.16);
+  --red:#c62f2f; --green:#23804c; --orange:#c46a12;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;min-height:100vh}
+.wrap{padding:1rem 1.4rem 2rem;max-width:980px}
+h1{color:#fff;margin:0;font-size:1.35rem;font-weight:800}
+.sub{color:rgba(255,255,255,.65);font-size:.84rem;margin:.25rem 0 1rem;line-height:1.7}
+.panel{background:var(--card);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:var(--head);text-align:right;padding:.65rem .8rem;font-size:.8rem;color:var(--sub)}
+td{padding:.65rem .8rem;border-top:1px solid var(--line);vertical-align:middle}
+.st{display:inline-block;border-radius:20px;padding:.12rem .6rem;font-size:.76rem;font-weight:800}
+.st.none{background:var(--hover);color:var(--sub)}
+.st.ok{background:#e0f3e8;color:var(--green)}
+.st.wait{background:#fdf0dc;color:var(--orange)}
+.st.off{background:#fde2e2;color:var(--red)}
+.btn{border:0;border-radius:8px;padding:.42rem .8rem;cursor:pointer;font:inherit;font-weight:700;font-size:.82rem}
+.btn-pri{background:var(--pri);color:#fff}
+.btn-ghost{background:var(--hover);color:var(--text)}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(198,47,47,.35)}
+.acts{display:flex;gap:.35rem;flex-wrap:wrap}
+.shade{position:fixed;inset:0;overscroll-behavior:contain;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:990;padding:1rem}
+.shade.open{display:flex}
+.modal{background:var(--card);border-radius:14px;padding:1.3rem;max-width:430px;width:100%;text-align:center}
+.modal h2{margin:0 0 .4rem;font-size:1.1rem}
+.pw{font-family:ui-monospace,Consolas,monospace;font-size:1.5rem;font-weight:800;letter-spacing:2px;direction:ltr;
+  background:#fff;border:2px dashed var(--pri);border-radius:10px;padding:.6rem;margin:.8rem 0;user-select:all}
+.warn{color:var(--orange);font-size:.82rem;font-weight:700;line-height:1.6}
+.muted{color:var(--muted);font-size:.8rem}
+.addbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;background:var(--card);border-radius:14px;padding:.8rem 1rem;margin-bottom:1rem}
+.addbar label{font-size:.82rem;font-weight:700;color:var(--sub)}
+.addbar input{border:1px solid var(--line);border-radius:8px;padding:.45rem .7rem;font:inherit}
+#newName{flex:1;min-width:180px}
+#newCap{width:80px}
+.h2{color:#fff;font-size:1rem;margin:1.4rem 0 .6rem}
+.msg{background:#fde2e2;color:var(--red);border-radius:10px;padding:.6rem .9rem;margin-bottom:.8rem;font-weight:700}
+.msg.ok{background:#e0f3e8;color:var(--green)}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+<div class="wrap">
+  <h1>👷 فريق المهندسين وحساباتهم</h1>
+  <div class="sub">أضف المهندس المعيَّن حديثاً، وأنشئ له حساباً ← تظهر كلمة مؤقتة <b>مرة واحدة</b> ← سلّمها له، وسيغيّرها عند أول دخول من <b>{{ request.host_url }}engineer</b> ({{ min_length }} أحرف على الأقل).
+    من ترك الشركة: «إزالة من الفريق» — يختفي من القوائم ويُغلق حسابه، ويبقى تاريخه وتقييماته.</div>
+  <div class="msg" id="msg" role="alert" hidden></div>
+
+  <form class="addbar" id="addForm" autocomplete="off">
+    <label for="newName">مهندس جديد</label>
+    <input id="newName" name="name" required minlength="2" maxlength="40" placeholder="مثال: خالد العتيبي…">
+    <label for="newCap">السعة (منافسات)</label>
+    <input id="newCap" name="capacity" type="number" inputmode="numeric" min="1" max="50" value="5">
+    <button class="btn btn-pri" type="submit">＋ إضافة للفريق</button>
+  </form>
+
+  <div class="panel">
+    <table>
+      <thead><tr><th>المهندس</th><th>عمله المفتوح</th><th>الحساب</th><th>آخر دخول</th><th>إجراء</th></tr></thead>
+      <tbody>
+      {% for r in rows if r.employed %}
+        <tr data-name="{{ r.name }}" data-open="{{ r.open_tenders }}|{{ r.open_tasks }}">
+          <td><b>م. {{ r.name }}</b><div class="muted">السعة {{ r.capacity }}</div></td>
+          <td class="muted">{{ r.open_tenders }} منافسة · {{ r.open_tasks }} مهمة</td>
+          <td>
+            {% if not r.has_account %}<span class="st none">لا يوجد حساب</span>
+            {% elif not r.active %}<span class="st off">موقوف</span>
+            {% elif r.must_change %}<span class="st wait">بانتظار أول دخول</span>
+            {% else %}<span class="st ok">نشط</span>{% endif %}
+          </td>
+          <td class="muted">{{ r.last_login or '—' }}</td>
+          <td><div class="acts">
+            {% if not r.has_account %}
+              <button class="btn btn-pri" data-act="issue">إنشاء حساب</button>
+            {% else %}
+              <button class="btn btn-ghost" data-act="issue">إعادة تعيين كلمة المرور</button>
+              {% if r.active %}<button class="btn btn-ghost" data-act="off">إيقاف الدخول</button>
+              {% else %}<button class="btn btn-ghost" data-act="on">تفعيل الدخول</button>{% endif %}
+            {% endif %}
+            <button class="btn btn-danger" data-act="remove">إزالة من الفريق</button>
+          </div></td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">لا يوجد مهندسون في الفريق — أضف أول مهندس من الأعلى.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% set former = rows|rejectattr("employed")|list %}
+  {% if former %}
+  <h2 class="h2">مهندسون سابقون ({{ former|length }})</h2>
+  <div class="panel">
+    <table>
+      <tbody>
+      {% for r in former %}
+        <tr data-name="{{ r.name }}" data-cap="{{ r.capacity }}">
+          <td><b>م. {{ r.name }}</b></td>
+          <td class="muted">خارج الفريق — تاريخه محفوظ</td>
+          <td><div class="acts"><button class="btn btn-ghost" data-act="rehire">إعادة للفريق</button></div></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="shade" id="shade">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2 id="mTitle"></h2>
+    <div class="muted">كلمة المرور المؤقتة:</div>
+    <div class="pw" id="mPw"></div>
+    <div class="warn">⚠️ لن تظهر مرة أخرى. سلّمها للمهندس مباشرة (لا تنشرها في مجموعة)،<br>وسيغيّرها بنفسه عند أول دخول من صفحة بوابة المهندس.</div>
+    <div style="display:flex;gap:.5rem;justify-content:center;margin-top:1rem">
+      <button class="btn btn-pri" id="mCopy">📋 نسخ</button>
+      <button class="btn btn-ghost" onclick="location.reload()">تم</button>
+    </div>
+  </div>
+</div>
+
+<script>
+async function post(url, body){
+  const r = await fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  let j = {}; try { j = await r.json(); } catch(e) { j = {ok: false, msg: 'انتهت جلسة الإدارة — سجّل الدخول مجدداً'}; }
+  if (!r.ok || !j.ok) throw new Error(j.msg || 'تعذّر تنفيذ العملية');
+  return j;
+}
+document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', async () => {
+  const name = b.closest('tr').dataset.name, act = b.dataset.act;
+  try {
+    if (act === 'issue') {
+      if (b.textContent.includes('إعادة') && !confirm('إعادة تعيين كلمة مرور م. ' + name + '؟ كلمته الحالية ستتوقف فوراً.')) return;
+      const j = await post('/admin/engineers/issue', {name});
+      document.getElementById('mTitle').textContent = 'حساب م. ' + j.name;
+      document.getElementById('mPw').textContent = j.temp_password;
+      document.getElementById('shade').classList.add('open');
+    } else if (act === 'remove') {
+      const [tn, tk] = (b.closest('tr').dataset.open || '0|0').split('|');
+      const work = (+tn || +tk) ? `
+لديه ${tn} منافسة و${tk} مهمة مفتوحة — أعد إسنادها لزميل بعد الإزالة.` : '';
+      if (!confirm('إزالة م. ' + name + ' من الفريق؟ سيختفي من القوائم ويُغلق حسابه وتتوقف رسائله، ويبقى تاريخه وتقييماته.' + work)) return;
+      await post('/admin/engineers/remove', {name});
+      location.reload();
+    } else if (act === 'rehire') {
+      await post('/admin/engineers/add', {name, capacity: b.closest('tr').dataset.cap || 5});
+      location.reload();
+    } else {
+      if (act === 'off' && !confirm('إيقاف دخول م. ' + name + '؟ لن يستطيع الدخول حتى تعيد تفعيله.')) return;
+      await post('/admin/engineers/active', {name, active: act === 'on'});
+      location.reload();
+    }
+  } catch(e) { const m = document.getElementById("msg"); m.textContent = "⚠️ " + e.message; m.hidden = false; }
+}));
+document.getElementById('addForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.submitter; btn.disabled = true;
+  try {
+    const j = await post('/admin/engineers/add', {name: document.getElementById('newName').value, capacity: document.getElementById('newCap').value});
+    sessionStorage.setItem('engMsg', j.result === 'REACTIVATED' ? 'أُعيد م. ' + j.name + ' للفريق' : 'أُضيف م. ' + j.name + ' — أنشئ له حساباً');
+    location.reload();
+  } catch(err) { const m = document.getElementById("msg"); m.textContent = "⚠️ " + err.message; m.hidden = false; btn.disabled = false; }
+});
+try { const t = sessionStorage.getItem('engMsg'); if (t) { const m = document.getElementById('msg'); m.textContent = '✔ ' + t; m.className = 'msg ok'; m.hidden = false; sessionStorage.removeItem('engMsg'); } } catch(e) {}
+document.getElementById('mCopy').addEventListener('click', async e => {
+  try { await navigator.clipboard.writeText(document.getElementById('mPw').textContent); e.target.textContent = '✔ نُسخت'; }
+  catch(err) { e.target.textContent = 'انسخها يدوياً'; }
+});
+</script>
+</body>
+</html>

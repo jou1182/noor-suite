@@ -1,0 +1,263 @@
+/* ══ مظهر النور — «ورق المخططات» (2026-09-25) ══════════════════════════
+   يُحمَّل بعد CSS كل صفحة (templates/_skin.html) فيعيد تعريف متغيراتها ومكوّناتها.
+   الخط: Tajawal لكل شيء، والأرقام بعرض ثابت (tabular-nums).
+   العنصر المميز: «جدول بيانات اللوحة الهندسية» — كروت المنافسات برأس مسطّر وخلايا.
+   ⚠️ لا تكتب هنا ألوان النور (#8a4800، #c8a028 …): theme_palette يحوّلها. */
+:root{
+  --ink:#16233B; --ink-2:#3A4A66; --ink-3:#6B7A93;
+  --noor:#1F4C8F; --noor-d:#163A6E; --noor-t:#E6EEF8;
+  --film:#F2F5F9; --sheet:#FFFFFF; --rule:#CBD5E1; --rule-2:#E3E9F1;
+  --lumen:#F4B63F; --lumen-t:#FDF3DB;
+  --late:#B42318; --late-t:#FDECEA; --ok:#1F7A4C; --ok-t:#E4F3EB; --warn:#B25E09; --warn-t:#FDF0DC;
+  /* متغيرات الصفحات الموجودة ← لوحة النور */
+  --bg:var(--film); --card:var(--sheet); --hover:#EEF3FA; --head:#E6EEF8; --field:#FFFFFF;
+  --border:var(--rule); --border2:var(--rule); --text:var(--ink); --sub:var(--ink-2); --muted:var(--ink-3);
+  --amber:var(--noor); --amber-l:#3A6DB5; --amber-d:var(--noor-d); --gold:var(--noor);
+  --pri:var(--noor); --pri-l:#3A6DB5; --pri-d:var(--ink);
+  --red:var(--late); --green:var(--ok); --orange:var(--warn); --yellow:var(--warn); --blue:var(--noor);
+  --topbar:var(--sheet);
+  --strong:#16233B; --side:#16233B; --on-fill:#FFFFFF; --lumen-ink:#8A5A00;
+  color-scheme:light;
+}
+/* ── الوضع الداكن (زر ☾/☀ أو إعداد الجهاز) — لوحة مستقلة لا عكس ألوان ── */
+:root[data-theme="dark"]{
+  --ink:#E3EAF5; --ink-2:#B4C0D4; --ink-3:#8494AD;
+  --noor:#7BA7F0; --noor-d:#5B8DE0; --noor-t:#1B2B47;
+  --film:#0D1524; --sheet:#141F33; --rule:#2B3A55; --rule-2:#223049;
+  --lumen:#F4B63F; --lumen-t:#3A2E12; --lumen-ink:#F4C66A;
+  --late:#F28B7F; --late-t:#3B1B1B; --ok:#5CCB94; --ok-t:#12301F; --warn:#F2AE5C; --warn-t:#3A2A12;
+  --hover:#1A2740; --head:#1A2842; --field:#0F192B;
+  --amber-l:#9BBEF5; --pri-l:#9BBEF5;
+  --strong:#51648A; --side:#09101C; --on-fill:#0B1424;
+  color-scheme:dark;
+}
+html,body{background:var(--film)!important;color:var(--ink)!important}
+body,button,input,select,textarea,.btn,.form-control,.form-select{font-family:'Tajawal',system-ui,sans-serif!important}
+body{font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--noor)!important;outline-offset:2px}
+h1,h2,h3,.tc-name,.info-card h2{text-wrap:balance}
+a,button,input,select,textarea,label{touch-action:manipulation}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ── الشريط العلوي (كل الصفحات) ── */
+.topbar,.header{background:var(--sheet)!important;border-bottom:1px solid var(--rule)!important;color:var(--ink)!important;box-shadow:none!important}
+.topbar .brand,.topbar .brand span,.header h1{color:var(--ink)!important}
+.brand-sub,.topbar .ts,.header .sub{color:var(--ink-3)!important}
+.tnav a,.logout{color:var(--ink-2)!important;border-color:var(--rule)!important}
+.tnav a:hover,.logout:hover{background:var(--noor-t)!important;color:var(--noor)!important}
+.tnav a.hi{color:var(--noor)!important;font-weight:700}
+.pulse{background:var(--ok)!important}
+
+/* ── العناوين والبطاقات واللوحات ── */
+h1,h2,h3,.sec-hdr h2,.phead,.sp-head{color:var(--ink)}
+.panel,.scard,.card,.spanel,.info-card,.ecard,.ss-card,.stat,.tcard,.tender-card{background:var(--sheet)!important;border-color:var(--rule-2)!important;box-shadow:none!important}
+.phead,.sp-head{background:var(--sheet)!important;border-bottom:1px solid var(--rule)!important;border-right:0!important;font-weight:800}
+.scard:hover,.tcard:hover{transform:none!important;box-shadow:0 1px 0 var(--rule)!important;border-color:var(--rule)!important}
+.snum,.ss-num,.stat .n{font-weight:800!important;letter-spacing:-.5px}
+
+/* ── الجداول ── */
+thead tr{background:var(--film)!important;border-bottom:1.5px solid var(--strong)!important}
+thead th{color:var(--ink-2)!important;text-transform:none!important}
+tbody tr{border-bottom:1px solid var(--rule-2)!important}
+tbody tr:hover{background:var(--hover)!important}
+
+/* ── الحقول والأزرار ── */
+input,select,textarea,.form-control,.form-select,.eng-select,.field,.srch-input{background:var(--sheet)!important;color:var(--ink)!important;border:1px solid var(--rule)!important;border-radius:8px}
+input::placeholder,textarea::placeholder{color:var(--ink-3)!important}
+input:focus,select:focus,textarea:focus{border-color:var(--noor)!important;box-shadow:0 0 0 3px var(--noor-t)!important}
+.btn-pri,.save-btn,button.btn-primary,.btn.btn-primary{background:var(--noor)!important;border-color:var(--noor)!important;color:var(--on-fill)!important}
+
+/* ── القائمة الجانبية ── */
+.nsb{background:var(--side)!important}
+.nsb-nav a.on{background:rgba(255,255,255,.08)!important;box-shadow:inset -3px 0 0 var(--lumen)!important}
+.nsb-handle{background:var(--side)!important}
+
+/* ══ بوابة المهندسين (/engineer-view) — كروت المنافسات كجدول بيانات هندسي ══ */
+.stats-strip{display:grid!important;grid-template-columns:repeat(5,1fr);gap:0!important;background:var(--sheet);border:1.5px solid var(--strong);border-radius:4px}
+.stats-strip .ss-card{border:0!important;border-left:1px solid var(--rule)!important;border-radius:0!important;text-align:right!important;padding:12px 16px!important;min-width:0}
+.stats-strip .ss-card:last-child{border-left:0!important}
+.stats-strip .ss-num{font-size:1.7rem!important;font-weight:700!important;color:var(--ink)!important}
+.stats-strip .ss-lbl{order:-1;color:var(--ink-3)!important;font-size:.76rem!important;margin:0 0 2px!important}
+.stats-strip .ss-card{display:flex;flex-direction:column}
+.filter-cnt:empty{display:none!important}
+.filter-cnt{background:var(--noor-t)!important;border-color:transparent!important;color:var(--noor)!important}
+.sec-hdr{border-bottom:2px solid var(--strong)!important}
+.sec-hdr h2{color:var(--ink)!important}
+
+.tcard{border:1.5px solid var(--strong)!important;border-radius:4px!important;padding:0!important;opacity:1!important}
+.tcard.urgent,.tcard.soon,.tcard.normal,.tcard.done{border-left-width:1.5px!important;border-left-color:var(--strong)!important}
+.tcard .tc-name{padding:12px 14px 10px!important;margin:0!important;border-bottom:1.5px solid var(--strong);font-size:.98rem!important;font-weight:800!important;color:var(--ink)!important}
+.tcard .tc-meta{display:grid!important;grid-template-columns:repeat(2,1fr);gap:0!important;margin:0!important;border-bottom:1px solid var(--rule)}
+.tcard .tc-badge{border-radius:0!important;background:none!important;padding:8px 12px 9px!important;font-size:.9rem!important;font-weight:700!important;color:var(--ink)!important;border-bottom:1px solid var(--rule);border-left:1px solid var(--rule)}
+.tcard .tc-badge:nth-child(2n){border-left:0}
+.tcard .tc-badge:last-child:nth-child(odd){grid-column:1/-1;border-left:0}
+.tcard .tc-badge::before{display:block;font-size:.7rem;font-weight:500;color:var(--ink-3);margin-bottom:1px}
+.tcard .tc-badge[class*="days-"]::before{content:"المتبقي على الإغلاق"}
+.tcard .tc-badge.cat::before{content:"نوع الأعمال"}
+.tcard .tc-badge.locked::before{content:"الإسناد"}
+.tcard .tc-badge.eng::before{content:"المهندس"}
+.tcard .tc-badge.days-red{color:var(--late)!important}
+.tcard .tc-badge.days-orange{color:var(--warn)!important}
+.tcard .tc-status{margin:0!important;padding:8px 14px!important;font-size:.82rem!important;color:var(--ink-3)!important}
+.tcard .tc-actions{gap:0!important;border-top:1.5px solid var(--strong)}
+.tcard .act-btn{border:0!important;border-left:1px solid var(--rule)!important;border-radius:0!important;background:none!important;padding:10px 6px!important;font-size:.88rem!important}
+.tcard .act-btn:last-child{border-left:0!important}
+.act-btn.submit{color:var(--noor)!important} .act-btn.won{color:var(--ok)!important} .act-btn.lost{color:var(--late)!important}
+.act-btn.submit.sel{background:var(--noor)!important;color:var(--on-fill)!important}
+.act-btn.won.sel{background:var(--ok)!important;color:var(--on-fill)!important}
+.act-btn.lost.sel{background:var(--late)!important;color:var(--on-fill)!important}
+.st-submitted{color:var(--noor)!important} .st-won{color:var(--ok)!important} .st-lost{color:var(--late)!important}
+
+/* ══ بوابة المهندس الشخصية (/engineer/dashboard) + الدخول + كلمة المرور ══ */
+.summary .stat{border-radius:4px!important;border:1.5px solid var(--strong)!important}
+.tender-card{border:1.5px solid var(--strong)!important;border-radius:4px!important}
+.tender-card.urgent{border-color:var(--late)!important}
+.tender-card .title{color:var(--ink);font-weight:800}
+.tender-card .meta{color:var(--ink-3)!important}
+.tender-card .btn,.result-row .btn{background:var(--sheet)!important;color:var(--ink-2)!important;border-color:var(--rule)!important}
+.btn.active-submit{background:var(--noor)!important;color:var(--on-fill)!important;border-color:var(--noor)!important}
+.btn.active-won{background:var(--ok)!important;color:var(--on-fill)!important;border-color:var(--ok)!important}
+.btn.active-no,.btn.active-lost{background:var(--late-t)!important;color:var(--late)!important;border-color:var(--late)!important}
+.badge.red{background:var(--late-t)!important;color:var(--late)!important;border-color:transparent!important}
+.badge.orange,.badge.gold{background:var(--warn-t)!important;color:var(--warn)!important;border-color:transparent!important}
+.badge.green{background:var(--ok-t)!important;color:var(--ok)!important;border-color:transparent!important}
+.badge.grey{background:var(--film)!important;color:var(--ink-3)!important;border-color:var(--rule)!important}
+
+/* ══ تفاصيل المنافسة — الرأس كجدول بيانات هندسي ══ */
+.info-card{border:1.5px solid var(--strong)!important;border-radius:4px!important;padding:0!important;overflow:hidden}
+.info-card h2{padding:14px 18px 12px!important;margin:0!important;border-bottom:1.5px solid var(--strong)!important;font-weight:800}
+.info-card .mg{gap:0!important;grid-template-columns:repeat(4,1fr)!important;margin-bottom:-1px}
+.info-card .mrow{padding:9px 14px 10px;border-left:1px solid var(--rule);border-bottom:1px solid var(--rule);gap:2px!important}
+.info-card .mrow:nth-child(4n){border-left:0}
+.info-card .mlbl{text-transform:none!important;letter-spacing:0!important;font-weight:500!important;color:var(--ink-3)!important}
+.info-card .mval{font-weight:700!important}
+.info-card button[onclick^="location.href='/?edit"]{background:var(--sheet)!important;color:var(--noor)!important;border-color:var(--noor)!important}
+@media(max-width:720px){.info-card .mg{grid-template-columns:repeat(2,1fr)!important}.info-card .mrow:nth-child(2n){border-left:0}}
+.sp-head{border-right:0!important;box-shadow:inset 0 -1px 0 var(--rule)}
+.chk-item{background:var(--sheet)!important;border-color:var(--rule-2)!important}
+
+/* ══ لوحة المهام + المهندسون والتقييم + حسابات المهندسين (صُممت لخلفية داكنة) ══ */
+.top,.top h1,.wrap>h1{color:var(--ink)!important}
+.top h1,.wrap>h1{font-weight:800;letter-spacing:-.3px}
+.top .sub,.wrap>.sub,.note{color:var(--ink-3)!important}
+.btn-ghost{background:var(--sheet)!important;color:var(--ink)!important;border:1px solid var(--rule)!important}
+.chip{background:var(--sheet)!important;color:var(--ink-2)!important;border-color:var(--rule)!important}
+.chip.on{background:var(--noor)!important;color:var(--on-fill)!important;border-color:var(--noor)!important}
+.stats{color:var(--ink-3)!important}
+.col{background:transparent!important;border:0!important;border-radius:0!important}
+.col-h{color:var(--ink)!important;border-bottom:2px solid var(--strong)!important;padding:4px 2px 10px!important}
+.col-h .dot{display:none}
+.col-h .n{background:transparent!important;color:var(--ink-3)!important;padding:0!important}
+.col-b{padding:12px 0!important}
+.col-b.over{background:var(--noor-t)!important;border-radius:8px}
+.empty{color:var(--ink-3)!important}
+.add-inline{color:var(--ink-3)!important;border-color:var(--rule)!important;margin:0!important}
+.add-inline:hover{background:var(--sheet)!important;color:var(--noor)!important}
+.board .card{border:1px solid var(--rule-2)!important;border-right-width:3px!important;border-radius:8px!important;box-shadow:none!important}
+.board .card:hover{border-color:var(--rule)!important;transform:none!important}
+.board .card.p-high{border-right-color:var(--late)!important}
+.board .card.p-medium{border-right-color:var(--warn)!important}
+.board .card.p-normal{border-right-color:var(--noor)!important}
+.tag.eng{background:var(--noor-t)!important;color:var(--noor)!important}
+.tag.star{background:var(--lumen-t)!important;color:var(--lumen-ink)!important}
+.ed-h{background:var(--film)!important;border-bottom:1.5px solid var(--strong)!important}
+/* الزر المختار: نص أبيض على الأزرق (كان يرث لون النص الداكن من قاعدة .seg button) */
+.seg button.on{background:var(--noor)!important;border-color:var(--noor)!important;color:var(--on-fill)!important}
+/* المهندسون والتقييم */
+.seg{background:var(--sheet)!important;border:1px solid var(--rule)}
+.seg button{color:var(--ink-2)!important}
+.seg button[aria-pressed="true"]{background:var(--noor)!important;color:var(--on-fill)!important}
+.kpis{gap:0!important;background:var(--sheet);border:1.5px solid var(--strong);border-radius:4px}
+.kpi{border-radius:0!important;border-left:1px solid var(--rule);background:transparent!important}
+.kpi:last-child{border-left:0}
+article.eng{border:1px solid var(--rule-2)!important;border-radius:10px!important}
+article.eng.top-rated{box-shadow:inset 0 3px 0 var(--lumen)!important}
+article.eng .badge{background:var(--lumen-t)!important;color:var(--lumen-ink)!important}
+article.eng .stats div{background:var(--film)!important}
+/* حسابات المهندسين */
+.panel th{background:var(--film)!important;color:var(--ink-2)!important}
+.pw{border-color:var(--noor)!important}
+
+/* ══ صفحات بنصوص فاتحة مصممة لخلفية داكنة: الإدارة + الجهات ══ */
+.topbar b,.topbar h1{color:var(--ink)!important}
+.topbar a{color:var(--ink-2)!important}
+.topbar a:hover{background:var(--noor-t)!important;color:var(--noor)!important}
+.topbar img{mix-blend-mode:normal!important;opacity:1!important}
+.ph{color:var(--ink)!important}
+.ps,.sl{color:var(--ink-3)!important}
+.sn{color:var(--noor)!important}
+#toast{background:var(--side)!important;color:#fff!important}
+/* بوابة المهندس: زر الدخول وكلمة المرور */
+.card>form .btn,.card .btn[type="submit"],.card>a.btn{background:var(--noor)!important;color:var(--on-fill)!important;border:0!important}
+.card h1{color:var(--ink)!important}
+/* المهندسون والتقييم: الصور الرمزية بلون النور بدل ألوان متفرقة */
+article.eng .av{background:var(--noor-t)!important;color:var(--noor)!important}
+
+/* بوابة المهندس الشخصية: عرض مريح على الشاشات العريضة */
+.summary,.tenders{max-width:1100px;margin-inline:auto}
+.wrap>.h2{color:var(--ink)!important}
+.addbar{border:1px solid var(--rule-2)}
+
+/* ══ ألوان مكتوبة حرفياً في القوالب ← رموز (تعمل في الفاتح والداكن) ══ */
+.tag.late{background:var(--late-t)!important;color:var(--late)!important}
+.tag.soon{background:var(--warn-t)!important;color:var(--warn)!important}
+.tag.ok{background:var(--ok-t)!important;color:var(--ok)!important}
+.rate{background:var(--lumen-t)!important;border-color:var(--lumen)!important}
+.rate h3{color:var(--lumen-ink)!important}
+.stars button{color:var(--rule)!important}
+.stars button.on{color:var(--lumen)!important}
+.msg{background:var(--late-t)!important;color:var(--late)!important}
+.msg.ok{background:var(--ok-t)!important;color:var(--ok)!important}
+.st.none{background:var(--hover)!important;color:var(--ink-3)!important}
+.st.ok{background:var(--ok-t)!important;color:var(--ok)!important}
+.st.wait{background:var(--warn-t)!important;color:var(--warn)!important}
+.st.off{background:var(--late-t)!important;color:var(--late)!important}
+.pw{background:var(--film)!important;color:var(--ink)!important}
+.btn-light{background:var(--head)!important;color:var(--ink)!important}
+.btn-danger{color:var(--late)!important;border-color:var(--late)!important;background:transparent!important}
+
+/* ══ أدوات أعلى الصفحة: الجرس + زر الوضع (templates/skins/noor_shell.js) ══ */
+.noor-shell{position:fixed;top:10px;left:14px;z-index:1100;display:flex;gap:8px;align-items:flex-start}
+.ns-btn{width:40px;height:40px;border-radius:11px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);
+  font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);transition:background-color .15s,border-color .15s}
+.ns-btn:hover,.ns-btn[aria-expanded="true"]{border-color:var(--noor);background:var(--noor-t)}
+.ns-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--late);
+  color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--sheet)}
+.ns-bell{position:relative}
+.ns-panel{position:absolute;top:48px;left:0;width:min(380px,calc(100vw - 28px));max-height:min(70vh,560px);overflow:auto;
+  overscroll-behavior:contain;background:var(--sheet);border:1px solid var(--rule);border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.ns-h{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--rule-2);position:sticky;top:0;background:var(--sheet)}
+.ns-h b{font-size:15px;font-weight:800}
+.ns-read{background:none;border:0;color:var(--noor);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.ns-read:disabled{color:var(--ink-3);cursor:default}
+.ns-sec{padding:9px 14px 5px;font-size:12px;font-weight:800;color:var(--ink-3)}
+.ns-now{color:var(--late)}.ns-now span{float:left;font-weight:800}
+.ns-item{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-top:1px solid var(--rule-2);color:var(--ink);text-decoration:none}
+.ns-item:hover,.ns-item:focus{background:var(--hover)}
+.ns-item.unread{box-shadow:inset -3px 0 0 var(--noor)}
+.ns-req-rate,.ns-req-late{box-shadow:inset -3px 0 0 var(--late)}
+.ns-ic{width:30px;height:30px;border-radius:9px;background:var(--noor-t);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.ns-tx{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.ns-tx b{font-size:13.5px;font-weight:800;overflow-wrap:anywhere}
+.ns-tx small{font-size:12px;color:var(--ink-2);overflow-wrap:anywhere}
+.ns-tx .ns-meta{color:var(--ink-3);font-size:11.5px}
+.ns-new{align-self:center;font-size:11px;font-weight:800;border-radius:20px;padding:1px 8px;background:var(--ok-t);color:var(--ok)}
+.ns-empty{padding:16px 14px;color:var(--ink-3);font-size:13px;text-align:center}
+/* مساحة للأدوات في رؤوس الصفحات (يسار الشريط العلوي) */
+.topbar,.header,.top,.main>.head{padding-left:118px!important}
+@media print{.noor-shell{display:none!important}}
+
+/* لوحة الإدارة: متغيراتها الخاصة ← الرموز (كانت تبقى فاتحة في الوضع الداكن) */
+:root{--bg-card:var(--sheet)}
+.sec{background:var(--sheet)!important;border-color:var(--rule-2)!important;border-top-color:var(--noor)!important}
+.sh{background:var(--head)!important;color:var(--ink)!important;border-bottom-color:var(--rule)!important}
+.lp,.fl{background:var(--sheet)!important;border-color:var(--rule)!important}
+.fg label,.lpc{color:var(--ink-3)!important}
+/* الشعارات: بلا دمج ألوان (كان يُعتم الشعار على الخلفية الداكنة) */
+img{mix-blend-mode:normal!important}
+.nsb-handle{border:1px solid var(--rule)!important;border-right:0!important}
+
+/* مخاطرة الجهة في صفحة المنافسة (من /analytics) */
+.risk-high,.risk-medium,.risk-low{font-size:.72rem;font-weight:800;border-radius:20px;padding:1px 8px;text-decoration:none;margin-inline-start:4px;white-space:nowrap}
+.risk-high{background:var(--late-t);color:var(--late)}.risk-medium{background:var(--warn-t);color:var(--warn)}.risk-low{background:var(--ok-t);color:var(--ok)}

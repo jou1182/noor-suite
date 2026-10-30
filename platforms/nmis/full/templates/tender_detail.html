@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تفاصيل — {{ t.title[:40] }}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:{{ co.theme_bg }};--field:{{ co.theme_field }};--card:{{ co.theme_card }};--hover:{{ co.theme_hover }};--head:{{ co.theme_head }};
+  --border:#c8a028;--border2:#a07820;--text:#1e1404;--sub:#4a3810;--muted:#7a5e28;
+  --amber:{{ co.theme_primary }};--amber-l:{{ co.theme_primary_l }};--amber-d:{{ co.theme_primary_d }};
+  --blue:#1a5a9a;--green:#247848;--red:#b02828;--yellow:#a06800;--orange:#a84e1a;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;font-size:14px;margin:0}
+
+/* TOP BAR */
+.topbar{background:linear-gradient(135deg,#5a2800 0%,#8a4800 55%,#b06000 100%);
+  border-bottom:2px solid #6e3200;padding:.9rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:200;color:#fff4d8}
+.brand{font-weight:900;font-size:1.1rem;display:flex;align-items:center;gap:.55rem;color:#fff4d8}
+.tnav a{color:rgba(255,215,140,.8);text-decoration:none;font-size:.83rem;
+  padding:.3rem .65rem;border-radius:7px;transition:.15s}
+.tnav a:hover{background:rgba(255,255,255,.12);color:#fff}
+.tnav a.hi{color:#ffd060}
+.tnav{display:flex;align-items:center;gap:.5rem}
+
+/* LAYOUT */
+.page{padding:1.25rem 1.5rem;max-width:1000px;margin:0 auto}
+
+/* INFO CARD */
+.info-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:1.5rem 1.75rem;margin-bottom:1rem;
+  border-top:3px solid var(--amber)}
+.info-card h2{font-size:1.2rem;font-weight:800;color:var(--text);margin-bottom:1rem;
+  padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+
+/* SECTION PANEL */
+.spanel{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;margin-bottom:1rem}
+.sp-head{background:var(--head);border-bottom:1px solid var(--border);
+  border-right:3px solid var(--amber);padding:.7rem 1rem;
+  font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:.5rem}
+.sp-body{padding:1.1rem 1.25rem}
+
+/* META GRID */
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem}
+.mrow{display:flex;flex-direction:column;gap:.2rem}
+.mlbl{color:var(--muted);font-size:.74rem;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.mval{color:var(--text);font-weight:500;font-size:.9rem}
+
+/* DAY BADGE */
+.db{display:inline-flex;align-items:center;padding:2px 10px;border-radius:20px;font-size:.78rem;font-weight:700}
+.db-r{background:rgba(248,81,73,.15);color:var(--red);border:1px solid rgba(248,81,73,.3)}
+.db-w{background:rgba(227,179,65,.15);color:var(--yellow);border:1px solid rgba(227,179,65,.3)}
+.db-g{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.3)}
+.db-s{background:rgba(139,148,158,.1);color:var(--muted);border:1px solid var(--border)}
+
+/* ENGINEER CHIP */
+.echip{display:inline-block;padding:3px 10px;background:rgba(200,135,60,.1);
+  color:var(--amber-l);border-radius:5px;font-size:.82rem;font-weight:600;
+  border:1px solid rgba(200,135,60,.25)}
+
+/* CHECKLIST */
+.chk-item{display:flex;align-items:flex-start;gap:.75rem;padding:.8rem .9rem;
+  background:var(--hover);border:1px solid var(--border);border-radius:9px;
+  margin-bottom:.6rem;transition:.18s;cursor:pointer}
+.chk-item:hover{border-color:var(--border2);background:#fef8c8}
+.chk-item.done{background:rgba(36,120,72,.06);border-color:rgba(36,120,72,.25)}
+.chk-item.done .chk-lbl{color:var(--green)}
+.chk-box{width:22px;height:22px;flex-shrink:0;accent-color:var(--green);cursor:pointer;margin-top:1px}
+.chk-lbl{font-weight:600;font-size:.92rem;margin-bottom:.15rem}
+.chk-sub{font-size:.78rem;color:var(--muted);margin-top:.1rem}
+.chk-date{display:none;margin-top:.5rem}
+.chk-date.show{display:block}
+.chk-date input{background:var(--field);border:1px solid var(--border);color:var(--text);
+  border-radius:7px;padding:.35rem .65rem;font-family:'Tajawal',sans-serif;font-size:.83rem;outline:none;transition:.2s}
+.chk-date input:focus{border-color:var(--amber);box-shadow:0 0 0 2px rgba(200,135,60,.12)}
+
+/* EXTENSION BADGE */
+.ext-badge{display:inline-flex;align-items:center;gap:.35rem;padding:2px 10px;
+  background:rgba(168,78,26,.1);color:var(--orange);border-radius:20px;
+  font-size:.76rem;font-weight:700;border:1px solid rgba(168,78,26,.25)}
+
+/* FORM ELEMENTS */
+.form-control,.form-select{background:var(--field)!important;border:1px solid var(--border)!important;
+  color:var(--text)!important;border-radius:8px;font-family:'Tajawal',sans-serif}
+.form-control:focus,.form-select:focus{border-color:var(--amber)!important;
+  box-shadow:0 0 0 3px rgba(200,135,60,.12)!important}
+.form-label{color:var(--muted);font-size:.8rem;font-weight:600;letter-spacing:.3px;margin-bottom:.3rem}
+textarea.form-control{resize:vertical;min-height:110px}
+
+/* SAVE BUTTON */
+.save-btn{background:var(--amber);border:none;color:#fff;border-radius:9px;
+  padding:.7rem 2rem;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:800;
+  cursor:pointer;transition:.18s;letter-spacing:.2px;display:inline-flex;align-items:center;gap:.5rem}
+.save-btn:hover{background:var(--amber-l);transform:translateY(-1px);box-shadow:0 4px 16px rgba(100,60,0,.22)}
+.save-btn:active{transform:scale(.96)}
+.save-btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* TOAST */
+#tw{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:9999}
+.tmsg{background:#e8f5ea;color:var(--green);border:1px solid rgba(36,120,72,.3);
+  padding:.6rem 1.5rem;border-radius:10px;font-size:.87rem;
+  box-shadow:0 6px 28px rgba(100,60,0,.15);opacity:0;
+  transform:translateY(12px) scale(.96);
+  transition:opacity .28s,transform .32s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;white-space:nowrap}
+.tmsg.err{background:#fde8e8;color:var(--red);border-color:rgba(176,40,40,.3)}
+.tmsg.on{opacity:1;transform:translateY(0) scale(1)}
+
+/* ENTRANCE */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.info-card,.spanel{opacity:0}
+
+/* MOBILE */
+@media(max-width:600px){
+  .page{padding:.75rem .7rem}
+  .info-card{padding:1rem 1rem}
+  .sp-body{padding:.85rem .9rem}
+  .mg{grid-template-columns:1fr 1fr}
+  .save-btn{width:100%;justify-content:center}
+}
+
+/* PRINT */
+@media print{
+  .topbar,.save-btn,#tw{display:none!important}
+  body{background:#fff!important;color:#000!important}
+  .info-card,.spanel{background:#fff!important;border-color:#ccc!important;opacity:1!important}
+  .sp-head{background:#f0f0f0!important}
+  .chk-item{background:#f8f8f8!important}
+}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <span style="font-size:1.2rem">📋</span>
+    <span>تفاصيل المنافسة</span>
+  </div>
+  <div class="tnav">
+    {% if kanban_on %}<a href="/tasks">🗂️ المهام</a>{% endif %}
+    <a href="/" class="hi">← اللوحة الرئيسية</a>
+    <a href="/logout">خروج ↩</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- TENDER INFO -->
+  <div class="info-card">
+    <h2>
+      {{ t.icon if t.icon else '' }}
+      {% if t.missing_seen_count and t.missing_seen_count > 0 %}
+      <span style="background:rgba(139,148,158,.1);color:var(--muted);border-radius:5px;
+            padding:2px 7px;font-size:.65rem;vertical-align:middle;margin-left:.5rem">غائبة {{ t.missing_seen_count }}x</span>
+      {% endif %}
+      {{ t.title }}
+    </h2>
+    <div class="mg">
+      <div class="mrow">
+        <span class="mlbl">رقم المنافسة</span>
+        <span class="mval">{{ t.tender_id or '—' }}</span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl">الجهة المالكة</span>
+        <span class="mval">{{ t.owner or '—' }}{% if owner_risk %} <a href="/analytics" class="risk-{{ owner_risk }}" title="نسبة إلغاء هذه الجهة لمنافساتها — صفحة التحليلات">مخاطرة {{ {'high':'عالية','medium':'متوسطة','low':'منخفضة'}[owner_risk] }}</a>{% endif %}</span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl">تاريخ الإغلاق</span>
+        <span class="mval">
+          {{ (t.submission_date or '')[:10] or '—' }} <span title="{{ 'تاريخ مقفول — لن يتغير تلقائياً' if t.date_locked else 'تاريخ مفتوح — قد يتغير بتغيير المنصة' }}" style="cursor:default;font-size:.85em">{{ '🔒' if t.date_locked else '🔓' }}</span>
+          {% if days_left is not none %}
+          &nbsp;
+          {% if badge=='danger' %}{% set dc='db-r' %}{% elif badge=='warning' %}{% set dc='db-w' %}{% elif badge=='success' %}{% set dc='db-g' %}{% else %}{% set dc='db-s' %}{% endif %}
+          <span class="db {{ dc }}">
+            {% if days_left < 0 %}منتهية
+            {% elif days_left == 0 %}اليوم
+            {% elif days_left == 1 %}غداً
+            {% else %}{{ days_left }} يوم{% endif %}
+          </span>
+          {% endif %}
+        </span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl">المهندس المسؤول</span>
+        <span class="mval">
+          {% if t.assigned_engineer %}<span class="echip">{{ t.assigned_engineer }}</span> <span title="{{ 'تعيين مقفول — لا يتغير تلقائياً' if t.engineer_locked else 'تعيين مفتوح — قد يتغير تلقائياً' }}" style="cursor:default;font-size:.9em">{{ '🔒' if t.engineer_locked else '🔓' }}</span>
+          {% else %}<span style="color:var(--muted)">غير معيّن</span>{% endif %}
+        </span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl"></span>
+        <span class="mval">
+          <button onclick="location.href='/?edit={{ t.id }}'" style="background:rgba(200,144,64,.12);color:var(--yellow);border:1px solid rgba(200,144,64,.35);border-radius:7px;padding:.3rem .8rem;font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif">✏️ تعديل تاريخ الإغلاق / المهندس</button>
+        </span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl">نوع الأعمال</span>
+        <span class="mval">{{ t.business_type or '—' }}</span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl">القطاع</span>
+        <span class="mval">{{ t.sector or '—' }}</span>
+      </div>
+      <div class="mrow">
+        <span class="mlbl">الحالة</span>
+        <span class="mval">{{ t.status or '—' }}</span>
+      </div>
+      {% if t.nt_extended %}
+      <div class="mrow">
+        <span class="mlbl">التمديدات</span>
+        <span class="mval">
+          <span class="ext-badge">🔄 مُمدَّدة {{ t.nt_ext_count }}x</span>
+        </span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-7">
+
+      <!-- CHECKLIST -->
+      <div class="spanel mb-3">
+        <div class="sp-head">✅ قائمة المهام</div>
+        <div class="sp-body">
+
+          <!-- 1. Submitted to Review -->
+          <div class="chk-item {% if t.nt_s_review %}done{% endif %}" onclick="toggleChk('s_review',this)">
+            <input type="checkbox" class="chk-box" id="ck_s_review" {% if t.nt_s_review %}checked{% endif %} onclick="event.stopPropagation()">
+            <div style="flex:1">
+              <div class="chk-lbl">📄 تم تقديم المنافسة لقسم المراجعة</div>
+              <div class="chk-sub">وثائق المنافسة قُدِّمت لمراجعة المستندات</div>
+              <div class="chk-date {% if t.nt_review_date %}show{% endif %}" id="dt_s_review">
+                <label class="form-label">تاريخ التقديم للمراجعة</label>
+                <input type="date" id="date_s_review" class="form-control" style="max-width:220px"
+                       value="{{ t.nt_review_date[:10] if t.nt_review_date else '' }}"
+                       onclick="event.stopPropagation()">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Submitted to Upload Dept -->
+          <div class="chk-item {% if t.nt_s_upload %}done{% endif %}" onclick="toggleChk('s_upload',this)">
+            <input type="checkbox" class="chk-box" id="ck_s_upload" {% if t.nt_s_upload %}checked{% endif %} onclick="event.stopPropagation()">
+            <div style="flex:1">
+              <div class="chk-lbl">📤 تم الرفع لقسم إدارة رفع المنافسات</div>
+              <div class="chk-sub">ملف المنافسة سُلِّم لقسم الرفع على المنصة</div>
+              <div class="chk-date {% if t.nt_upload_date %}show{% endif %}" id="dt_s_upload">
+                <label class="form-label">تاريخ الرفع للقسم</label>
+                <input type="date" id="date_s_upload" class="form-control" style="max-width:220px"
+                       value="{{ t.nt_upload_date[:10] if t.nt_upload_date else '' }}"
+                       onclick="event.stopPropagation()">
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Uploaded to Platform -->
+          <div class="chk-item {% if t.nt_uploaded %}done{% endif %}" onclick="toggleChk('uploaded',this)">
+            <input type="checkbox" class="chk-box" id="ck_uploaded" {% if t.nt_uploaded %}checked{% endif %} onclick="event.stopPropagation()">
+            <div style="flex:1">
+              <div class="chk-lbl">🌐 تم النشر على المنصة الإلكترونية</div>
+              <div class="chk-sub">العرض نُشِر ورُفع رسمياً على منصة المنافسات</div>
+              <div class="chk-date {% if t.nt_platform_date %}show{% endif %}" id="dt_uploaded">
+                <label class="form-label">تاريخ النشر على المنصة</label>
+                <input type="date" id="date_uploaded" class="form-control" style="max-width:220px"
+                       value="{{ t.nt_platform_date[:10] if t.nt_platform_date else '' }}"
+                       onclick="event.stopPropagation()">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- EXTENSION TRACKING -->
+      <div class="spanel">
+        <div class="sp-head">🔄 تتبع التمديد</div>
+        <div class="sp-body">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+            <input type="checkbox" class="chk-box" id="ck_extended"
+                   {% if t.nt_extended %}checked{% endif %}
+                   onchange="toggleExt(this)">
+            <label for="ck_extended" style="font-weight:600;font-size:.9rem;cursor:pointer">
+              هذه المنافسة تم تمديدها
+            </label>
+            {% if t.nt_extended %}
+            <span class="ext-badge">🔄 مُمدَّدة</span>
+            {% endif %}
+          </div>
+          <div id="extDetails" style="display:{% if t.nt_extended %}block{% else %}none{% endif %}">
+            <div class="row g-2">
+              <div class="col-auto">
+                <label class="form-label">عدد مرات التمديد</label>
+                <input type="number" id="extCount" class="form-control" min="1" max="20" style="width:100px"
+                       value="{{ t.nt_ext_count or 1 }}">
+              </div>
+            </div>
+            <div class="mt-2">
+              <label class="form-label">تواريخ التمديد (افصل بفاصلة)</label>
+              <input type="text" id="extDates" class="form-control"
+                     placeholder="مثال: 2025-01-15، 2025-02-20"
+                     value="{{ t.nt_ext_dates or '' }}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-12 col-md-5">
+
+      <!-- NOTES -->
+      <div class="spanel">
+        <div class="sp-head">📝 ملاحظات المهندس</div>
+        <div class="sp-body">
+          <textarea id="tNotes" class="form-control" rows="8"
+            placeholder="أضف أي ملاحظات، متطلبات خاصة، مستجدات، أو معلومات مهمة عن هذه المنافسة…"
+          >{{ t.nt_notes or '' }}</textarea>
+          <div style="margin-top:.75rem">
+            <div class="form-label">المهندس المسؤول</div>
+            <select id="engSelect" class="form-select">
+              {% for eng in engineers %}
+              <option value="{{ eng }}" {% if eng == t.assigned_engineer %}selected{% endif %}>{{ eng }}</option>
+              {% endfor %}
+            </select>
+          <button type="button" id="lockBtn" onclick="toggleLock()" title="قفل/فتح تعيين المهندس" style="margin-top:.5rem;padding:.45rem .8rem;border-radius:7px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#aaa;cursor:pointer;font-size:.88rem;width:100%;text-align:center;transition:background .15s,color .15s,border-color .15s">{{ "🔒 مقفول — انقر للفتح" if t.engineer_locked else "🔓 مفتوح — انقر للقفل" }}</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GUARANTEE (v5.6) -->
+      <div class="spanel" style="margin-top:1rem">
+        <div class="sp-head">🛡️ الضمان الابتدائي</div>
+        <div class="sp-body">
+          <div class="form-label">حالة الضمان</div>
+          <select id="gStatus" class="form-select">
+            <option value="PENDING">⚪ لم يبدأ</option>
+            <option value="IN_PROGRESS">🟡 قيد الإصدار من البنك</option>
+            <option value="READY">🟢 جاهز</option>
+            <option value="SUBMITTED">✅ قُدّم مع العرض</option>
+            <option value="NOT_REQUIRED">➖ غير مطلوب</option>
+          </select>
+          <div class="form-label" style="margin-top:.6rem">موعد الاستحقاق <span id="gAuto" style="font-size:.7rem;color:#888"></span></div>
+          <input type="date" id="gDue" class="form-control">
+          <div class="form-label" style="margin-top:.6rem">ملاحظات الضمان</div>
+          <input type="text" id="gNotes" class="form-control" placeholder="رقم الضمان، البنك، النسبة…">
+          <button type="button" onclick="gSave()" id="gBtn" style="margin-top:.7rem;width:100%;padding:.5rem;
+            border-radius:8px;border:1px solid rgba(184,106,0,.4);background:rgba(184,106,0,.12);
+            color:#b86a00;font-weight:700;cursor:pointer;font-family:'Tajawal',sans-serif">💾 حفظ الضمان</button>
+          <script>
+          (function(){
+            fetch(`/api/tender/{{ t.id }}/guarantee`).then(r=>r.json()).then(g=>{
+              if(!g.ok) return;
+              document.getElementById('gStatus').value = g.status || 'PENDING';
+              document.getElementById('gDue').value = g.due_date || '';
+              document.getElementById('gNotes').value = g.notes || '';
+              document.getElementById('gAuto').textContent = g.auto ? '(محسوب تلقائياً: قبل التقديم بـ5 أيام)' : '(محدد يدوياً)';
+            }).catch(()=>{});
+          })();
+          function gSave(){
+            const btn = document.getElementById('gBtn');
+            btn.disabled = true; btn.textContent = '⏳ جاري الحفظ…';
+            fetch(`/api/tender/{{ t.id }}/guarantee`, {method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body: JSON.stringify({status: document.getElementById('gStatus').value,
+                                    due_date: document.getElementById('gDue').value,
+                                    notes: document.getElementById('gNotes').value})
+            }).then(r=>r.json()).then(j=>{
+              btn.textContent = j.ok ? '✅ تم الحفظ' : '⚠️ خطأ';
+              setTimeout(()=>{btn.disabled=false;btn.textContent='💾 حفظ الضمان';}, 1600);
+            }).catch(()=>{btn.disabled=false;btn.textContent='💾 حفظ الضمان';});
+          }
+          </script>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SAVE -->
+  <div style="display:flex;justify-content:center;gap:1rem;margin-top:.5rem;padding-bottom:2rem">
+    <button class="save-btn" id="saveBtn" onclick="saveAll()">
+      💾 حفظ جميع التغييرات
+    </button>
+    <a href="{{ back_url }}" style="display:inline-flex;align-items:center;gap:.4rem;
+       padding:.7rem 1.5rem;border:1px solid var(--border);border-radius:9px;
+       color:var(--muted);text-decoration:none;font-weight:600;font-size:.9rem;
+       background:var(--card);transition:.18s"
+       onmouseover="this.style.background='var(--hover)'"
+       onmouseout="this.style.background='var(--card)'">
+      ← العودة للوحة
+    </a>
+  </div>
+
+</div>
+
+<div id="tw"><div id="toast" class="tmsg" role="status" aria-live="polite"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const TID = {{ t.id }};
+
+// Checkbox toggle with date reveal
+function toggleChk(key, el) {
+  const cb = document.getElementById('ck_' + key);
+  const dt = document.getElementById('dt_' + key);
+  cb.checked = !cb.checked;
+  el.classList.toggle('done', cb.checked);
+  if (dt) dt.classList.toggle('show', cb.checked);
+}
+
+// Extension toggle
+function toggleExt(cb) {
+  document.getElementById('extDetails').style.display = cb.checked ? 'block' : 'none';
+}
+
+// Entrance animations
+(function(){
+  const items = document.querySelectorAll('.info-card,.spanel');
+  items.forEach((el, i) => {
+    el.style.animation = `fadeUp .45s cubic-bezier(.25,1,.5,1) ${40+i*70}ms both`;
+  });
+})();
+
+// Save all
+function saveAll() {
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = '⏳ جاري الحفظ…';
+
+  const payload = {
+    notes:               document.getElementById('tNotes').value,
+    is_extended:         document.getElementById('ck_extended').checked,
+    extension_count:     document.getElementById('extCount') ? +document.getElementById('extCount').value : 0,
+    extension_dates:     document.getElementById('extDates') ? document.getElementById('extDates').value : '',
+    submitted_to_review: document.getElementById('ck_s_review').checked,
+    review_date:         document.getElementById('date_s_review') ? document.getElementById('date_s_review').value : '',
+    submitted_to_upload: document.getElementById('ck_s_upload').checked,
+    upload_submit_date:  document.getElementById('date_s_upload') ? document.getElementById('date_s_upload').value : '',
+    uploaded_to_platform:document.getElementById('ck_uploaded').checked,
+    platform_upload_date:document.getElementById('date_uploaded') ? document.getElementById('date_uploaded').value : '',
+  };
+
+  // Also update engineer if changed
+  const engSel = document.getElementById('engSelect');
+  const eng = engSel ? engSel.value : '';
+  const savedEng = '{{ t.assigned_engineer or "" }}';
+  const isLocked = {{ 'true' if t.engineer_locked else 'false' }};
+
+  const notesPromise = fetch('/api/tender/' + TID + '/notes', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload)
+  });
+
+  const promises = [notesPromise];
+  if (eng && eng !== savedEng) {
+    promises.push(fetch('/api/tender/' + TID + '/update', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({engineer: eng})
+    }));
+  }
+
+  Promise.all(promises)
+    .then(resps => Promise.all(resps.map(r => r.json())))
+    .then(results => {
+      const allOk = results.every(d => d.ok);
+      if (allOk) {
+        btn.textContent = '✅ تم الحفظ';
+        btn.style.background = 'var(--green)';
+        toast('✅ تم حفظ جميع التغييرات بنجاح');
+        setTimeout(() => { btn.style.background = ''; btn.textContent = '💾 حفظ جميع التغييرات'; }, 2000);
+      } else {
+        toast('⚠️ حدث خطأ أثناء الحفظ', 1);
+      }
+    })
+    .catch(() => toast('خطأ في الاتصال بالسيرفر', 1))
+    .finally(() => { btn.disabled = false; });
+}
+
+let _tt;
+function toast(m, err=0) {
+  const t = document.getElementById('toast');
+  if (_tt) clearTimeout(_tt);
+  t.textContent = m;
+  t.className = 'tmsg' + (err ? ' err' : '');
+  void t.offsetWidth;
+  t.classList.add('on');
+  _tt = setTimeout(() => {
+    t.style.opacity = '0';
+    setTimeout(() => { t.className = 'tmsg' + (err?' err':''); t.style.opacity=''; }, 300);
+  }, err ? 3500 : 2800);
+}
+
+// Keyboard save
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveAll(); }
+});
+</script>
+<!-- COPYRIGHT FOOTER -->
+<div style="text-align:center;padding:1rem;color:rgba(255,255,255,.82);font-size:.68rem;font-family:'Tajawal',sans-serif;letter-spacing:.3px">
+  Copyright 2026 &copy; {{ co.footer_owner }} &mdash; <a href="{{ co.footer_url }}" target="_blank" style="color:rgba(255,255,255,.6);text-decoration:none">{{ (co.footer_url or "").replace("https://","").replace("http://","") }}</a>
+</div>
+
+</body></html>

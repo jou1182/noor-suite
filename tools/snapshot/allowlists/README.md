@@ -1,6 +1,6 @@
 # Snapshot allowlists
 
-Create `<platform>.txt` on the platform's staging day. Use one repository-relative POSIX glob per line; `**` matches nested files. Blank lines and lines starting with `#` are ignored. An absent or empty allowlist stops selection. Hard-coded forbidden families are always removed, even when a glob matches them. Keep source-specific paths and private report content out of this directory.
+Create `<platform>.txt` on the platform's staging day. Use one repository-relative POSIX glob per line; `**` matches nested files. A leading `!` excludes matching files. A file is kept only when it matches a positive glob and no exclusion glob. Blank lines and lines starting with `#` are ignored. An absent allowlist or one without positive globs stops selection. Hard-coded forbidden families are always removed, even when a glob matches them. The private `selection.json` records kept, unlisted, and forbidden paths; stdout contains counts only. Keep source-specific paths and private report content out of this directory.
 
 Destination-root `SOURCE.md` is excluded from the snapshot tree. It is written after import, scanned during `verify`, and covered by the repository scan before commit. Verification fails when it exists but `NOOR_BLOCKLIST_FILE` is unset. A destination-root `.gitkeep`, if present, must be empty.
 

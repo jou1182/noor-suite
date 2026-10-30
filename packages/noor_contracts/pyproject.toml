@@ -19,6 +19,9 @@ noor_contracts = ["schemas/*.json"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Imported snapshots are pinned by their tree digest (platforms/_snapshots); editing them to satisfy
+# lint would break verification. They are checked by the snapshot scan, not reformatted.
+extend-exclude = ["**/platforms/nmis/full"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "S"]

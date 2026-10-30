@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ co.short_ar }} — وضع العرض</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16233B;--ink-2:#3A4A66;--ink-3:#6B7A93;--noor:#1F4C8F;--noor-t:#E6EEF8;--film:#F2F5F9;--sheet:#fff;--rule:#CBD5E1;
+  --rule-2:#E3E9F1;--late:#B42318;--late-t:#FDECEA;--ok:#1F7A4C;--ok-t:#E4F3EB;--warn:#B25E09;--warn-t:#FDF0DC;--strong:#16233B;
+  --hover:#EEF3FA;--on-fill:#fff}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--film);color:var(--ink);font-family:'Tajawal',sans-serif;font-size:14px;line-height:1.6;font-variant-numeric:tabular-nums}
+.wrap{padding:22px 28px 40px;max-width:1150px}
+h1{margin:0;font-size:26px;font-weight:800}
+.lead{color:var(--ink-2);margin:.3rem 0 1rem;max-width:860px}
+.tb{background:var(--sheet);border:1.5px solid var(--strong);border-radius:4px;margin-bottom:16px}
+.tb-grid{display:grid;grid-template-columns:repeat(5,1fr)}
+.tb-grid div{padding:10px 14px;border-left:1px solid var(--rule)}.tb-grid div:last-child{border-left:0}
+.tb-grid label{display:block;font-size:11.5px;color:var(--ink-3)}.tb-grid b{font-size:15px}
+.tb-act{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--rule);flex-wrap:wrap;align-items:center}
+@media(max-width:800px){.tb-grid{grid-template-columns:1fr 1fr}.tb-grid div{border-bottom:1px solid var(--rule-2)}}
+.btn{border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:9px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{border-color:var(--noor)}
+.btn-pri{background:var(--noor);border-color:var(--noor);color:var(--on-fill)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--sheet);border:1px solid var(--rule-2);border-radius:10px;padding:16px 18px}
+.card h2{margin:0 0 .3rem;font-size:15px;font-weight:800}
+.hint{font-size:12.5px;color:var(--ink-3)}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px dashed var(--rule);border-radius:12px;
+  padding:26px 12px;margin-top:10px;cursor:pointer;text-align:center;color:var(--ink-2);transition:background-color .15s,border-color .15s}
+.drop:hover,.drop.over,.drop:focus-within{border-color:var(--noor);background:var(--noor-t)}
+.drop b{font-size:15px;color:var(--ink)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.field{width:100%;border:1px solid var(--rule);border-radius:8px;padding:8px 10px;font:inherit;direction:ltr;text-align:left;background:var(--sheet);color:var(--ink);margin:8px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.steps{margin:.5rem 0 0;padding-inline-start:1.2rem;font-size:12.5px;color:var(--ink-2)}
+.msg{border-radius:10px;padding:.6rem .9rem;margin-bottom:12px;font-weight:700}
+.msg.err{background:var(--late-t);color:var(--late)}.msg.ok{background:var(--ok-t);color:var(--ok)}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.pill{border-radius:20px;padding:3px 12px;font-size:12.5px;font-weight:800;background:var(--hover);color:var(--ink-2)}
+.pill.new{background:var(--ok-t);color:var(--ok)}.pill.chg{background:var(--noor-t);color:var(--noor)}
+.pill.del{background:var(--late-t);color:var(--late)}.pill.cls{background:var(--warn-t);color:var(--warn)}
+.danger{border:1.5px solid var(--late);background:var(--late-t);color:var(--late);border-radius:10px;padding:10px 14px;margin:10px 0;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 12px}
+th{font-size:11.5px;color:var(--ink-3);text-align:right;padding:5px 8px;border-bottom:1.5px solid var(--strong)}
+td{padding:6px 8px;border-bottom:1px solid var(--rule-2)}
+h3{font-size:13.5px;margin:12px 0 2px}
+.tb-grid{grid-template-columns:repeat(4,1fr)}@media(max-width:800px){.tb-grid{grid-template-columns:1fr 1fr}}
+.state{font-weight:800}.state.on{color:var(--ok)}
+.btn-del{color:var(--late);border-color:var(--late)}
+ul.facts{margin:.4rem 0 0;padding-inline-start:1.2rem;color:var(--ink-2)}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+<div class="wrap">
+  <h1>🎬 وضع العرض</h1>
+  <p class="lead">يملأ النظام في ثوانٍ ببيانات <b>وهمية</b> مترابطة — منافسات بمراحل مختلفة، مهام في كل الأعمدة، تقييمات ونتائج — لتظهر اللوحة والتحليلات والتقييم والجرس كاملة أمام الطلبة والعملاء. ثم تمسحها بضغطة.</p>
+
+  <div class="msg" id="msg" role="status" aria-live="polite" hidden></div>
+
+  <section class="tb" aria-label="حالة العرض">
+    <div class="tb-grid">
+      <div><label>الحالة</label><b class="state {{ 'on' if info.active }}">{{ '● بيانات العرض موجودة' if info.active else 'غير مفعّل' }}</b></div>
+      <div><label>منافسات العرض</label><b>{{ info.tenders }}</b></div>
+      <div><label>مهام العرض</label><b>{{ info.tasks }}</b></div>
+      <div><label>المهندسون المستخدمون</label><b>{{ info.engineers|length }}</b></div>
+    </div>
+    <div class="tb-act">
+      <button class="btn btn-pri" type="button" id="seed" {{ 'disabled' if not info.engineers }}>{{ '↻ إعادة الملء من جديد' if info.active else '▶ املأ ببيانات العرض' }}</button>
+      {% if info.active %}<button class="btn btn-del" type="button" id="clear">🗑 مسح بيانات العرض</button>{% endif %}
+      {% if not info.engineers %}<span class="hint" style="color:var(--late)">أضف مهندساً من «فريق المهندسين» أولاً</span>{% endif %}
+    </div>
+    <div class="tb-act">
+      <label style="display:inline-flex;gap:8px;align-items:center;font-weight:700;cursor:pointer">
+        <input type="checkbox" id="nightly" {{ 'checked' if info.nightly }}> 🌙 تجديد تلقائي كل ليلة الساعة {{ nightly_at }}</label>
+      <span class="hint">يعيد ملء بيانات العرض بتاريخ اليوم — فيبقى العرض حياً، ويُمحى ما حُرّك في المحاضرة. يعمل فقط إن كانت بيانات العرض موجودة، ولا يلمس غيرها ولا يرسل تليجرام.
+        {% if info.last_refresh %}آخر تجديد: <b>{{ info.last_refresh }}</b>{% endif %}</span>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>ماذا سيُضاف</h2>
+      <ul class="facts">
+        <li><b>{{ catalog|length }}</b> منافسة خيالية لجهات خيالية: نشطة تُغلق خلال أيام وأسابيع، ومنتهية بفوز أو خسارة على مدى عام، واثنتان ألغتهما الجهة.</li>
+        <li>مهام القالب لكل منافسة موزّعة على مهندسيكم ({{ info.engineers|join('، ') or '—' }}) في الأعمدة الثلاثة، ومنها متأخرة.</li>
+        <li>تقييمات للمهام المنتهية، ونتائج وأسعار، وضمانات بمراحل مختلفة، وحركة حديثة تظهر في 🔔.</li>
+        <li>التواريخ محسوبة من اليوم، فيبدو العرض حياً في أي يوم تملؤه فيه.</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>الأمان</h2>
+      <ul class="facts">
+        <li>نسخة احتياطية كاملة من قاعدة البيانات قبل كل ملء.</li>
+        <li>المسح يزيل بيانات العرض وحدها — منافساتكم الحقيقية ومهامها لا تُلمس.</li>
+        <li><b>لا تُرسل أي رسالة تليجرام</b>: لا إشعارات إسناد، ولا تذكيرات مواعيد أو ضمانات، ولا ملخصات يومية عن منافسات العرض.</li>
+        <li>النظام لا يعتبرها «محذوفة من المنصة» لغيابها عن ملف المصدر.</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="card" id="viewerCard" style="margin-bottom:16px">
+    <h2>👁️ حساب العرض للطلاب والعملاء</h2>
+    <p class="hint" style="margin:.2rem 0 .6rem">دخول من <b dir="ltr">/viewer</b> بكلمة مرور واحدة تعطيها للطلاب: يرون كل الشاشات كما تراها الإدارة — اللوحة، التقويم، التحليلات، التقييم، القوالب، والإدارة — <b>ولا يُحفظ أي تغيير</b> (الحماية في الخادم). البريد ورابط Google ونسخة قاعدة البيانات مخفية عنهم.</p>
+    <div class="row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span class="state {{ 'on' if viewer.enabled }}" id="vState">{{ '● مفعّل' if viewer.enabled else 'غير مفعّل' }}</span>
+      <button class="btn btn-pri" type="button" id="vIssue">{{ '↻ كلمة مرور جديدة' if viewer.enabled else '🔑 إنشاء كلمة مرور العرض' }}</button>
+      <button class="btn btn-del" type="button" id="vOff" {{ '' if viewer.enabled else 'hidden' }}>إيقاف حساب العرض</button>
+    </div>
+    <div id="vOut" class="msg ok" hidden style="margin-top:10px"></div>
+    <p class="hint" style="margin-top:.6rem">كلمة المرور تظهر هنا <b>مرة واحدة</b> — انسخها للمحاضرة. «كلمة مرور جديدة» تُبطل القديمة فوراً (مفيد بعد انتهاء الدورة). يمكن أن يستخدمها أكثر من طالب في نفس الوقت.</p>
+  </section>
+
+  <section class="card">
+    <h2>المنافسات الخيالية</h2>
+    <table><thead><tr><th>المنافسة</th><th>الجهة</th><th>الموعد</th><th>الحالة</th></tr></thead><tbody>
+    {% set labels = {'active': 'نشطة', 'late': 'نشطة — مهام متأخرة', 'won': 'فزنا بها', 'lost': 'لم نفز', 'nosubmit': 'لم نتقدم', 'deleted': 'ألغتها الجهة'} %}
+    {% for c in catalog %}<tr><td>{{ c[0] }}</td><td>{{ c[1] }}</td><td>{{ ('بعد %d يوم'|format(c[4])) if c[4] > 0 else ('قبل %d يوم'|format(-c[4])) }}</td><td>{{ labels[c[5]] }}</td></tr>{% endfor %}
+    </tbody></table>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+function say(text, ok){ const m = $('msg'); m.textContent = text; m.className = 'msg ' + (ok ? 'ok' : 'err'); m.hidden = false; m.scrollIntoView({block: 'nearest'}); }
+async function call(url){
+  const r = await fetch(url, {method: 'POST'}); let j = {};
+  try { j = await r.json(); } catch(e) { j = {ok: false, msg: 'انتهت جلسة الإدارة — سجّل الدخول مجدداً'}; }
+  if (!r.ok || !j.ok) throw new Error(j.msg || 'تعذّر تنفيذ العملية');
+  return j;
+}
+async function run(btn, url, done){
+  btn.disabled = true;
+  try { const j = await call(url); say(done(j), true); setTimeout(() => location.reload(), 1400); }
+  catch(e) { say(e.message, false); btn.disabled = false; }
+}
+$('seed')?.addEventListener('click', e => run(e.currentTarget, '/admin/demo/seed',
+  j => `✓ تم الملء: ${j.tenders} منافسة، ${j.tasks} مهمة، ${j.ratings} تقييم — افتح لوحة المهام أو التحليلات.`));
+$('nightly').addEventListener('change', async e => {
+  const on = e.target.checked;
+  try {
+    const r = await fetch('/admin/demo/nightly', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({on})});
+    const j = await r.json(); if (!r.ok || !j.ok) throw new Error(j.msg || 'تعذّر الحفظ');
+    say(on ? '✓ التجديد الليلي مفعّل — كل ليلة {{ nightly_at }} تُعاد بيانات العرض بتاريخ اليوم.' : '✓ أُوقف التجديد الليلي.', true);
+  } catch (err) { e.target.checked = !on; say(err.message, false); }
+});
+$('vIssue').addEventListener('click', async e => {
+  if ({{ 'true' if viewer.enabled else 'false' }} && !confirm('إنشاء كلمة مرور جديدة يُبطل القديمة فوراً — متابعة؟')) return;
+  e.currentTarget.disabled = true;
+  try {
+    const r = await fetch('/admin/demo/viewer', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'});
+    const j = await r.json(); if (!j.ok) throw new Error(j.msg || 'تعذّر الإنشاء');
+    const o = $('vOut'); o.hidden = false;
+    o.innerHTML = 'الرابط: <b dir="ltr"></b><br>كلمة المرور: <b dir="ltr" style="font-size:18px;letter-spacing:1px"></b>';
+    const b = o.querySelectorAll('b'); b[0].textContent = j.url; b[1].textContent = j.password;
+    $('vState').textContent = '● مفعّل'; $('vState').classList.add('on'); $('vOff').hidden = false;
+  } catch (err) { say(err.message, false); }
+  e.currentTarget.disabled = false;
+});
+$('vOff').addEventListener('click', async () => {
+  if (!confirm('إيقاف حساب العرض؟ لن يستطيع أحد الدخول بكلمة مروره.')) return;
+  await fetch('/admin/demo/viewer', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{"action":"disable"}'});
+  location.reload();
+});
+$('clear')?.addEventListener('click', e => {
+  if (!confirm('مسح كل بيانات العرض؟ منافساتكم الحقيقية لن تتأثر.')) return;
+  run(e.currentTarget, '/admin/demo/clear', j => `✓ مُسحت بيانات العرض (${j.tenders} منافسة).`);
+});
+</script>
+</body>
+</html>

@@ -86,6 +86,133 @@ def test_select_forbidden_and_allowlist(dirs):
     assert {p.name for p in (stage / "radar" / stamp).iterdir()} == {"keep.py"}
 
 
+def test_select_negation_and_private_report(dirs, capsys):
+    repo, stage, reports = dirs
+    source = repo / "source"
+    source.mkdir()
+    for name in ("keep.py", "omit.py", "private.txt", "x.pem"):
+        (source / name).write_text("synthetic", encoding="utf-8")
+    allow = repo / "tools" / "snapshot" / "allowlists"
+    allow.mkdir(parents=True)
+    (allow / "radar.txt").write_text("!omit.py\n", encoding="utf-8")
+    assert run("stage", "--platform", "radar", "--from-dir", str(source)) == 0
+    stamp = next((stage / "radar").iterdir()).name
+    assert run("select", "--platform", "radar", "--stamp", stamp) == 2
+    assert "allowlist empty" in capsys.readouterr().err
+    (allow / "radar.txt").write_text("*.py\n*.pem\n!omit.py\n", encoding="utf-8")
+    assert run("select", "--platform", "radar", "--stamp", stamp) == 0
+    report = json.loads((reports / "radar" / stamp / "selection.json").read_text(encoding="utf-8"))
+    assert report == {"kept": ["keep.py"], "removed_not_allowlisted": ["omit.py", "private.txt"],
+                      "removed_forbidden": ["x.pem"]}
+    output = capsys.readouterr().out
+    assert "keep.py" not in output and "omit.py" not in output
+
+
+def test_select_forbids_nested_vault_directory(dirs):
+    repo, stage, reports = dirs
+    source = repo / "source"
+    nested = source / "security_vault_local"
+    nested.mkdir(parents=True)
+    (nested / "reader.py").write_text("synthetic", encoding="utf-8")
+    (source / "keep.py").write_text("synthetic", encoding="utf-8")
+    allow = repo / "tools" / "snapshot" / "allowlists"
+    allow.mkdir(parents=True)
+    (allow / "radar.txt").write_text("**\n", encoding="utf-8")
+    assert run("stage", "--platform", "radar", "--from-dir", str(source)) == 0
+    stamp = next((stage / "radar").iterdir()).name
+    assert run("select", "--platform", "radar", "--stamp", stamp) == 0
+    report = json.loads((reports / "radar" / stamp / "selection.json").read_text(encoding="utf-8"))
+    assert report["removed_forbidden"] == ["security_vault_local/reader.py"]
+    assert not (stage / "radar" / stamp / "security_vault_local").exists()
+
+
+def test_source_renders_manifest_and_refuses_existing_or_changed_tree(dirs, monkeypatch, capsys):
+    repo, stage, reports = dirs
+    source = repo / "source"
+    source.mkdir()
+    (source / "a.txt").write_text("synthetic", encoding="utf-8")
+    allow = repo / "tools" / "snapshot" / "allowlists"
+    allow.mkdir(parents=True)
+    (allow / "radar.txt").write_text("*.txt\n!private.txt\n", encoding="utf-8")
+    template = repo / "tools" / "snapshot" / "templates"
+    template.mkdir(parents=True)
+    from tools.snapshot import source as snapshot_source
+    shutil.copyfile(Path(snapshot_source.__file__).parent / "templates" / "SOURCE.template.md",
+                    template / "SOURCE.template.md")
+    block = stage.parent / "block.txt"
+    block.write_text("Oldmark", encoding="utf-8")
+    monkeypatch.setenv("NOOR_BLOCKLIST_FILE", str(block))
+    assert run("stage", "--platform", "radar", "--from-dir", str(source)) == 0
+    stamp = next((stage / "radar").iterdir()).name
+    assert run("select", "--platform", "radar", "--stamp", stamp) == 0
+    assert run("scan", "--platform", "radar", "--stamp", stamp) == 0
+    assert run("fingerprint", "--platform", "radar", "--stamp", stamp,
+               "--source-label", "synthetic-source", "--reviewed-by", "Tester",
+               "--exposure", "EXP-TEST-CLOSED") == 0
+    manifest = json.loads((reports / "radar" / stamp / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["source_commit"] is None
+    assert run("import", "--platform", "radar", "--stamp", stamp) == 0
+    assert run("source", "--platform", "radar") == 0
+    target = repo / "platforms" / "radar"
+    content = (target / "SOURCE.md").read_text(encoding="utf-8")
+    for value in ("synthetic-source", manifest["tree_sha256"], manifest["copied_at"],
+                  "file_count: 1", "*.txt", "private.txt", "EXP-TEST-CLOSED",
+                  "secrets_paths_ids", "version", "decision 8", "FR-007"):
+        assert value in content
+    assert "source_commit" not in content
+    assert run("source", "--platform", "radar") == 1
+    (target / "SOURCE.md").unlink()
+    with monkeypatch.context() as patch:
+        patch.delenv("NOOR_BLOCKLIST_FILE")
+        assert run("source", "--platform", "radar") == 1
+        assert not (target / "SOURCE.md").exists()
+    with monkeypatch.context() as patch:
+        patch.setattr(snapshot_source, "source_status", lambda *_: "names-unchecked")
+        assert run("source", "--platform", "radar") == 1
+        assert not (target / "SOURCE.md").exists()
+    (target / "a.txt").write_text("changed", encoding="utf-8")
+    assert run("source", "--platform", "radar") == 1
+    assert not (target / "SOURCE.md").exists()
+    assert "SOURCE.md: clean" in capsys.readouterr().out
+
+
+def test_source_deletes_findings_and_fingerprint_rejects_commit(dirs, monkeypatch, capsys):
+    stamp, target, private = prepared(dirs, monkeypatch)
+    repo = dirs[0]
+    allow = repo / "tools" / "snapshot" / "allowlists"
+    allow.mkdir(parents=True)
+    (allow / "radar.txt").write_text("*.txt\n", encoding="utf-8")
+    template = repo / "tools" / "snapshot" / "templates"
+    template.mkdir(parents=True)
+    from tools.snapshot import source as snapshot_source
+    shutil.copyfile(Path(snapshot_source.__file__).parent / "templates" / "SOURCE.template.md",
+                    template / "SOURCE.template.md")
+    assert run("scan", "--platform", "radar", "--stamp", stamp) == 0
+    assert run("fingerprint", "--platform", "radar", "--stamp", stamp,
+               "--source-label", "synthetic-source", "--source-commit", "abcdef0",
+               "--reviewed-by", "Tester") == 1
+    assert "decision 8" in capsys.readouterr().err
+    assert run("fingerprint", "--platform", "radar", "--stamp", stamp,
+               "--source-label", "synthetic-source", "--reviewed-by", "Tester") == 0
+    assert run("import", "--platform", "radar", "--stamp", stamp) == 0
+    manifest_path = repo / "platforms" / "_snapshots" / "radar.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["source_label"] = "alfulani-source"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    assert run("source", "--platform", "radar") == 1
+    assert not (repo / "platforms" / "radar" / "SOURCE.md").exists()
+    manifest["source_label"] = "synthetic-source"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    monkeypatch.setattr(snapshot_source, "source_status", lambda *_: "findings")
+    assert run("source", "--platform", "radar") == 1
+    assert not (repo / "platforms" / "radar" / "SOURCE.md").exists()
+
+
+def test_source_requires_manifest(dirs, capsys):
+    assert run("source", "--platform", "radar") == 1
+    assert "manifest invalid or unavailable" in capsys.readouterr().err
+
+
 def test_tree_formula_nfc_and_verify_change(dirs, monkeypatch):
     repo, stage, reports = dirs
     from tools.snapshot.fingerprint import inventory, tree_hash
@@ -159,7 +286,7 @@ def test_approval_resolves_only_non_sensitive_findings(dirs, monkeypatch):
     source = repo / "source"
     source.mkdir()
     data = b"\x00synthetic"
-    (source / "asset.bin").write_bytes(data)
+    (source / "asset.woff2").write_bytes(data)
     block = stage.parent / "block.txt"
     block.write_text("al" + "fulani", encoding="utf-8")
     monkeypatch.setenv("NOOR_BLOCKLIST_FILE", str(block))
@@ -179,6 +306,30 @@ def test_approval_resolves_only_non_sensitive_findings(dirs, monkeypatch):
     assert run("mark-sanitized", "--platform", "radar", "--stamp", stamp,
                "--list", str(approved)) == 0
     assert run("scan", "--platform", "radar", "--stamp", stamp) == 1
+
+
+def test_unapprovable_binary_stays_failed_with_visual_approval(dirs, monkeypatch):
+    stamp, _, private = prepared(dirs, monkeypatch, name="asset.bin", data=b"\x00synthetic")
+    digest = hashlib.sha256(b"\x00synthetic").hexdigest()
+    approved = dirs[1].parent / "approved.txt"
+    approved.write_text(digest + " visual synthetic review", encoding="utf-8")
+    assert run("mark-sanitized", "--platform", "radar", "--stamp", stamp,
+               "--list", str(approved)) == 0
+    assert run("scan", "--platform", "radar", "--stamp", stamp) == 1
+    state = json.loads((private / "state.json").read_text(encoding="utf-8"))
+    assert state["tool_results"]["secrets_paths_ids"] == "failed"
+
+
+def test_approvable_image_resolves_with_visual_approval(dirs, monkeypatch):
+    stamp, _, private = prepared(dirs, monkeypatch, name="asset.gif", data=b"\x00synthetic")
+    digest = hashlib.sha256(b"\x00synthetic").hexdigest()
+    approved = dirs[1].parent / "approved.txt"
+    approved.write_text(digest + " visual synthetic review", encoding="utf-8")
+    assert run("mark-sanitized", "--platform", "radar", "--stamp", stamp,
+               "--list", str(approved)) == 0
+    assert run("scan", "--platform", "radar", "--stamp", stamp) == 0
+    state = json.loads((private / "state.json").read_text(encoding="utf-8"))
+    assert state["tool_results"]["secrets_paths_ids"] == "findings_resolved"
 
 
 def test_scan_rejects_change_during_scan(dirs, monkeypatch):
@@ -215,14 +366,14 @@ def test_import_prevalidates_in_sibling_space(dirs, monkeypatch):
 
 
 def test_mark_requires_full_digest_and_binary_review(dirs, monkeypatch):
-    stamp, target, private = prepared(dirs, monkeypatch, name="asset.bin", data=b"\x00synthetic")
+    stamp, target, private = prepared(dirs, monkeypatch, name="asset.woff2", data=b"\x00synthetic")
     digest = hashlib.sha256(b"\x00synthetic").hexdigest()
     approved = dirs[1].parent / "approved.txt"
     approved.write_text(digest[:12], encoding="utf-8")
     assert run("mark-sanitized", "--platform", "radar", "--stamp", stamp,
                "--list", str(approved)) == 2
     assert run("scan", "--platform", "radar", "--stamp", stamp) == 1
-    approved.write_text(digest + " visual synthetic review", encoding="utf-8")
+    approved.write_text(digest + " visual synthetic review", encoding="utf-8-sig")
     assert run("mark-sanitized", "--platform", "radar", "--stamp", stamp,
                "--list", str(approved)) == 0
     state = json.loads((private / "state.json").read_text(encoding="utf-8"))
@@ -347,7 +498,7 @@ def test_snapshot_usage_and_fingerprint_status_only(dirs, monkeypatch, capsys):
 
 
 def test_mark_requires_kind_and_reason(dirs, monkeypatch):
-    stamp, target, private = prepared(dirs, monkeypatch, name="asset.bin", data=b"\x00synthetic")
+    stamp, target, private = prepared(dirs, monkeypatch, name="asset.woff2", data=b"\x00synthetic")
     digest = hashlib.sha256(b"\x00synthetic").hexdigest()
     approved = dirs[1].parent / "review.txt"
     for line in (digest, digest + " visual", digest + " unknown reviewed"):

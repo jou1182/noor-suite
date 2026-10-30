@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>{{ co.short_ar }} — مصدر المنافسات</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16233B;--ink-2:#3A4A66;--ink-3:#6B7A93;--noor:#1F4C8F;--noor-t:#E6EEF8;--film:#F2F5F9;--sheet:#fff;--rule:#CBD5E1;
+  --rule-2:#E3E9F1;--late:#B42318;--late-t:#FDECEA;--ok:#1F7A4C;--ok-t:#E4F3EB;--warn:#B25E09;--warn-t:#FDF0DC;--strong:#16233B;
+  --hover:#EEF3FA;--on-fill:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--film);color:var(--ink);font-family:'Tajawal',sans-serif;font-size:14px;line-height:1.6;font-variant-numeric:tabular-nums}
+.wrap{padding:22px 28px 40px;max-width:1150px}
+h1{margin:0;font-size:26px;font-weight:800}
+.lead{color:var(--ink-2);margin:.3rem 0 1rem;max-width:860px}
+.tb{background:var(--sheet);border:1.5px solid var(--strong);border-radius:4px;margin-bottom:16px}
+.tb-grid{display:grid;grid-template-columns:repeat(5,1fr)}
+.tb-grid div{padding:10px 14px;border-left:1px solid var(--rule)}.tb-grid div:last-child{border-left:0}
+.tb-grid label{display:block;font-size:11.5px;color:var(--ink-3)}.tb-grid b{font-size:15px}
+.tb-act{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--rule);flex-wrap:wrap;align-items:center}
+@media(max-width:800px){.tb-grid{grid-template-columns:1fr 1fr}.tb-grid div{border-bottom:1px solid var(--rule-2)}}
+.btn{border:1px solid var(--rule);background:var(--sheet);color:var(--ink);border-radius:9px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px;text-decoration:none;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{border-color:var(--noor)}
+.btn-pri{background:var(--noor);border-color:var(--noor);color:var(--on-fill)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--sheet);border:1px solid var(--rule-2);border-radius:10px;padding:16px 18px}
+.card h2{margin:0 0 .3rem;font-size:15px;font-weight:800}
+.hint{font-size:12.5px;color:var(--ink-3)}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px dashed var(--rule);border-radius:12px;
+  padding:26px 12px;margin-top:10px;cursor:pointer;text-align:center;color:var(--ink-2);transition:background-color .15s,border-color .15s}
+.drop:hover,.drop.over,.drop:focus-within{border-color:var(--noor);background:var(--noor-t)}
+.drop b{font-size:15px;color:var(--ink)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.field{width:100%;border:1px solid var(--rule);border-radius:8px;padding:8px 10px;font:inherit;direction:ltr;text-align:left;background:var(--sheet);color:var(--ink);margin:8px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.steps{margin:.5rem 0 0;padding-inline-start:1.2rem;font-size:12.5px;color:var(--ink-2)}
+.msg{border-radius:10px;padding:.6rem .9rem;margin-bottom:12px;font-weight:700}
+.msg.err{background:var(--late-t);color:var(--late)}.msg.ok{background:var(--ok-t);color:var(--ok)}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.pill{border-radius:20px;padding:3px 12px;font-size:12.5px;font-weight:800;background:var(--hover);color:var(--ink-2)}
+.pill.new{background:var(--ok-t);color:var(--ok)}.pill.chg{background:var(--noor-t);color:var(--noor)}
+.pill.del{background:var(--late-t);color:var(--late)}.pill.cls{background:var(--warn-t);color:var(--warn)}
+.danger{border:1.5px solid var(--late);background:var(--late-t);color:var(--late);border-radius:10px;padding:10px 14px;margin:10px 0;font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 12px}
+th{font-size:11.5px;color:var(--ink-3);text-align:right;padding:5px 8px;border-bottom:1.5px solid var(--strong)}
+td{padding:6px 8px;border-bottom:1px solid var(--rule-2)}
+h3{font-size:13.5px;margin:12px 0 2px}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+{% include "_sidebar.html" %}
+<div class="wrap">
+  <h1>📥 مصدر المنافسات</h1>
+  <p class="lead">منصة المنافسات في هذه النسخة = <b>ملف إكسل واحد</b>. النظام يقرؤه كل 5 دقائق (وخلال ثوانٍ بعد أي تحديث من هنا) ويكتشف وحده: المنافسات الجديدة ← اعتماد على تليجرام، تغيّر المواعيد، والمنافسات التي اختفت.</p>
+
+  <div class="msg" id="msg" role="status" aria-live="polite" hidden></div>
+
+  <section class="tb" aria-label="المصدر الحالي">
+    <div class="tb-grid">
+      <div><label>الملف على السيرفر</label><b dir="ltr">{{ info.path }}</b></div>
+      <div><label>المنافسات في الملف</label><b>{{ info.rows if info.exists else '—' }}</b></div>
+      <div><label>آخر تحديث</label><b>{{ info.modified or '—' }}</b></div>
+      <div><label>طريقة التحديث</label><b>{{ 'رابط Google — تلقائي' if info.auto else ('رابط Google — يدوي' if info.url else 'رفع ملف') }}</b></div>
+      <div><label>نسخ سابقة محفوظة</label><b>{{ info.history }}</b></div>
+    </div>
+    <div class="tb-act">
+      {% if info.exists %}<a class="btn" href="/admin/source/file.xlsx">⬇ تحميل الملف الحالي</a>{% endif %}
+      <a class="btn" href="/admin/source/template.xlsx">⬇ تحميل القالب الفارغ</a>
+      <span class="hint">الأعمدة بالترتيب: {{ columns|join(' · ') }} — التاريخ بصيغة DD/MM/YYYY</span>
+      {% if info.error %}<span class="hint" style="color:var(--late)">⚠️ {{ info.error }}</span>{% endif %}
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="card">
+      <h2>① رفع ملف إكسل</h2>
+      <div class="hint">عدّل الملف على جهازك ثم ارفعه هنا — تظهر المعاينة قبل أي تطبيق.</div>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        <span aria-hidden="true" style="font-size:26px">📄</span>
+        <b>اسحب الملف هنا أو اضغط للاختيار</b>
+        <span class="hint">.xlsx حتى 5 ميجابايت</span>
+      </label>
+    </section>
+    <section class="card">
+      <h2>② رابط Google Drive / Google Sheets</h2>
+      <div class="hint">للمشاركة مع الفريق والتعديل من أي جهاز.</div>
+      <label for="url" class="hint" style="display:block;margin-top:8px">رابط المشاركة</label>
+      <input class="field" id="url" type="url" inputmode="url" autocomplete="off" spellcheck="false"
+             placeholder="https://docs.google.com/spreadsheets/d/…" value="{{ info.url }}">
+      <div class="row">
+        <label class="hint"><input type="checkbox" id="auto" {{ 'checked' if info.auto }}> سحب تلقائي مع كل فحص (كل 5 دقائق)</label>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" type="button" id="saveUrl">حفظ الرابط</button>
+        <button class="btn btn-pri" type="button" id="pull" {{ '' if info.url else 'disabled' }}>سحب الآن ومعاينة</button>
+      </div>
+      <ol class="steps">
+        <li>في Google Sheets (أو ملف xlsx على Drive): زر «مشاركة».</li>
+        <li>«الوصول العام» ← <b>أي شخص معه الرابط</b> ← «عارض».</li>
+        <li>«نسخ الرابط» والصقه هنا. ⚠️ من يملك الرابط يرى المنافسات.</li>
+      </ol>
+    </section>
+  </div>
+
+  <section class="card" id="pv" hidden aria-live="polite">
+    <h2>المعاينة — لم يُطبَّق شيء بعد</h2>
+    <div id="pvBody"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn btn-pri" type="button" id="apply">✔ تطبيق هذا الملف</button>
+      <button class="btn" type="button" id="cancel">إلغاء</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let TOKEN = null;
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function say(text, ok){ const m = $('msg'); m.textContent = text; m.className = 'msg ' + (ok ? 'ok' : 'err'); m.hidden = false; m.scrollIntoView({block: 'nearest'}); }
+async function call(url, opts){
+  const r = await fetch(url, opts); let j = {};
+  try { j = await r.json(); } catch(e) { j = {ok: false, msg: 'انتهت جلسة الإدارة — سجّل الدخول مجدداً'}; }
+  if (!r.ok || !j.ok) throw new Error(j.msg || 'تعذّر تنفيذ العملية');
+  return j;
+}
+function table(rows, cols){
+  return `<table><thead><tr>${cols.map(c => `<th>${c[1]}</th>`).join('')}</tr></thead><tbody>${
+    rows.slice(0, 40).map(r => `<tr>${cols.map(c => `<td>${esc(r[c[0]])}</td>`).join('')}</tr>`).join('')}</tbody></table>` +
+    (rows.length > 40 ? `<div class="hint">و${rows.length - 40} أخرى…</div>` : '');
+}
+function showPreview(p){
+  TOKEN = p.token;
+  const base = [['title', 'المنافسة'], ['owner', 'الجهة'], ['date', 'الإغلاق']];
+  let h = `<div class="sum"><span class="pill">${p.valid} صف صالح من ${p.rows}</span>
+    <span class="pill new">جديدة ${p.new.length}</span><span class="pill chg">تغيّر تاريخها ${p.changed.length}</span>
+    <span class="pill">بلا تغيير ${p.unchanged}</span><span class="pill cls">ستُغلق ${p.will_close.length}</span>
+    <span class="pill del">ستُعتبر محذوفة ${p.will_delete.length}</span></div>`;
+  if (p.errors.length) h += `<div class="danger">لا يمكن التطبيق — صحّح هذه الصفوف في الملف ثم أعد الرفع:<br>${
+    p.errors.map(e => `الصف ${e.row}: ${esc(e.msg)}`).join('<br>')}</div>`;
+  if (p.will_delete.length) h += `<div class="danger">⚠️ ${p.will_delete.length} منافسة لم يحن موعدها غير موجودة في الملف ← سيعتبرها النظام «محذوفة من المنصة» ويُطلق التنبيه الأحمر في تليجرام. إن كان حذفها خطأً فأضفها للملف قبل التطبيق.</div>` +
+    table(p.will_delete, base);
+  if (p.new.length) h += '<h3>جديدة (تُرسل للاعتماد على تليجرام)</h3>' + table(p.new, base);
+  if (p.changed.length) h += '<h3>تغيّر موعدها</h3>' + table(p.changed, [['title', 'المنافسة'], ['old_date', 'كان'], ['date', 'أصبح']]);
+  if (p.will_close.length) h += '<h3>انتهى موعدها وغير موجودة ← تُغلق بهدوء</h3>' + table(p.will_close, base);
+  $('pvBody').innerHTML = h;
+  $('apply').disabled = !!p.errors.length;
+  $('pv').hidden = false; $('pv').scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+async function previewFile(file){
+  if (!file) return;
+  const fd = new FormData(); fd.append('file', file);
+  try { showPreview(await call('/admin/source/preview', {method: 'POST', body: fd})); $('msg').hidden = true; }
+  catch(e) { say('⚠️ ' + e.message, false); }
+}
+$('file').addEventListener('change', e => previewFile(e.target.files[0]));
+const drop = $('drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => previewFile(e.dataTransfer.files[0]));
+$('saveUrl').addEventListener('click', async () => {
+  try {
+    await call('/admin/source/settings', {method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: $('url').value, auto: $('auto').checked})});
+    say('✔ حُفظ — ' + ($('url').value ? ($('auto').checked ? 'سيُسحب تلقائياً مع كل فحص' : 'اضغط «سحب الآن» عند التحديث') : 'أُلغي الرابط'), true);
+    $('pull').disabled = !$('url').value;
+  } catch(e) { say('⚠️ ' + e.message, false); }
+});
+$('pull').addEventListener('click', async e => {
+  e.target.disabled = true; e.target.textContent = 'جاري السحب…';
+  try { showPreview(await call('/admin/source/preview', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'})); $('msg').hidden = true; }
+  catch(err) { say('⚠️ ' + err.message, false); }
+  finally { e.target.disabled = false; e.target.textContent = 'سحب الآن ومعاينة'; }
+});
+$('apply').addEventListener('click', async e => {
+  e.target.disabled = true;
+  try {
+    await call('/admin/source/apply', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({token: TOKEN})});
+    try { sessionStorage.setItem('srcMsg', '1'); } catch(err) {}
+    location.reload();
+  } catch(err) { say('⚠️ ' + err.message, false); e.target.disabled = false; }
+});
+$('cancel').addEventListener('click', () => { $('pv').hidden = true; $('file').value = ''; TOKEN = null; });
+try { if (sessionStorage.getItem('srcMsg')) { sessionStorage.removeItem('srcMsg');
+  say('✔ طُبّق الملف — يلتقطه النظام خلال ثوانٍ. المنافسات الجديدة تصلك للاعتماد على تليجرام.', true); } } catch(e) {}
+</script>
+</body>
+</html>

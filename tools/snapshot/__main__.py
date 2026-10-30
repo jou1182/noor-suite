@@ -6,7 +6,18 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import PLATFORMS, SnapshotError, fingerprint, importer, scan, selection, stage, verify
+from . import (
+    PLATFORMS,
+    SnapshotError,
+    fingerprint,
+    importer,
+    sanitize,
+    scan,
+    selection,
+    source,
+    stage,
+    verify,
+)
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -19,7 +30,7 @@ class OpaqueArgumentParser(argparse.ArgumentParser):
 def main(argv: list[str] | None = None) -> int:
     parser = OpaqueArgumentParser(prog="python -m tools.snapshot")
     commands = parser.add_subparsers(dest="command", required=True, parser_class=OpaqueArgumentParser)
-    for name in ("stage", "select", "scan", "mark-sanitized", "fingerprint", "import", "verify"):
+    for name in ("stage", "select", "sanitize", "scan", "mark-sanitized", "fingerprint", "import", "source", "verify"):
         cmd = commands.add_parser(name)
         if name == "verify":
             group = cmd.add_mutually_exclusive_group(required=True)
@@ -27,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
             group.add_argument("--all", action="store_true")
         else:
             cmd.add_argument("--platform", choices=PLATFORMS, required=True)
-        if name in ("select", "scan", "mark-sanitized", "fingerprint", "import"):
+        if name in ("select", "sanitize", "scan", "mark-sanitized", "fingerprint", "import"):
             cmd.add_argument("--stamp", required=True)
         if name == "stage":
             group = cmd.add_mutually_exclusive_group(required=True)
@@ -47,6 +58,8 @@ def main(argv: list[str] | None = None) -> int:
             message, code = stage.run(REPO, args.platform, args.from_dir, args.from_git, args.commit), 0
         elif args.command == "select":
             message, code = selection.run(REPO, args.platform, args.stamp), 0
+        elif args.command == "sanitize":
+            message, code = sanitize.run(REPO, args.platform, args.stamp)
         elif args.command == "scan":
             message, code = scan.run(REPO, args.platform, args.stamp)
         elif args.command == "mark-sanitized":
@@ -56,6 +69,8 @@ def main(argv: list[str] | None = None) -> int:
                                             args.source_commit, args.exposure, args.reviewed_by), 0
         elif args.command == "import":
             message, code = importer.run(REPO, args.platform, args.stamp), 0
+        elif args.command == "source":
+            message, code = source.run(REPO, args.platform), 0
         elif args.all:
             message, code = verify.all_manifests(REPO)
         else:

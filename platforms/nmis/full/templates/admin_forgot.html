@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>استعادة كلمة مرور المشرف</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:linear-gradient(145deg,#3d1c00 0%,#6a3000 50%,#3d1c00 100%);font-family:'Tajawal',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.wrap{width:100%;max-width:390px;padding:1rem}
+.card{background:#fdf8ee;border:1px solid #c8a028;border-top:4px solid #5a2800;border-radius:14px;padding:2.5rem 2rem;text-align:center;box-shadow:0 20px 60px rgba(40,15,0,.5)}
+.badge{display:inline-block;background:rgba(138,72,0,.1);border:1px solid rgba(138,72,0,.3);color:#8a4800;font-size:.72rem;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:1.2rem;letter-spacing:.8px}
+h1{color:#1e1404;font-size:1.15rem;font-weight:900;margin-bottom:.3rem}
+.sub{color:#7a5e28;font-size:.82rem;margin-bottom:1.6rem;line-height:1.6}
+.err{background:rgba(176,40,40,.08);border:1px solid rgba(176,40,40,.25);color:#b02828;border-radius:8px;padding:.65rem;font-size:.83rem;margin-bottom:1rem}
+.ok{background:rgba(26,107,60,.08);border:1px solid rgba(26,107,60,.3);color:#1a6b3c;border-radius:8px;padding:.65rem;font-size:.83rem;margin-bottom:1rem}
+.field{margin-bottom:.85rem;text-align:right}
+label{display:block;font-size:.75rem;font-weight:700;color:#5a3810;margin-bottom:.3rem}
+input{width:100%;background:#fdf5c0;border:1px solid #c8a028;color:#1e1404;border-radius:8px;padding:.7rem 1rem;font-family:'Tajawal',sans-serif;font-size:.95rem;outline:none;transition:.2s}
+input:focus{border-color:#8a4800;box-shadow:0 0 0 3px rgba(138,72,0,.15)}
+.btn{width:100%;background:linear-gradient(135deg,#5a2800,#8a4800);border:none;color:#fff4d8;border-radius:9px;padding:.85rem;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:900;cursor:pointer;transition:.2s;margin-top:.3rem}
+.btn:hover{background:linear-gradient(135deg,#6e3200,#a05200)}
+.back{display:block;margin-top:1.2rem;color:#9a7838;font-size:.78rem;text-decoration:none}
+</style>
+{% include "_skin.html" %}</head>
+<body>
+<div class="wrap"><div class="card">
+  <img src="{{ logo_uri }}" alt="logo" style="width:110px;height:auto;margin:0 auto .9rem;display:block;mix-blend-mode:multiply">
+  <div class="badge">&#128274; استعادة كلمة المرور</div>
+  <h1>استعادة كلمة مرور المشرف</h1>
+  {% if not sent %}
+    <p class="sub">سيُرسل كود تحقق من 6 أرقام إلى حساب تليجرام الخاص بالمالك فقط، صالح لمدة 10 دقائق.</p>
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+    <form method="POST">
+      <input type="hidden" name="action" value="send">
+      <button type="submit" class="btn">إرسال الكود إلى تليجرام</button>
+    </form>
+  {% else %}
+    <p class="sub">تم إرسال الكود إلى تليجرام (إن كان الإعداد مفعّلاً). أدخله مع كلمة المرور الجديدة:</p>
+    {% if error %}<div class="err">{{ error }}</div>{% endif %}
+    <form method="POST">
+      <input type="hidden" name="action" value="verify">
+      <input type="hidden" name="token" value="{{ token }}">
+      <div class="field"><label>كود التحقق</label>
+        <input type="text" name="code" inputmode="numeric" maxlength="6" dir="ltr" autofocus></div>
+      <div class="field"><label>كلمة المرور الجديدة</label>
+        <input type="password" name="new_apwd" placeholder="8 أحرف على الأقل"></div>
+      <div class="field"><label>تأكيد كلمة المرور الجديدة</label>
+        <input type="password" name="new_apwd2"></div>
+      <button type="submit" class="btn">تعيين كلمة المرور &#8592;</button>
+    </form>
+  {% endif %}
+  <a href="/admin/login" class="back">&#8592; العودة لدخول المشرف</a>
+</div></div>
+</body></html>
